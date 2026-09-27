@@ -1,5 +1,6 @@
 import type { PlayerView } from '@partygame/engine';
 import { useEffect, useState } from 'react';
+import { getProfile, reportDevice } from '../input/device.ts';
 import type { Connection, ConnStatus } from '../net/connection.ts';
 import { seatLink } from '../net/storage.ts';
 import { Avatar, avatarColour } from '../ui/Avatar.tsx';
@@ -15,6 +16,13 @@ import { useWakeLock } from './wakeLock.ts';
 export function PlayerShell({ conn, view, status }: { conn: Connection<PlayerView>; view: PlayerView; status: ConnStatus }) {
   const [menu, setMenu] = useState(false);
   useWakeLock();
+  useEffect(() => reportDevice((profile) => conn.send({ t: 'device', profile })), [conn]);
+  // Re-send after every reconnect: the server may have restarted.
+  useEffect(() => {
+    if (status !== 'open') return;
+    const { kind, size, keyboard, gamepad } = getProfile();
+    conn.send({ t: 'device', profile: { kind, size, keyboard, gamepad } });
+  }, [status, conn]);
   const me = view.me;
   const Screen = playerScreens[view.phase.kind];
   const game = view.game as { coins?: number; stars?: number } | null;

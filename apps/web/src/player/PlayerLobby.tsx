@@ -1,4 +1,7 @@
 import type { PlayerView } from '@partygame/engine';
+import type { Stroke } from '@partygame/shared';
+import { useEffect, useState } from 'react';
+import { Direction, Draw } from '../input/index.ts';
 import type { Connection } from '../net/connection.ts';
 import { Avatar } from '../ui/Avatar.tsx';
 
@@ -48,6 +51,8 @@ export function PlayerLobby({ conn, view }: { conn: Connection<PlayerView>; view
         </section>
       )}
 
+      <LobbyToys conn={conn} view={view} />
+
       <section className="stack" style={{ gap: 8 }}>
         <h3>
           Players <span className="muted">{view.seats.length}/16</span>
@@ -72,5 +77,46 @@ export function PlayerLobby({ conn, view }: { conn: Connection<PlayerView>; view
         </ul>
       </section>
     </div>
+  );
+}
+
+/** Something to do while waiting: doodle a flag for your sticker, or wiggle it with the d-pad. */
+function LobbyToys({ conn, view }: { conn: Connection<PlayerView>; view: PlayerView }) {
+  const [toy, setToy] = useState<'doodle' | 'wiggle' | null>(null);
+  const [strokes, setStrokes] = useState<Stroke[]>(() => (view.phase.myDoodle as Stroke[]) ?? []);
+  useEffect(() => {
+    if (toy !== 'wiggle') conn.intent({ type: 'lobby.nudge', x: 0, y: 0 });
+  }, [toy, conn]);
+  return (
+    <section className="panel stack pl-toys">
+      <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <h3>While you wait</h3>
+        <div className="row" style={{ gap: 6 }}>
+          <button className="btn white small" aria-pressed={toy === 'doodle'} onClick={() => setToy(toy === 'doodle' ? null : 'doodle')}>
+            Doodle a flag
+          </button>
+          <button className="btn white small" aria-pressed={toy === 'wiggle'} onClick={() => setToy(toy === 'wiggle' ? null : 'wiggle')}>
+            Wiggle
+          </button>
+        </div>
+      </div>
+      {toy === 'doodle' && (
+        <div className="pl-doodle">
+          <Draw
+            strokes={strokes}
+            onChange={(s) => {
+              setStrokes(s);
+              conn.intent({ type: 'lobby.doodle', strokes: s });
+            }}
+          />
+        </div>
+      )}
+      {toy === 'wiggle' && (
+        <div className="center stack" style={{ gap: 8 }}>
+          <Direction mode="8" onChange={(v) => conn.intent({ type: 'lobby.nudge', x: v.x, y: v.y })} />
+          <span className="muted">Watch your sticker on the big screen (or use WASD).</span>
+        </div>
+      )}
+    </section>
   );
 }

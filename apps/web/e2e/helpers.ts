@@ -1,9 +1,9 @@
 import { devices, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
-export const phones = {
-  iphone: devices['iPhone 13'],
-  pixelLandscape: devices['Pixel 7 landscape'],
-};
+// We only install Chromium, so keep the phone viewport/touch/UA but not WebKit as the browser.
+const { defaultBrowserType: _a, ...iphone } = devices['iPhone 13'];
+const { defaultBrowserType: _b, ...pixelLandscape } = devices['Pixel 7 landscape'];
+export const phones = { iphone, pixelLandscape };
 
 export async function hostGame(page: Page): Promise<string> {
   await page.goto('/host');

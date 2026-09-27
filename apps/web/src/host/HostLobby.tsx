@@ -1,5 +1,5 @@
 import type { HostView } from '@partygame/engine';
-import { MAX_PLAYERS } from '@partygame/shared';
+import { DRAW_PALETTE, MAX_PLAYERS, strokePath, type Stroke } from '@partygame/shared';
 import { useState } from 'react';
 import type { Connection } from '../net/connection.ts';
 import { joinLink } from '../net/storage.ts';
@@ -19,6 +19,8 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
   const url = joinLink(view.code);
   const humans = view.seats.filter((s) => !s.isBot).length;
   const length = LENGTHS.find((l) => l.id === view.settings.length) ?? LENGTHS[1];
+  const doodles = (view.phase.doodles ?? {}) as Record<string, Stroke[]>;
+  const nudges = (view.phase.nudges ?? {}) as Record<string, { x: number; y: number }>;
 
   return (
     <div className="hl">
@@ -89,11 +91,15 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
             if (!s) return <div key={`empty${i}`} className="hl-slot empty">{i === view.seats.length ? 'Waiting…' : ''}</div>;
             return (
               <div key={s.id} className="hl-slot filled" data-seat={s.id}>
-                <Avatar avatar={s.avatar} size={104} dim={!s.connected} />
+                {doodles[s.id]?.length ? <Doodle strokes={doodles[s.id]!} /> : null}
+                <div className="hl-av" style={{ transform: `translate(${(nudges[s.id]?.x ?? 0) * 34}px, ${(nudges[s.id]?.y ?? 0) * 22}px)` }}>
+                  <Avatar avatar={s.avatar} size={104} dim={!s.connected} />
+                </div>
                 <span className="name">{s.name}</span>
                 {s.vip && <span className="hl-badge">VIP</span>}
                 {s.isBot && <span className="hl-badge bot">BOT</span>}
                 {!s.connected && <span className="hl-badge away">away</span>}
+                {s.connected && s.device && !s.isBot && <span className="hl-device" title={s.device}>{s.device === 'touch' ? '📱' : '💻'}</span>}
               </div>
             );
           })}
@@ -114,5 +120,15 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
 
       {playOpen && <PlayHere view={view} onClose={() => setPlayOpen(false)} />}
     </div>
+  );
+}
+
+function Doodle({ strokes }: { strokes: Stroke[] }) {
+  return (
+    <svg className="hl-doodle" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden>
+      {strokes.map((st, i) => (
+        <path key={i} d={strokePath(st)} stroke={DRAW_PALETTE[st.c]} strokeWidth={st.w} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      ))}
+    </svg>
   );
 }

@@ -288,3 +288,35 @@
   height: 32px;
   accent-color: var(--good);
 }
+
+.hl-slot.filled {
+  overflow: visible;
+}
+
+.hl-doodle {
+  position: absolute;
+  inset: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  border-radius: 14px;
+  opacity: 0.85;
+}
+
+.hl-av {
+  position: relative;
+  transition: transform 120ms ease-out;
+}
+
+.hl-slot .name {
+  position: relative;
+  background: var(--paper);
+  padding: 0 10px;
+  border-radius: 10px;
+}
+
+.hl-device {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 24px;
+}

@@ -18,6 +18,6 @@ export default defineConfig({
     port: PORT,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
-    stdout: 'pipe',
+    stdout: process.env.PW_SERVER_LOG ? 'pipe' : 'ignore',
   },
 });

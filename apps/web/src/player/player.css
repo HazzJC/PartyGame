@@ -246,3 +246,15 @@
   color: var(--bad);
   margin: 0;
 }
+
+.pl-toys h3 {
+  font-size: 20px;
+}
+
+.pl-toys .btn[aria-pressed='true'] {
+  --btn-bg: var(--star);
+}
+
+.pl-doodle {
+  height: min(78vw, 420px);
+}
