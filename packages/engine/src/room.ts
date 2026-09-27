@@ -327,6 +327,7 @@ export class RoomEngine {
     const s = this.state.settings;
     if (input.length === 'quick' || input.length === 'standard' || input.length === 'long') s.length = input.length;
     if (input.movement === 'dice' || input.movement === 'cards') s.movement = input.movement;
+    if (input.forceGame === null || (typeof input.forceGame === 'string' && input.forceGame.length <= 40)) s.forceGame = input.forceGame as string | null;
     if (Array.isArray(input.removedGames)) s.removedGames = input.removedGames.filter((x): x is string => typeof x === 'string').slice(0, 64);
   }
 
@@ -367,7 +368,7 @@ export class RoomEngine {
   scheduleBots(): void {
     const def = getPhase(this.state.phase.kind);
     if (!def.bot || !def.awaiting) return;
-    const [lo, hi] = def.botDelay ?? [700, 2600];
+    const [lo, hi] = typeof def.botDelay === 'function' ? def.botDelay(this, this.state.phase) : (def.botDelay ?? [700, 2600]);
     for (const seat of this.state.seats) {
       if (!this.isAutomated(seat)) continue;
       const key = `bot:${seat.id}`;
@@ -375,7 +376,7 @@ export class RoomEngine {
       if (!def.awaiting(this, this.state.phase, seat.id)) continue;
       // Humans who dropped get extra grace before the autopilot steps in.
       const grace = seat.isBot ? 0 : 1500;
-      this.timers.set(key, this.now() + grace + this.rng.int(lo, hi));
+      this.timers.set(key, this.now() + grace + this.rng.int(Math.max(0, Math.round(lo)), Math.max(0, Math.round(Math.max(lo, hi)))));
     }
   }
 

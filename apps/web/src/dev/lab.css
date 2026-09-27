@@ -133,3 +133,27 @@
     display: none;
   }
 }
+
+.harness {
+  height: 100%;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: var(--table-edge);
+}
+
+.harness iframe {
+  border: 4px solid var(--ink);
+  border-radius: 16px;
+  background: var(--felt);
+}
+
+.harness-host {
+  flex: 1;
+  min-width: 0;
+}
+
+.harness-player {
+  width: 390px;
+  flex: none;
+}

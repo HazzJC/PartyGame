@@ -27,8 +27,8 @@ export interface PhaseDef<S extends PhaseBase = PhaseBase> {
   awaiting?(room: RoomEngine, s: S, seatId: SeatId): boolean;
   /** The input a bot (or the autopilot for a disconnected player) makes. */
   bot?(room: RoomEngine, s: S, seatId: SeatId): Intent | null;
-  /** Bot think time range in ms. */
-  botDelay?: [number, number];
+  /** Bot think time range in ms (or computed from the phase, e.g. "just before the deadline"). */
+  botDelay?: [number, number] | ((room: RoomEngine, s: S) => [number, number]);
   /** Real-time phases: ticks per second the adapter should drive (0 or absent = none). */
   tickHz?(room: RoomEngine, s: S): number;
   /** Advances one real-time step; the return value is broadcast as a compact tick message. */

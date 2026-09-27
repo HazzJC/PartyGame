@@ -33,3 +33,14 @@ Do this over a **real Discord screen share**, with at least one person on a TV o
 - [ ] VIP: press **Reaction test**. Three rounds: tap on FIRE!, not on the fakes.
 - [ ] Does it feel fair between phones and laptops? (Device icons show next to each time.)
 - [ ] Add `?debug` to the end of your page URL: offset and round trip should stay stable.
+
+## v0.4 · Mini game loop
+
+The VIP presses **Start game** (add bots if you're few). No board yet: every round is one mini game.
+
+- [ ] Rules card: is it clear what to do? Does it show the right controls for your device?
+- [ ] **Lowest Unique Number**: was the reveal fun to watch? Did your phone wait for the stream before showing your result?
+- [ ] **Stopwatch Chicken**: does the clock on your phone feel fair? Any lag between tapping STOP and it stopping?
+- [ ] **Count Together**: did clashes feel fair? (They're judged by when you tapped, not when it arrived.)
+- [ ] Is the standings screen after each game readable on the stream?
+- [ ] Solo testing: `/dev/minigame/lowest-unique?n=6` (also `stopwatch-chicken`, `count-to`) plays one game against bots.

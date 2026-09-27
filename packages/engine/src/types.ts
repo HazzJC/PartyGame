@@ -25,6 +25,8 @@ export interface Settings {
   movement: 'dice' | 'cards';
   /** Mini game ids the host removed from the decks. */
   removedGames: string[];
+  /** Dev/testing: deal this mini game every round. */
+  forceGame?: string | null;
 }
 
 export interface Timer {

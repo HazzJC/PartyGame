@@ -8,6 +8,9 @@ import { Qr } from '../ui/Qr.tsx';
 import { PlayerLobby } from './PlayerLobby.tsx';
 import { playerScreens } from './registry.tsx';
 import { useWakeLock } from './wakeLock.ts';
+import { WatchScreen } from './WatchScreen.tsx';
+
+export { WatchScreen };
 import '../screens.ts';
 import { DebugOverlay } from '../timing/DebugOverlay.tsx';
 
@@ -53,17 +56,6 @@ export function PlayerShell({ conn, view, status }: { conn: Connection<PlayerVie
       </main>
       {menu && <PlayerMenu conn={conn} view={view} onClose={() => setMenu(false)} />}
       <DebugOverlay conn={conn} streamDelayMs={me.streamDelayMs} />
-    </div>
-  );
-}
-
-export function WatchScreen({ text = 'Watch the screen' }: { text?: string }) {
-  return (
-    <div className="ps-watch">
-      <div className="ps-watch-icon" aria-hidden>
-        👀
-      </div>
-      <h2>{text}</h2>
     </div>
   );
 }
