@@ -1,0 +1,235 @@
+/* ------------------------------------------------------------------ shared word-game bits */
+.word-prompt {
+  padding: 22px 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.word-prompt h2 {
+  font-size: 62px;
+}
+
+.word-mode[data-mode='unique'] {
+  background: var(--event);
+  color: var(--paper);
+}
+
+.word-prompt-small {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* ------------------------------------------------------------------ Herd Mentality */
+.herd-groups {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-content: flex-start;
+  justify-content: center;
+}
+
+.herd-group {
+  min-width: 220px;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 32px;
+}
+
+.herd-count {
+  font-family: var(--font-display);
+  font-size: 44px;
+}
+
+.herd-group[data-scored='true'] {
+  background: #c9f2dc;
+  transform: rotate(-1deg) scale(1.04);
+}
+
+/* ------------------------------------------------------------------ Odd One Out */
+.odd-cards {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  align-content: center;
+}
+
+.odd-card {
+  position: relative;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.odd-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+
+.odd-clue {
+  font-size: 30px;
+  text-align: center;
+}
+
+.odd-card[data-imposter='true'] {
+  background: #ffd6da;
+}
+
+.odd-card[data-accused='true'] {
+  outline: 6px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.odd-tag {
+  position: absolute;
+  top: -14px;
+  right: -10px;
+  padding: 2px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--red);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.odd-word {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.odd-word b {
+  font-family: var(--font-display);
+  font-size: 40px;
+}
+
+/* ------------------------------------------------------------------ Who Wrote That? */
+.who-cards {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-content: center;
+}
+
+.who-card {
+  position: relative;
+  min-height: 180px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.who-card p {
+  margin: 0;
+  font-size: 28px;
+}
+
+.who-card[data-revealed='true'] {
+  background: #fff6cc;
+}
+
+.who-n {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink-soft);
+}
+
+.who-writer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 24px;
+}
+
+.who-guess-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+}
+
+.who-guess {
+  padding: 10px;
+}
+
+.who-guess p {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.who-guess-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.who-guess-btn {
+  appearance: none;
+  padding: 2px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.who-guess-btn[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--star);
+}
+
+/* ------------------------------------------------------------------ Predict the Crowd */
+.predict-bars {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: end;
+  padding: 0 40px;
+}
+
+.predict-bar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.predict-fill {
+  min-height: 8px;
+  display: grid;
+  place-items: start center;
+  border: 5px solid var(--ink);
+  border-radius: 16px 16px 0 0;
+  transition: height 900ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.predict-fill span {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--paper);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+}
+
+.predict-label {
+  padding: 10px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+}

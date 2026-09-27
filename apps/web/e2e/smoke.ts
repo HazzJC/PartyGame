@@ -39,6 +39,20 @@ async function tryClick(frame: FrameLocator, selector: string, index = 0): Promi
 }
 
 async function poke(player: FrameLocator): Promise<boolean> {
+  // Word games: type an answer, vote, guess writers, lock in a ranking.
+  const text = player.locator('.text-answer input');
+  if ((await text.isVisible().catch(() => false)) && (await text.isEnabled().catch(() => false))) {
+    await text.fill('Pizza').catch(() => undefined);
+    await player.locator('.text-answer button').click({ timeout: 2000 }).catch(() => undefined);
+    return true;
+  }
+  if (await tryClick(player, 'button:has-text("Lock in my ranking")')) return true;
+  const openCard = player.locator('.who-guess:not(:has(.who-guess-btn[aria-pressed="true"]))').first();
+  if (await openCard.isVisible().catch(() => false)) {
+    await openCard.locator('.who-guess-btn').first().click({ timeout: 2000 }).catch(() => undefined);
+    return true;
+  }
+  if ((await player.locator('.vote-item[aria-pressed="true"]').count().catch(() => 0)) === 0 && (await tryClick(player, '.vote-item'))) return true;
   // Multi-select pickers (hunter, trap-setter) need their submit button after picking.
   if (await tryClick(player, 'button:has-text("Search 3/3")')) return true;
   if (await tryClick(player, 'button:has-text("Set trap")')) return true;

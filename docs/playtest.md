@@ -99,3 +99,12 @@ Each can be tried solo at `/dev/minigame/<id>?n=6`.
 - [ ] **Raft Gamble** (`raft-gamble`): bank or stay? Are the side bets worth doing once you're ashore?
 - [ ] **Crumble Tower** (`crumble-tower`): is the "which row falls" rule clear on the phone?
 - [ ] **Quick Draw** (`quick-draw`) now appears as a free-for-all too.
+
+## v0.9 · Wave B: word and social games
+
+- [ ] **Herd Mentality** (`herd-mentality`): answers are grouped even with typos and plurals. When it missed a match, did the merge vote fix it?
+- [ ] The last Herd round flips to "be the only one". Fun twist or confusing?
+- [ ] **Odd One Out** (`odd-one-out`): the imposter doesn't know they're the imposter. Did the clues give it away too fast?
+- [ ] **Who Wrote That?** (`who-wrote-that`): is guessing 6 to 8 answers on a phone too fiddly?
+- [ ] **Predict the Crowd** (`predict-the-crowd`): is ranking by dragging (or ▲▼) easy enough?
+- [ ] Any prompt that fell flat or was confusing? Note it in Report a problem.
