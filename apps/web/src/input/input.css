@@ -681,3 +681,58 @@ kbd {
   background: var(--felt-dark);
   cursor: pointer;
 }
+
+/* ------------------------------------------------------------------ timed cue */
+.cue-surface {
+  flex: 1;
+  width: 100%;
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  border: 5px solid var(--ink);
+  border-radius: 28px;
+  background: var(--felt-dark);
+  box-shadow: 0 8px 0 var(--ink);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+.cue-label {
+  font-family: var(--font-display);
+  font-size: 44px;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.cue-surface[data-cue='go'] {
+  background: var(--red);
+}
+
+.cue-surface[data-cue='go'] .cue-label {
+  font-size: 88px;
+  color: var(--paper);
+  -webkit-text-stroke: 10px var(--ink);
+  paint-order: stroke fill;
+}
+
+.cue-surface[data-cue='fake'] {
+  background: var(--event);
+}
+
+.cue-surface[data-cue='fake'] .cue-label {
+  font-size: 72px;
+  color: var(--paper);
+  -webkit-text-stroke: 9px var(--ink);
+  paint-order: stroke fill;
+}
+
+.cue-surface[data-cue='early'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.cue-surface[data-cue='hit'] {
+  background: var(--good);
+}

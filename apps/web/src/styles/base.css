@@ -238,3 +238,34 @@ a {
     transition-duration: 1ms !important;
   }
 }
+
+.debug-overlay {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 999;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(43, 34, 51, 0.88);
+  color: #fff;
+  font: 600 12px/1.4 ui-monospace, monospace;
+  pointer-events: none;
+}
+
+.countdown {
+  display: inline-grid;
+  place-items: center;
+  min-width: 52px;
+  height: 52px;
+  padding: 0 10px;
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  font-family: var(--font-display);
+  font-size: 26px;
+}
+
+.countdown[data-urgent='true'] {
+  background: var(--red);
+  color: var(--paper);
+}

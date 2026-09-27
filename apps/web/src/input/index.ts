@@ -13,3 +13,4 @@ export * from './TextAnswer.tsx';
 export * from './Draw.tsx';
 export * from './Rotate.tsx';
 export * from './Vote.tsx';
+export * from './Timing.tsx';

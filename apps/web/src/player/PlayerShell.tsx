@@ -8,6 +8,8 @@ import { Qr } from '../ui/Qr.tsx';
 import { PlayerLobby } from './PlayerLobby.tsx';
 import { playerScreens } from './registry.tsx';
 import { useWakeLock } from './wakeLock.ts';
+import '../screens.ts';
+import { DebugOverlay } from '../timing/DebugOverlay.tsx';
 
 /**
  * The player screen is a thin shell (identity header, system states, menu) around a surface
@@ -50,6 +52,7 @@ export function PlayerShell({ conn, view, status }: { conn: Connection<PlayerVie
         {view.phase.kind === 'lobby' ? <PlayerLobby conn={conn} view={view} /> : Screen ? <Screen conn={conn} view={view} /> : <WatchScreen />}
       </main>
       {menu && <PlayerMenu conn={conn} view={view} onClose={() => setMenu(false)} />}
+      <DebugOverlay conn={conn} streamDelayMs={me.streamDelayMs} />
     </div>
   );
 }

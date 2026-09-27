@@ -4,3 +4,6 @@ export * from './timers.ts';
 export * from './room.ts';
 export * from './lobby.ts';
 export * from './views.ts';
+export * from './timing.ts';
+export * from './toys/calibrate.ts';
+export * from './toys/reaction.ts';

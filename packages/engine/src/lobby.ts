@@ -37,6 +37,13 @@ export const lobbyPhase = definePhase<LobbyPhase>({
     }
   },
   hostAction(room, s, action) {
+    if (action.action === 'toy') {
+      // Toys run as their own phases and hand the lobby (doodles and all) back when done.
+      const returnTo: LobbyPhase = { ...s, notice: null };
+      if (action.toy === 'calibrate') room.goto({ kind: 'calibrate', flashes: [], results: {}, returnTo });
+      if (action.toy === 'reaction') room.goto({ kind: 'reaction', returnTo });
+      return true;
+    }
     if (action.action !== 'start') return false;
     if (room.seats.length < MIN_PLAYERS) {
       s.notice = `Need at least ${MIN_PLAYERS} players. Add bots to test solo.`;

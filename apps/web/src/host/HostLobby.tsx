@@ -108,6 +108,12 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
           <button className="btn green big" onClick={() => conn.host({ action: 'start' })} disabled={view.seats.length < 2}>
             Start game
           </button>
+          <button className="btn white" onClick={() => conn.host({ action: 'toy', toy: 'calibrate' })}>
+            Stream check
+          </button>
+          <button className="btn white" onClick={() => conn.host({ action: 'toy', toy: 'reaction' })}>
+            Reaction test
+          </button>
           {view.phase.notice ? (
             <div className="sticker hl-notice">{view.phase.notice}</div>
           ) : (

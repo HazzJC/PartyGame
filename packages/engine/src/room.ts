@@ -236,7 +236,7 @@ export class RoomEngine {
     return this.state.phase;
   }
 
-  goto<S extends PhaseBase>(next: Omit<S, 'startedAt'> & { startedAt?: number }): void {
+  goto(next: { kind: string; startedAt?: number; [k: string]: any }): void {
     this.timers.clearPrefix('phase:');
     this.timers.clearPrefix('bot:');
     this.state.phase = { ...next, startedAt: next.startedAt ?? this.now() } as PhaseBase & Record<string, any>;

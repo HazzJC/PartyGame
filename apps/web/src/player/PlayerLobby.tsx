@@ -21,6 +21,7 @@ export function PlayerLobby({ conn, view }: { conn: Connection<PlayerView>; view
         <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
           Find your sticker on the shared screen. {me.vip ? "You're the VIP, so you start the game." : 'The VIP starts the game.'}
         </p>
+        <span className="chip">Stream delay: {(me.streamDelayMs / 1000).toFixed(1)} s</span>
       </div>
 
       {view.phase.notice && <div className="sticker pl-notice">{view.phase.notice}</div>}
@@ -44,6 +45,14 @@ export function PlayerLobby({ conn, view }: { conn: Connection<PlayerView>; view
                 Clear bots
               </button>
             )}
+          </div>
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            <button className="btn white small" onClick={() => conn.host({ action: 'toy', toy: 'calibrate' })}>
+              Stream check
+            </button>
+            <button className="btn white small" onClick={() => conn.host({ action: 'toy', toy: 'reaction' })}>
+              Reaction test
+            </button>
           </div>
           <button className="btn green big block" onClick={() => conn.host({ action: 'start' })} disabled={view.seats.length < 2}>
             Start game

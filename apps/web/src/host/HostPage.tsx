@@ -7,6 +7,8 @@ import { HostLobby } from './HostLobby.tsx';
 import { Stage } from './Stage.tsx';
 import { hostScreens } from './registry.tsx';
 import './host.css';
+import '../screens.ts';
+import { DebugOverlay } from '../timing/DebugOverlay.tsx';
 
 /** Resolve the host token: from a fresh "re-open host screen" link (#t=…) or this tab's session. */
 function resolveHostToken(code: string): string | null {
@@ -66,6 +68,7 @@ function HostLive({ code, conn }: { code: string; conn: Connection<HostView> }) 
       )}
       {status === 'reconnecting' && <div className="host-status sticker">Reconnecting…</div>}
       {view?.paused && <div className="host-status sticker" style={{ background: 'var(--star)' }}>Paused</div>}
+      <DebugOverlay conn={conn} />
     </Stage>
   );
 }

@@ -31,6 +31,7 @@ export const HostAction = v.variant('action', [
   v.object({ action: v.literal('settings'), settings: v.record(v.string(), v.unknown()) }),
   v.object({ action: v.literal('newHostToken') }),
   v.object({ action: v.literal('seatLink') }),
+  v.object({ action: v.literal('toy'), toy: v.picklist(['calibrate', 'reaction']) }),
 ]);
 export type HostAction = v.InferOutput<typeof HostAction>;
 
