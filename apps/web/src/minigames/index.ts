@@ -15,3 +15,7 @@ import './HerdMentality.tsx';
 import './OddOneOut.tsx';
 import './WhoWroteThat.tsx';
 import './PredictTheCrowd.tsx';
+import './Sumo.tsx';
+import './Artillery.tsx';
+import './Heist.tsx';
+import './LandGrab.tsx';

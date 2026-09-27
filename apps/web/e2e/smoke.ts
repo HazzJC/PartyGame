@@ -46,7 +46,7 @@ async function poke(player: FrameLocator): Promise<boolean> {
     await player.locator('.text-answer button').click({ timeout: 2000 }).catch(() => undefined);
     return true;
   }
-  if (await tryClick(player, 'button:has-text("Lock in my ranking")')) return true;
+  if (await tryClick(player, 'button:has-text("Lock in")')) return true;
   const openCard = player.locator('.who-guess:not(:has(.who-guess-btn[aria-pressed="true"]))').first();
   if (await openCard.isVisible().catch(() => false)) {
     await openCard.locator('.who-guess-btn').first().click({ timeout: 2000 }).catch(() => undefined);

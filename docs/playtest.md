@@ -108,3 +108,14 @@ Each can be tried solo at `/dev/minigame/<id>?n=6`.
 - [ ] **Who Wrote That?** (`who-wrote-that`): is guessing 6 to 8 answers on a phone too fiddly?
 - [ ] **Predict the Crowd** (`predict-the-crowd`): is ranking by dragging (or ▲▼) easy enough?
 - [ ] Any prompt that fell flat or was confusing? Note it in Report a problem.
+
+## v0.10 · Wave C: simulated games
+
+All physics runs once on the server and is played back, so every screen shows the same thing.
+
+- [ ] **Sumo Programming** (`sumo-programming`): tap the platform to aim, set force. Does the playback look fair?
+- [ ] **Artillery Trajectory** (`artillery`): does the red preview line plus last round's dashed path help you learn?
+- [ ] **Artillery: Fortress** (`artillery-fortress`, 1 vs many): is the fortress too tough or too weak?
+- [ ] **Planned Movement Heist** (`heist`): is programming 5 moves on the phone quick enough? Are bumps clear on the stream?
+- [ ] **Heist: Guard** (`heist-guard`, 1 vs many): do the guards have a fair chance?
+- [ ] **Land Grab** (`land-grab`): does the zoomed view of your own area make placing easy? Clashes stay grey forever.

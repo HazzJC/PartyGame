@@ -29,6 +29,12 @@ export default function DevRoutes({ path }: { path: string[] }) {
         <a href="/dev/minigame/odd-one-out">Odd One Out</a>
         <a href="/dev/minigame/who-wrote-that">Who Wrote That?</a>
         <a href="/dev/minigame/predict-the-crowd">Predict the Crowd</a>
+        <a href="/dev/minigame/sumo-programming">Sumo Programming</a>
+        <a href="/dev/minigame/artillery">Artillery Trajectory</a>
+        <a href="/dev/minigame/artillery-fortress">Artillery: Fortress</a>
+        <a href="/dev/minigame/heist">Planned Movement Heist</a>
+        <a href="/dev/minigame/heist-guard">Heist: Guard</a>
+        <a href="/dev/minigame/land-grab">Land Grab</a>
         <p className="muted">Unknown dev page: {path.join('/') || '(none)'}</p>
       </div>
     </div>
