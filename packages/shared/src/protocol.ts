@@ -32,6 +32,8 @@ export const HostAction = v.variant('action', [
   v.object({ action: v.literal('newHostToken') }),
   v.object({ action: v.literal('seatLink') }),
   v.object({ action: v.literal('toy'), toy: v.picklist(['calibrate', 'reaction']) }),
+  /** Test/playtest shortcuts; only honoured when the room's settings.devTools is on. */
+  v.object({ action: v.literal('dev'), op: v.picklist(['giveItems', 'queueDuel', 'shop']) }),
 ]);
 export type HostAction = v.InferOutput<typeof HostAction>;
 

@@ -27,6 +27,8 @@ export interface Settings {
   removedGames: string[];
   /** Dev/testing: deal this mini game every round. */
   forceGame?: string | null;
+  /** Dev/testing: allow the 'dev' host actions (give items, queue a duel, open the shop). */
+  devTools?: boolean;
 }
 
 export interface Timer {

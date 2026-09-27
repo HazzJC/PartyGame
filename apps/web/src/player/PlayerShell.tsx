@@ -30,7 +30,7 @@ export function PlayerShell({ conn, view, status }: { conn: Connection<PlayerVie
   }, [status, conn]);
   const me = view.me;
   const Screen = playerScreens[view.phase.kind];
-  const game = view.game as { coins?: number; stars?: number } | null;
+  const game = view.game as { coins?: number; stars?: number; items?: string[] } | null;
 
   return (
     <div className="ps" style={{ ['--me' as string]: avatarColour(me.avatar) }}>
@@ -42,6 +42,7 @@ export function PlayerShell({ conn, view, status }: { conn: Connection<PlayerVie
           <span className="ps-stats">
             <span className="chip">★ {game.stars ?? 0}</span>
             <span className="chip">● {game.coins ?? 0}</span>
+            {game.items && game.items.length > 0 && <span className="chip" title="Items in your bag">▣ {game.items.length}</span>}
           </span>
         )}
         <span className={`ps-dot ${status}`} title={status} />

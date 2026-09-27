@@ -7,8 +7,11 @@ import './lab.css';
  * /dev/minigame/:id?n=6 — one mini game on repeat against bots. Creates a room, joins you as a
  * player, fills the rest with bots and forces that game every round. The host screen and your
  * player screen sit side by side, so a game can be tested solo on one monitor.
+ *
+ * /dev/board?n=4&dev=items,duel,shop — a real board game with dev tools on; optionally hands you
+ * items, queues a duel and opens the shop so those flows can be tried on purpose.
  */
-export default function MinigameHarness({ gameId }: { gameId: string }) {
+export default function MinigameHarness({ gameId }: { gameId: string | null }) {
   const params = new URLSearchParams(location.search);
   const n = Math.max(2, Math.min(16, Number(params.get('n')) || 6));
   const [room, setRoom] = useState<{ code: string; hostToken: string; seatToken: string } | null>(null);
@@ -31,12 +34,20 @@ export default function MinigameHarness({ gameId }: { gameId: string }) {
           }
         });
       });
-      conn.host({ action: 'settings', settings: { forceGame: gameId, length: 'quick' } });
+      conn.host({ action: 'settings', settings: { forceGame: gameId, length: 'quick', devTools: true } });
       for (let i = 1; i < n; i++) conn.host({ action: 'addBot' });
       if (!live) return;
       setRoom({ code, hostToken, seatToken: joined.seatToken });
       // Give the player iframe a moment to connect so it doesn't get autopiloted.
-      setTimeout(() => conn?.host({ action: 'start' }), 1500);
+      setTimeout(() => {
+        conn?.host({ action: 'start' });
+        const ops = (params.get('dev') ?? '').split(',');
+        setTimeout(() => {
+          if (ops.includes('items')) conn?.host({ action: 'dev', op: 'giveItems' });
+          if (ops.includes('duel')) conn?.host({ action: 'dev', op: 'queueDuel' });
+          if (ops.includes('shop')) conn?.host({ action: 'dev', op: 'shop' });
+        }, 500);
+      }, 1500);
     })().catch((e: Error) => live && setError(e.message));
     return () => {
       live = false;
@@ -45,7 +56,7 @@ export default function MinigameHarness({ gameId }: { gameId: string }) {
   }, [gameId, n]);
 
   if (error) return <div className="panel" style={{ margin: 20 }}>Harness failed: {error}</div>;
-  if (!room) return <div className="center" style={{ height: '100%' }}>Setting up {gameId}…</div>;
+  if (!room) return <div className="center" style={{ height: '100%' }}>Setting up {gameId ?? 'the board'}…</div>;
   return (
     <div className="harness">
       <iframe title="Host screen" className="harness-host" src={`/host/${room.code}#t=${encodeURIComponent(room.hostToken)}`} />

@@ -10,8 +10,10 @@ import './games/count.ts';
 import './games/tug.ts';
 import './games/hunter.ts';
 import '../board/board.ts';
-// After the board: the endgame wraps the board's flow steps.
+import './games/quickdraw.ts';
+// After the board: the endgame wraps the board's flow steps, and duels wrap the endgame's.
 import './endgame.ts';
+import './duels.ts';
 
 export * from './state.ts';
 export * from './minigame.ts';
@@ -26,3 +28,6 @@ export { formatFromColours, initBoard } from '../board/board.ts';
 export * from './endgame.ts';
 export { hunterZones, caught } from './games/hunter.ts';
 export * from '../simulate.ts';
+export * from './items.ts';
+export * from './duels.ts';
+export { quickDrawScore } from './games/quickdraw.ts';

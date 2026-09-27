@@ -52,6 +52,26 @@ export interface GameState {
   twist?: 'cheapStars' | 'starMoves' | 'bottomItems' | null;
   /** Bonus stars awarded at the end. */
   bonus?: { id: string; winners: string[] }[];
+  /** Hidden traps: owner → space. Known only to the owner. */
+  traps: Record<SeatId, number>;
+  /** Players holding a star discount for their next star. */
+  discounts: SeatId[];
+  /** Duels waiting to be played (extra duels carry over to the next round). */
+  pendingDuels: PendingDuel[];
+  /** Players who landed on a shop this round (the shop opens on their phone at payout). */
+  shoppers: SeatId[];
+  /** Spotlight moments used this round (the cap is 3, shared with duels). */
+  spotlightsThisRound: number;
+  /** The duel being played, between its setup and its result. */
+  duel?: import('./duels.ts').DuelState | null;
+  duelsThisRound?: number;
+}
+
+export interface PendingDuel {
+  a: SeatId;
+  /** Null: the challenger picks an opponent (duel space). */
+  b: SeatId | null;
+  reason: 'space' | 'meet' | 'ticket';
 }
 
 export function newGamePlayer(id: SeatId): GamePlayer {
@@ -79,6 +99,11 @@ export function createGameState(room: RoomEngine): GameState {
     threatMax: 3,
     lastPayout: null,
     history: [],
+    traps: {},
+    discounts: [],
+    pendingDuels: [],
+    shoppers: [],
+    spotlightsThisRound: 0,
   };
 }
 

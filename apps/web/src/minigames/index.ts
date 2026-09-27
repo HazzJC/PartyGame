@@ -4,3 +4,4 @@ import './StopwatchChicken.tsx';
 import './CountTogether.tsx';
 import './TugOfWar.tsx';
 import './HunterVsHiders.tsx';
+import './QuickDraw.tsx';

@@ -6,6 +6,7 @@ import { addCoins, game, isFinalStretch, type GameState } from '../game/state.ts
 import { generateBoard, isJunction, preview } from './generate.ts';
 import { BOARD_EVENTS, applyBoardEvent } from './events.ts';
 import { board, moveStar, type BoardState, type Spotlight } from './state.ts';
+import { resolveItems, springTrap, starPriceFor, validateUse, type ItemUse } from '../game/items.ts';
 
 export type { BoardState, Spotlight };
 
@@ -34,8 +35,11 @@ export interface StarContest {
 
 export interface BoardPhase extends PhaseBase {
   kind: 'board';
-  stage: 'roll' | 'move' | 'bid' | 'resolve';
+  stage: 'roll' | 'items' | 'move' | 'bid' | 'resolve';
   walks: Record<string, Walk>;
+  /** Items queued secretly during the roll step, revealed together when it ends. */
+  uses: Record<string, ItemUse>;
+  itemLines: string[];
   contests: StarContest[];
   /** Coins from the landing space, for floating numbers. */
   landing: Record<string, number>;
@@ -58,6 +62,7 @@ export const LANDING_MS = 2600;
 export const FLIP_MS = 2400;
 export const SUMMARY_MS = 3000;
 export const SPOTLIGHT_CAP = 3;
+export const ITEMS_REVEAL_MS = 4500;
 
 // ------------------------------------------------------------------ setup
 
@@ -117,13 +122,23 @@ function finishWalk(room: RoomEngine, s: BoardPhase, id: string): void {
   }
 }
 
+/** End of the roll step: everyone's roll is locked, then queued items are revealed and resolved. */
+function endRoll(room: RoomEngine, s: BoardPhase): void {
+  room.clearPhaseTimer('rollEnd');
+  for (const w of Object.values(s.walks)) if (w.roll === null) w.roll = rollDie(room);
+  if (Object.keys(s.uses).length === 0) return startMove(room, s);
+  const g = game(room);
+  s.itemLines = resolveItems(room, g, board(g), s.walks, s.uses, () => rollDie(room));
+  s.stage = 'items';
+  s.endsAt = room.now() + ITEMS_REVEAL_MS;
+  room.setPhaseTimer('itemsDone', s.endsAt);
+}
+
 function startMove(room: RoomEngine, s: BoardPhase): void {
   s.stage = 'move';
   s.endsAt = null;
-  room.clearPhaseTimer('rollEnd');
   for (const [id, w] of Object.entries(s.walks)) {
-    if (w.roll === null) w.roll = rollDie(room);
-    w.remaining = w.roll;
+    w.remaining = w.roll ?? rollDie(room);
     walkOn(room, s, id);
   }
   room.scheduleBots();
@@ -138,13 +153,12 @@ function rollDie(room: RoomEngine): number {
 function settleStars(room: RoomEngine, s: BoardPhase): void {
   const g = game(room);
   const b = board(g);
-  const price = b.starPrice;
   const byStar = new Map<number, string[]>();
   for (const [id, w] of Object.entries(s.walks))
-    for (const star of new Set(w.passedStars)) if (g.players[id]!.coins >= price) byStar.set(star, [...(byStar.get(star) ?? []), id]);
+    for (const star of new Set(w.passedStars)) if (g.players[id]!.coins >= starPriceFor(g, b, id)) byStar.set(star, [...(byStar.get(star) ?? []), id]);
 
   for (const [star, ids] of byStar) {
-    if (ids.length === 1) buyStar(room, s, ids[0]!, star, price);
+    if (ids.length === 1) buyStar(room, s, ids[0]!, star, starPriceFor(g, b, ids[0]!));
     else s.contests.push({ star, bidders: ids, bids: {}, closesAt: room.now() + BID_MS });
   }
   if (s.contests.length) {
@@ -163,6 +177,8 @@ function buyStar(room: RoomEngine, s: BoardPhase, id: string, star: number, cost
   if (!b.stars.includes(star)) return;
   addCoins(g, id, -cost);
   g.players[id]!.stars++;
+  // A star coupon is used up by the next star, whatever it cost.
+  g.discounts = g.discounts.filter((x) => x !== id);
   moveStar(room, b, star);
   s.spotlights.push({
     kind: contest ? 'contest' : 'star',
@@ -194,9 +210,14 @@ function resolve(room: RoomEngine, s: BoardPhase): void {
   const b = board(g);
   const final = isFinalStretch(g);
   const events: Spotlight[] = [];
+  const name = (id: string) => room.seat(id)?.name ?? 'Someone';
   for (const id of g.order) {
     const node = b.def.nodes[b.positions[id]!]!;
     const p = g.players[id]!;
+    const sprung = springTrap(g, id, node.id);
+    if (sprung) events.unshift({ kind: 'event', seats: [id, sprung[0]], title: 'Trap!', text: `${name(id)} sprang ${name(sprung[0])}'s hidden trap and paid ${sprung[1]} coins` });
+    if (node.type === 'shop') g.shoppers.push(id);
+    if (node.type === 'duel') g.pendingDuels.push({ a: id, b: null, reason: 'space' });
     if (node.type === 'blue') {
       s.landing[id] = addCoins(g, id, final ? 6 : 3);
       s.colours[id] = 'blue';
@@ -211,10 +232,20 @@ function resolve(room: RoomEngine, s: BoardPhase): void {
       s.flipped.push(id);
     }
   }
+  // Two players ending on the same space: a duel between them.
+  const byNode = new Map<number, string[]>();
+  for (const id of g.order) byNode.set(b.positions[id]!, [...(byNode.get(b.positions[id]!) ?? []), id]);
+  for (const [node, ids] of byNode) {
+    if (ids.length < 2 || node === b.def.start) continue;
+    const [a, c] = room.rng.shuffle(ids);
+    g.pendingDuels.push({ a: a!, b: c!, reason: 'meet' });
+  }
   // Spotlight cap: star purchases first, then events; the rest resolve in a summary panel.
+  // Duels run after the mini game and share the same cap.
   const all = [...s.spotlights, ...events];
   s.spotlights = all.slice(0, SPOTLIGHT_CAP);
   s.summary = all.slice(SPOTLIGHT_CAP).map((x) => x.text);
+  g.spotlightsThisRound = s.spotlights.length;
   s.stage = 'resolve';
   s.resolveAt = room.now();
   const flipMs = s.flipped.length ? FLIP_MS : 0;
@@ -251,6 +282,8 @@ export const boardPhase = definePhase<BoardPhase>({
     s.stage = 'roll';
     s.walks = Object.fromEntries(g.order.map((id) => [id, { roll: null, start: b.positions[id]!, at: b.positions[id]!, remaining: 0, path: [], passedStars: [], junction: null, done: false, finalAt: null } satisfies Walk]));
     s.contests = [];
+    s.uses = {};
+    s.itemLines = [];
     s.landing = {};
     s.colours = {};
     s.flipped = [];
@@ -266,6 +299,12 @@ export const boardPhase = definePhase<BoardPhase>({
     if (intent.type === 'roll' && s.stage === 'roll' && w.roll === null) {
       w.roll = rollDie(room);
       if (Object.values(s.walks).every((x) => x.roll !== null)) room.setPhaseTimer('rollEnd', room.now() + 1600);
+    } else if (intent.type === 'useItem' && s.stage === 'roll') {
+      // Secret until the roll step ends; can be changed or cancelled until then.
+      const g = game(room);
+      const use = intent.item ? validateUse(g, board(g), seatId, intent as { item?: unknown; target?: unknown; space?: unknown }) : null;
+      if (use) s.uses[seatId] = use;
+      else delete s.uses[seatId];
     } else if (intent.type === 'branch' && s.stage === 'move' && w.junction) {
       const choice = w.junction.options.find((o) => o.next === Number(intent.next));
       if (!choice) return;
@@ -283,7 +322,8 @@ export const boardPhase = definePhase<BoardPhase>({
     }
   },
   timer(room, s, key) {
-    if (key === 'rollEnd' && s.stage === 'roll') startMove(room, s);
+    if (key === 'rollEnd' && s.stage === 'roll') endRoll(room, s);
+    else if (key === 'itemsDone' && s.stage === 'items') startMove(room, s);
     else if (key.startsWith('jn:')) {
       // Timer ran out at a junction: a random branch is taken.
       const id = key.slice(3);
@@ -298,7 +338,8 @@ export const boardPhase = definePhase<BoardPhase>({
   },
   hostAction(room, s, action) {
     if (action.action !== 'skip') return false;
-    if (s.stage === 'roll') startMove(room, s);
+    if (s.stage === 'roll') endRoll(room, s);
+    else if (s.stage === 'items') startMove(room, s);
     else if (s.stage === 'resolve') room.setPhaseTimer('resolved', room.now());
     return true;
   },
@@ -313,7 +354,17 @@ export const boardPhase = definePhase<BoardPhase>({
   botDelay: [700, 2500],
   bot(room, s, seatId) {
     const w = s.walks[seatId]!;
-    if (s.stage === 'roll') return { type: 'roll' };
+    if (s.stage === 'roll') {
+      const g = game(room);
+      const hand = g.players[seatId]!.items;
+      if (hand.length && !s.uses[seatId] && room.rng.chance(0.5)) {
+        const item = room.rng.pick(hand);
+        const others = g.order.filter((x) => x !== seatId);
+        const spaces = board(g).def.nodes.filter((nd) => nd.type !== 'slot').map((nd) => nd.id);
+        return { type: 'useItem', item, target: room.rng.pick(others), space: room.rng.pick(spaces) };
+      }
+      return { type: 'roll' };
+    }
     if (s.stage === 'move' && w.junction) {
       // Bots head for a star if one lies on a route.
       const b = board(game(room));
@@ -349,6 +400,7 @@ export const boardPhase = definePhase<BoardPhase>({
       flipped: s.flipped,
       spotlights: s.spotlights,
       summary: s.summary,
+      itemLines: s.stage === 'items' ? s.itemLines : [],
       resolveAt: s.resolveAt,
       stepMs: STEP_MS,
       timeline: { landingMs: LANDING_MS, flipMs: s.flipped.length ? FLIP_MS : 0, spotlightMs: SPOTLIGHT_MS, summaryMs: s.summary.length ? SUMMARY_MS : 0 },
@@ -369,6 +421,10 @@ export const boardPhase = definePhase<BoardPhase>({
       at: w?.at ?? null,
       remaining: w?.remaining ?? 0,
       done: w?.done ?? false,
+      hand: g.players[seatId]?.items ?? [],
+      use: s.uses[seatId] ?? null,
+      trap: g.traps[seatId] ?? null,
+      coupon: g.discounts.includes(seatId),
       bid: contest && s.stage === 'bid' ? { mine: contest.bids[seatId] ?? null, min: b.starPrice, max: g.players[seatId]!.coins, rivals: contest.bidders.filter((x) => x !== seatId) } : null,
       landing: s.landing[seatId] ?? null,
       colour: s.colours[seatId] ?? null,

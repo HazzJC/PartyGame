@@ -75,3 +75,15 @@ Balance numbers from `pnpm --filter @partygame/sim sim 40 standard` (bots only, 
 
 The doc targets 3 to 5 stars for the leader. Coins pile up until the shop, items, duels and bets arrive in v0.7.
 With the doc's thresholds, 6-player games are mostly team and 1-vs-many; free-for-all only happens when everyone lands on one colour.
+
+## v0.7 · Items, shop, traps, duels and bets
+
+Try it solo first with `/dev/board?n=4&dev=items,duel,shop` (hands you items, queues a duel and opens the shop).
+
+- [ ] Items: during the roll, tap an item (and a target) before rolling. Is it clear it's secret until everyone has rolled?
+- [ ] The reveal lists every item used. Two people swapping with each other cancels out. Did anyone see that happen?
+- [ ] Hidden traps: place one from your map. Nobody else should ever see where it is until someone steps on it.
+- [ ] Shop spaces (yellow $): the shop opens on your phone at the standings screen for 15 seconds.
+- [ ] Duels (green VS spaces, sharing a space, or a Duel Ticket): pick the wager, everyone else bets. Fun or too slow?
+- [ ] Bets: did underdog bets pay out more? Was the result on your phone in sync with the stream?
+- [ ] **Quick Draw**: hold, then let go on FIRE! Fair between phones and laptops?

@@ -5,12 +5,16 @@ import { onHostAction, setGameViews, type RoomEngine } from '../room.ts';
 import { getMinigame, allMinigames, onMinigameFinish, onMinigameFlowTimer, type MinigamePhase } from './minigame.ts';
 import { computePayout } from './payout.ts';
 import { addCoins, createGameState, game, isFinalStretch, standings, type GameState, type NextMinigame } from './state.ts';
+import { buyItem } from './items.ts';
+import { ITEMS, MAX_ITEMS, type ItemId } from '@partygame/shared';
 
 /** Minimum time a rules card stays up, and the longest it waits for "Ready". */
 export const RULES_MIN_MS = 4000;
 export const RULES_MAX_MS = 25_000;
 const ROUND_INTRO_MS = 3000;
 const PAYOUT_MS = 7000;
+/** The shop stays open this long on a shopper's phone, while everyone else sees the standings. */
+const SHOP_MS = 15_000;
 const REVEAL_TAIL_MS = 1200;
 
 // ------------------------------------------------------------------ extension points (board, endgame)
@@ -200,24 +204,49 @@ export interface PayoutPhase extends PhaseBase {
   kind: 'payout';
 }
 
+function endPayout(room: RoomEngine): void {
+  game(room).shoppers = [];
+  afterPayout(room);
+}
+
 export const payoutPhase = definePhase<PayoutPhase>({
   kind: 'payout',
   enter(room, s) {
-    s.endsAt = room.now() + PAYOUT_MS;
+    s.endsAt = room.now() + (game(room).shoppers.length ? SHOP_MS : PAYOUT_MS);
     room.setPhaseTimer('next', s.endsAt);
   },
+  intent(room, _s, seatId, intent) {
+    const g = game(room);
+    if (intent.type === 'buy' && g.shoppers.includes(seatId)) buyItem(g, seatId, String(intent.item) as ItemId);
+    if (intent.type === 'shopDone') g.shoppers = g.shoppers.filter((x) => x !== seatId);
+  },
   timer(room, _s, key) {
-    if (key === 'next') afterPayout(room);
+    if (key === 'next') endPayout(room);
   },
   hostAction(room, _s, action) {
     if (action.action !== 'skip') return false;
-    afterPayout(room);
+    endPayout(room);
     return true;
   },
-  hostView: (room) => ({ standings: standings(game(room)), lastPayout: game(room).lastPayout }),
+  awaiting: (room, _s, seatId) => game(room).shoppers.includes(seatId),
+  botDelay: [1500, 5000],
+  bot(room, _s, seatId) {
+    const g = game(room);
+    const p = g.players[seatId]!;
+    const affordable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].price <= p.coins - 20);
+    if (p.items.length < MAX_ITEMS && affordable.length && room.rng.chance(0.7)) return { type: 'buy', item: room.rng.pick(affordable) };
+    return { type: 'shopDone' };
+  },
+  hostView: (room) => ({ standings: standings(game(room)), lastPayout: game(room).lastPayout, shoppers: game(room).shoppers }),
   playerView: (room, _s, seatId) => {
     const g = game(room);
-    return { gained: g.lastPayout?.[seatId] ?? 0, rank: standings(g).indexOf(seatId) + 1, of: g.order.length };
+    const shopping = g.shoppers.includes(seatId);
+    return {
+      gained: g.lastPayout?.[seatId] ?? 0,
+      rank: standings(g).indexOf(seatId) + 1,
+      of: g.order.length,
+      shop: shopping ? { items: ITEMS, hand: g.players[seatId]!.items, coins: g.players[seatId]!.coins, max: MAX_ITEMS } : null,
+    };
   },
 });
 
@@ -240,6 +269,12 @@ export const podiumPhase = definePhase<PodiumPhase>({
 
 // ------------------------------------------------------------------ wiring
 
+let recordDuelWinner: (room: RoomEngine, winner: string | null) => void = () => undefined;
+/** The duels module registers how a duel's winner is recorded. */
+export function onDuelWinner(fn: typeof recordDuelWinner): void {
+  recordDuelWinner = fn;
+}
+
 export function startGame(room: RoomEngine): void {
   const g = createGameState(room);
   room.state.game = g;
@@ -251,6 +286,20 @@ onStartGame(startGame);
 
 onMinigameFinish((room, phase, result, revealMs) => {
   const g = game(room);
+  if (phase.format === 'duel') {
+    // Duels pay their wager in the duel result phase, not the mini game payout table.
+    const [a, b] = phase.participants;
+    const places = result.kind === 'ffa' ? result.places : {};
+    const winner = places[a!] === 1 && places[b!] !== 1 ? a! : places[b!] === 1 && places[a!] !== 1 ? b! : null;
+    recordDuelWinner(room, winner);
+    phase.stage = 'reveal';
+    phase.result = result;
+    phase.payout = Object.fromEntries(phase.participants.map((id) => [id, 0]));
+    phase.revealEndsAt = room.now() + revealMs;
+    phase.endsAt = phase.revealEndsAt;
+    room.setPhaseTimer('revealDone', phase.revealEndsAt + REVEAL_TAIL_MS);
+    return;
+  }
   // Anyone who is still away when the game ends was covered by the autopilot.
   for (const id of phase.participants) {
     const seat = room.seat(id);
@@ -276,8 +325,9 @@ onMinigameFinish((room, phase, result, revealMs) => {
   room.setPhaseTimer('revealDone', phase.revealEndsAt + REVEAL_TAIL_MS);
 });
 
-onMinigameFlowTimer((room, _phase, key) => {
-  if (key === 'revealDone') room.goto({ kind: 'payout' });
+onMinigameFlowTimer((room, phase, key) => {
+  if (key !== 'revealDone') return;
+  room.goto({ kind: phase.format === 'duel' ? 'duelResult' : 'payout' });
 });
 
 onHostAction((room, action) => {

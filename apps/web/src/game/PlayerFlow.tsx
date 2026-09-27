@@ -3,6 +3,7 @@ import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { minigameUi, type MgPlayerPhase } from './registry.ts';
+import { Shop } from './Shop.tsx';
 import './game.css';
 
 const ordinal = (n: number) => {
@@ -61,6 +62,8 @@ function PersonalResult({ mg }: { mg: MgPlayerPhase }) {
 export function MinigamePlayer({ conn, view }: PlayerScreenProps) {
   const mg = view.phase as unknown as MgPlayerPhase;
   const ui = minigameUi(mg.gameId);
+  // Duels settle on their own result screen.
+  if (mg.stage === 'reveal' && mg.format === 'duel') return <WatchScreen />;
   if (mg.stage === 'reveal')
     return (
       <SpoilerGate conn={conn} revealEndsAt={mg.revealEndsAt ?? 0} delayMs={view.me.streamDelayMs} waiting={<WatchScreen />}>
@@ -71,8 +74,9 @@ export function MinigamePlayer({ conn, view }: PlayerScreenProps) {
   return ui ? <ui.Player conn={conn} view={view} mg={mg} /> : <WatchScreen text={`Missing UI for ${mg.gameId}`} />;
 }
 
-export function PayoutPlayer({ view }: PlayerScreenProps) {
+export function PayoutPlayer({ conn, view }: PlayerScreenProps) {
   const p = view.phase;
+  if (p.shop) return <Shop conn={conn} shop={p.shop} endsAt={p.endsAt} />;
   return (
     <div className="pf center">
       <span className="muted">This round</span>

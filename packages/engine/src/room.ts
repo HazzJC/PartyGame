@@ -327,6 +327,7 @@ export class RoomEngine {
     const s = this.state.settings;
     if (input.length === 'quick' || input.length === 'standard' || input.length === 'long') s.length = input.length;
     if (input.movement === 'dice' || input.movement === 'cards') s.movement = input.movement;
+    if (typeof input.devTools === 'boolean') s.devTools = input.devTools;
     if (input.forceGame === null || (typeof input.forceGame === 'string' && input.forceGame.length <= 40)) s.forceGame = input.forceGame as string | null;
     if (Array.isArray(input.removedGames)) s.removedGames = input.removedGames.filter((x): x is string => typeof x === 'string').slice(0, 64);
   }

@@ -2,6 +2,7 @@
 import { BoardHost } from './board/BoardHost.tsx';
 import { BoardPlayer } from './board/BoardPlayer.tsx';
 import { BonusHost, BonusPlayer, ThreatHost, ThreatPlayer, TwistHost, TwistPlayer } from './game/Endgame.tsx';
+import { DuelResultHost, DuelResultPlayer, DuelSetupHost, DuelSetupPlayer } from './game/Duels.tsx';
 import { MinigameHost, PayoutHost, PodiumHost, RoundIntroHost, RulesHost } from './game/HostFlow.tsx';
 import { MinigamePlayer, PayoutPlayer, PodiumPlayer, RoundIntroPlayer, RulesPlayer } from './game/PlayerFlow.tsx';
 import { registerHostScreen } from './host/registry.tsx';
@@ -33,3 +34,7 @@ registerHostScreen('threat', ThreatHost);
 registerPlayerScreen('threat', ThreatPlayer);
 registerHostScreen('bonus', BonusHost);
 registerPlayerScreen('bonus', BonusPlayer);
+registerHostScreen('duelSetup', DuelSetupHost);
+registerPlayerScreen('duelSetup', DuelSetupPlayer);
+registerHostScreen('duelResult', DuelResultHost);
+registerPlayerScreen('duelResult', DuelResultPlayer);

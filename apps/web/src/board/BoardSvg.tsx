@@ -73,6 +73,7 @@ export function BoardSvg({
   pawnSize = 56,
   className,
   focus,
+  onNodeClick,
 }: {
   def: BoardDef;
   stars: number[];
@@ -82,6 +83,8 @@ export function BoardSvg({
   className?: string;
   /** Optional viewBox override (e.g. zoom the phone map on a junction). */
   focus?: { x: number; y: number; w: number; h: number };
+  /** Makes spaces tappable (e.g. to place a hidden trap). */
+  onNodeClick?: (id: number) => void;
 }) {
   const vb = focus ?? { x: 0, y: 0, w: def.width, h: def.height };
   const edges: ReactNode[] = [];
@@ -120,7 +123,7 @@ export function BoardSvg({
         }
         const ring = hl.get(node.id);
         return (
-          <g key={node.id}>
+          <g key={node.id} onClick={onNodeClick ? () => onNodeClick(node.id) : undefined} style={onNodeClick ? { cursor: 'pointer' } : undefined} role={onNodeClick ? 'button' : undefined} aria-label={onNodeClick ? `Space ${node.id}` : undefined}>
             <circle cx={node.x} cy={node.y} r={31} fill={ring ?? '#FFFFFF'} stroke="#2B2233" strokeWidth={4} />
             <circle cx={node.x} cy={node.y} r={22} fill={SPACE_FILL[node.type]} stroke="#2B2233" strokeWidth={3} />
             {GLYPH[node.type] && (

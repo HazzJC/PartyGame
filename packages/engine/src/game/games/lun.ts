@@ -30,14 +30,15 @@ export function lunPlaces(picks: Record<string, number>, participants: string[])
 export const lowestUnique = defineMinigame<LunData>({
   id: 'lowest-unique',
   name: 'Lowest Unique Number',
-  formats: ['ffa'],
+  formats: ['ffa', 'duel'],
   inputs: [{ kind: 'pick', what: 'Pick a number' }],
   blurb: 'Pick a number in secret. The lowest number that nobody else picked wins. Clash with someone and you both score nothing.',
   setup(ctx) {
     const closesAt = ctx.now() + PICK_MS;
     ctx.setTimer('deadline', closesAt + 400);
     ctx.phase.endsAt = closesAt;
-    return { max: lunRange(ctx.n), closesAt, picks: {} };
+    // A 1v1 duel uses 1 to 5; otherwise the range scales with the room.
+    return { max: ctx.phase.format === 'duel' ? 5 : lunRange(ctx.n), closesAt, picks: {} };
   },
   intent(ctx, d, seatId, intent, sentAt) {
     if (intent.type !== 'pick') return;

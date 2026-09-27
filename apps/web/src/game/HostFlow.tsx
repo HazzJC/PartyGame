@@ -16,7 +16,7 @@ interface GameHostView {
   players: { id: string; coins: number; stars: number; items: number }[];
 }
 
-export const seatMap = (view: HostView) => new Map(view.seats.map((s) => [s.id, s]));
+export const seatMap = (view: { seats: PublicSeat[] }) => new Map(view.seats.map((s) => [s.id, s]));
 
 export function Coin({ size = 28 }: { size?: number }) {
   return (
@@ -161,8 +161,9 @@ export function PayoutHost({ view }: HostScreenProps) {
   const seats = seatMap(view);
   const gains = p.lastPayout as Record<string, number> | null;
   const byId = new Map(g.players.map((x) => [x.id, x]));
+  const shoppers = (p.shoppers ?? []) as string[];
   return (
-    <HostGameFrame view={view} title="Standings" rail={false}>
+    <HostGameFrame view={view} title={shoppers.length ? `Standings · ${shoppers.map((id) => seats.get(id)?.name).join(', ')} shopping` : 'Standings'} rail={false}>
       <ol className="standings">
         {(p.standings as string[]).map((id, i) => {
           const s = seats.get(id);

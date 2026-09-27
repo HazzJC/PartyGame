@@ -32,9 +32,9 @@ describe('mini game loop', () => {
     expect(g.round).toBe(8);
     expect(g.history).toHaveLength(8);
     const coins = Object.values(g.players).map((p) => p.coins);
-    // 10 starting coins plus 8 rounds of mini game payouts (co-op can pay 0).
-    for (const c of coins) expect(c).toBeGreaterThanOrEqual(10);
-    expect(Math.max(...coins)).toBeLessThanOrEqual(10 + 8 * 10);
+    // Coins never go negative, and nobody can have earned an absurd amount in 8 rounds.
+    for (const c of coins) expect(c).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...coins)).toBeLessThan(250);
   });
 
   it('works at 16 players', () => {

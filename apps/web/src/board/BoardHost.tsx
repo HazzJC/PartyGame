@@ -15,7 +15,8 @@ interface HostWalk {
 }
 
 interface BoardHostPhase {
-  stage: 'roll' | 'move' | 'bid' | 'resolve';
+  stage: 'roll' | 'items' | 'move' | 'bid' | 'resolve';
+  itemLines: string[];
   def: BoardDef;
   stars: number[];
   starPrice: number;
@@ -123,6 +124,8 @@ export function BoardHost({ conn, view }: HostScreenProps) {
           Object.values(p.walks).some((w) => w.deciding) ? 'Players marked ? are choosing a path' : 'Moving'
         ) : p.stage === 'bid' ? (
           'Star contest!'
+        ) : p.stage === 'items' ? (
+          'Items revealed'
         ) : colourShown ? (
           <span className="board-sides">
             <span className="side blue">Blue {blue}</span> · <span className="side red">Red {red}</span>
@@ -157,6 +160,20 @@ export function BoardHost({ conn, view }: HostScreenProps) {
               </div>
             </div>
           ))}
+        {p.stage === 'items' && (
+          <div className="spot-back">
+            <div className="spot-card sticker pop-in">
+              <div className="spot-title">Items!</div>
+              <ul className="spot-summary">
+                {p.itemLines.map((t, i) => (
+                  <li key={i} className="pop-in" style={{ animationDelay: `${i * 250}ms` }}>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
         {inFlip && (
           <div className="spot-back">
             <div className="spot-card sticker pop-in">

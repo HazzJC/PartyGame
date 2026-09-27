@@ -5,6 +5,8 @@ import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { BoardSvg } from './BoardSvg.tsx';
+import { ItemPicker, type ItemUseView } from './ItemPicker.tsx';
+import type { ItemId } from '@partygame/shared';
 import './board.css';
 
 interface Junction {
@@ -14,8 +16,12 @@ interface Junction {
 }
 
 interface BoardPlayerPhase {
-  stage: 'roll' | 'move' | 'bid' | 'resolve';
+  stage: 'roll' | 'items' | 'move' | 'bid' | 'resolve';
   def: BoardDef | null;
+  hand: ItemId[];
+  use: ItemUseView | null;
+  trap: number | null;
+  coupon: boolean;
   stars: number[];
   position: number;
   roll: number | null;
@@ -53,7 +59,7 @@ export function Die({ value, size = 120 }: { value: number; size?: number }) {
   );
 }
 
-function RollStage({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlayerPhase }) {
+function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: BoardPlayerPhase; view: PlayerScreenProps['view'] }) {
   const device = useDevice();
   useVirtualKeys((e) => {
     if (e.down && e.key === 'confirm' && p.roll === null) conn.intent({ type: 'roll' });
@@ -64,7 +70,16 @@ function RollStage({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlaye
         <h2>{p.roll === null ? 'Your turn to roll' : `You rolled ${p.roll}!`}</h2>
         <Countdown conn={conn} until={p.endsAt} />
       </div>
-      {p.def && <BoardSvg className="bp-map" def={p.def} stars={p.stars} highlights={[{ nodes: [p.position], colour: '#FFD23F' }]} />}
+      {p.def && (
+        <BoardSvg
+          className="bp-map"
+          def={p.def}
+          stars={p.stars}
+          highlights={[{ nodes: [p.position], colour: '#FFD23F' }, ...(p.trap !== null ? [{ nodes: [p.trap], colour: '#E5484D' }] : [])]}
+        />
+      )}
+      {p.def && <ItemPicker conn={conn} view={view} hand={p.hand} use={p.use} def={p.def} position={p.position} stars={p.stars} />}
+      {p.coupon && <span className="chip">Star coupon ready: your next star is cheaper</span>}
       {p.roll === null ? (
         <button type="button" className="bp-roll" onPointerDown={() => conn.intent({ type: 'roll' })}>
           Roll!
@@ -154,7 +169,8 @@ function BidStage({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlayer
 
 export function BoardPlayer({ conn, view }: PlayerScreenProps) {
   const p = view.phase as unknown as BoardPlayerPhase;
-  if (p.stage === 'roll') return <RollStage conn={conn} p={p} />;
+  if (p.stage === 'roll') return <RollStage conn={conn} p={p} view={view} />;
+  if (p.stage === 'items') return <WatchScreen text="Items revealed! Watch the screen" />;
   if (p.stage === 'move' && p.junction && p.def) return <JunctionStage conn={conn} p={p} j={p.junction} />;
   if (p.stage === 'move') return <WatchScreen text={p.done ? 'Watch your pawn!' : `Moving ${p.roll ?? ''} spaces…`} />;
   if (p.stage === 'bid' && p.bid) return <BidStage conn={conn} p={p} />;
