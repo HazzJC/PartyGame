@@ -1,0 +1,19 @@
+{
+  "name": "partygame",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.20.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "pnpm --filter @partygame/web dev",
+    "build": "pnpm --filter @partygame/web build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm test",
+    "e2e": "pnpm --filter @partygame/web e2e"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  }
+}
