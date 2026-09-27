@@ -39,6 +39,13 @@ async function tryClick(frame: FrameLocator, selector: string, index = 0): Promi
 }
 
 async function poke(player: FrameLocator): Promise<boolean> {
+  // Rhythm: tap the beat pad; maps: tap the middle.
+  if (await tryClick(player, '[aria-label="Tap on the beat"]')) return true;
+  const radar = player.locator('.radar-svg');
+  if (await radar.isVisible().catch(() => false)) {
+    await radar.click({ position: { x: 60, y: 60 } }).catch(() => undefined);
+    return true;
+  }
   // Word games: type an answer, vote, guess writers, lock in a ranking.
   const text = player.locator('.text-answer input');
   if ((await text.isVisible().catch(() => false)) && (await text.isEnabled().catch(() => false))) {

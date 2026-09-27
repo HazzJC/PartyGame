@@ -35,6 +35,10 @@ export default function DevRoutes({ path }: { path: string[] }) {
         <a href="/dev/minigame/heist">Planned Movement Heist</a>
         <a href="/dev/minigame/heist-guard">Heist: Guard</a>
         <a href="/dev/minigame/land-grab">Land Grab</a>
+        <a href="/dev/minigame/synchronised-pulse">Synchronised Pulse</a>
+        <a href="/dev/minigame/mirror-maze">Mirror Maze Optics</a>
+        <a href="/dev/minigame/radar-beacon">Radar Beacon</a>
+        <a href="/dev/minigame/blind-architect">Blind Architect</a>
         <p className="muted">Unknown dev page: {path.join('/') || '(none)'}</p>
       </div>
     </div>

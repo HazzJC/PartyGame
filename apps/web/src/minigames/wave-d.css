@@ -1,0 +1,223 @@
+/* ------------------------------------------------------------------ Synchronised Pulse */
+.pulse-orb {
+  width: 280px;
+  height: 280px;
+  margin: 10px auto;
+  border-radius: 50%;
+  border: 8px solid var(--ink);
+  background: var(--felt-dark);
+  transition: transform 60ms ease-out;
+}
+
+.pulse-orb[data-flash='true'] {
+  background: var(--star);
+  transform: scale(1.12);
+}
+
+.pulse-teams {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pulse-team {
+  min-width: 260px;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 30px;
+  border-color: var(--team);
+  border-width: 6px;
+}
+
+.pulse-team b {
+  color: var(--team);
+  font-family: var(--font-display);
+  font-size: 40px;
+}
+
+.pulse-team[data-best='true'] {
+  background: #c9f2dc;
+}
+
+.pulse-pad {
+  flex: 1;
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  border: 6px solid var(--ink);
+  border-radius: 50%;
+  aspect-ratio: 1;
+  max-width: 100%;
+  align-self: center;
+  background: var(--felt-dark);
+  font-family: var(--font-display);
+  font-size: 48px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+.pulse-pad[data-flash='true'] {
+  background: var(--star);
+}
+
+/* ------------------------------------------------------------------ Mirror Maze */
+.mirror-host {
+  flex-direction: row;
+  align-items: center;
+}
+
+.mirror-svg {
+  height: 100%;
+  max-width: 60%;
+  aspect-ratio: 1;
+}
+
+.mirror-svg.small {
+  max-width: 100%;
+  height: 340px;
+}
+
+.mirror-results {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mirror-team {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-color: var(--team);
+  border-width: 6px;
+}
+
+.mirror-team h3 {
+  font-size: 34px;
+  color: var(--team);
+}
+
+.mirror-results .mirror-svg {
+  height: 560px;
+  max-width: none;
+}
+
+.mirror-results .mirror-svg.small {
+  height: 340px;
+}
+
+/* ------------------------------------------------------------------ Radar Beacon */
+.radar-host {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.radar-svg {
+  aspect-ratio: 1;
+  border: 5px solid var(--ink);
+  border-radius: 18px;
+  touch-action: none;
+}
+
+.radar-host .radar-svg {
+  height: 100%;
+}
+
+.mg-player .radar-svg {
+  width: 100%;
+  max-height: 50vh;
+  align-self: center;
+}
+
+.radar-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radar-team {
+  font-size: 28px;
+  align-self: flex-start;
+}
+
+.radar-log {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+}
+
+/* ------------------------------------------------------------------ Blind Architect */
+.arch-teams,
+.arch-results {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.arch-teams {
+  display: flex;
+}
+
+.arch-team {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 26px;
+  border-color: var(--team, var(--ink));
+  border-width: 6px;
+}
+
+.arch-team h3 {
+  font-size: 34px;
+  color: var(--team, var(--ink));
+}
+
+.arch-svg {
+  width: 420px;
+  height: 420px;
+}
+
+.arch-svg.small {
+  width: 100%;
+  height: auto;
+  max-width: 300px;
+}
+
+.arch-results .arch-svg.small {
+  width: 300px;
+}
+
+.arch-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.arch-chat {
+  margin: 0;
+  padding: 8px 12px 8px 26px;
+  max-height: 22vh;
+  overflow: auto;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: var(--paper);
+  font-size: 16px;
+}
+
+.arch-results .arch-svg {
+  width: 360px;
+  height: 360px;
+}
+
+.arch-results .arch-svg.small {
+  width: 250px;
+  height: 250px;
+}

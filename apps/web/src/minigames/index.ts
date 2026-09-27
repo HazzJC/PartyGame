@@ -19,3 +19,7 @@ import './Sumo.tsx';
 import './Artillery.tsx';
 import './Heist.tsx';
 import './LandGrab.tsx';
+import './SynchronisedPulse.tsx';
+import './MirrorMaze.tsx';
+import './RadarBeacon.tsx';
+import './BlindArchitect.tsx';

@@ -119,3 +119,11 @@ All physics runs once on the server and is played back, so every screen shows th
 - [ ] **Planned Movement Heist** (`heist`): is programming 5 moves on the phone quick enough? Are bumps clear on the stream?
 - [ ] **Heist: Guard** (`heist-guard`, 1 vs many): do the guards have a fair chance?
 - [ ] **Land Grab** (`land-grab`): does the zoomed view of your own area make placing easy? Clashes stay grey forever.
+
+## v0.11 · Wave D: team games
+
+- [ ] **Synchronised Pulse** (`synchronised-pulse`): the first 4 beats tune your phone. Did phones and laptops feel equal after that?
+- [ ] **Mirror Maze Optics** (`mirror-maze`): your phone shows your team's beam live. Is flipping mirrors clear?
+- [ ] **Radar Beacon** (`radar-beacon`): three pings, taken in turns. Could your team find the beacon from the rings?
+- [ ] **Blind Architect** (`blind-architect`): the architect types short messages instead of talking, so all teams play at once. Enough messages?
+- [ ] At 12+ players, team games split into four teams (two-team games like Tug of War merge back into two).

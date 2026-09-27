@@ -103,3 +103,40 @@ export function placementCells(board: { side: number; cells: number[] }, owner: 
   }
   return touches ? out : null;
 }
+
+// ------------------------------------------------------------------ Mirror Maze
+
+export type Mirror = '/' | '\\' | '';
+
+export interface MirrorLayout {
+  size: number;
+  source: { x: number; y: number; dx: number; dy: number };
+  targets: number[];
+  walls: number[];
+  slots: number[];
+}
+
+/** Traces the laser from the source; returns visited cells in order and the targets hit. */
+export function traceLaser(d: MirrorLayout, board: Mirror[]): { path: number[]; hits: number[] } {
+  const path: number[] = [];
+  const hits = new Set<number>();
+  let { x, y, dx, dy } = d.source;
+  const seen = new Set<string>();
+  for (let i = 0; i < d.size * d.size * 4; i++) {
+    x += dx;
+    y += dy;
+    if (x < 0 || y < 0 || x >= d.size || y >= d.size) break;
+    const c = y * d.size + x;
+    if (d.walls.includes(c)) break;
+    const key = `${c},${dx},${dy}`;
+    if (seen.has(key)) break;
+    seen.add(key);
+    path.push(c);
+    if (d.targets.includes(c)) hits.add(c);
+    const slot = d.slots.indexOf(c);
+    const m = slot >= 0 ? board[slot] : '';
+    if (m === '/') [dx, dy] = [-dy, -dx];
+    else if (m === '\\') [dx, dy] = [dy, dx];
+  }
+  return { path, hits: [...hits] };
+}
