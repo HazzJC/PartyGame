@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "partygame",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-20",
+  "workers_dev": true,
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/ws/*"]
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "ROOMS", "class_name": "Room" },
+      { "name": "FEEDBACK", "class_name": "Feedback" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room", "Feedback"] }],
+  "observability": { "enabled": true },
+  "env": {
+    "staging": {
+      "name": "partygame-staging",
+      "durable_objects": {
+        "bindings": [
+          { "name": "ROOMS", "class_name": "Room" },
+          { "name": "FEEDBACK", "class_name": "Feedback" }
+        ]
+      }
+    }
+  }
+}
