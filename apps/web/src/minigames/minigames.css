@@ -250,3 +250,118 @@
 .count-say[data-clash='true'] {
   background: var(--red);
 }
+
+/* ------------------------------------------------------------------ Tug of War */
+.tug-rope {
+  position: relative;
+  height: 64px;
+  margin: 18px 0;
+  border: 5px solid var(--ink);
+  border-radius: 999px;
+  background: repeating-linear-gradient(115deg, #c89b62 0 22px, #a8783f 22px 44px);
+  overflow: visible;
+}
+
+.tug-rope[data-slippery='true'] {
+  outline: 8px solid var(--red);
+  outline-offset: 4px;
+}
+
+.tug-zone {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 6%;
+  border: 5px solid var(--ink);
+}
+
+.tug-zone.left {
+  left: -5px;
+  background: var(--red);
+  border-radius: 999px 0 0 999px;
+}
+
+.tug-zone.right {
+  right: -5px;
+  background: var(--blue);
+  border-radius: 0 999px 999px 0;
+}
+
+.tug-knot {
+  position: absolute;
+  top: 50%;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  border: 5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--star);
+  transition: left 120ms linear;
+}
+
+.tug-teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.tug-team {
+  padding: 18px;
+  border-color: var(--team);
+  border-width: 6px;
+}
+
+.tug-team h3 {
+  font-size: 42px;
+  color: var(--team);
+  text-align: center;
+}
+
+.mash.tug-pad[data-slippery='true'] {
+  background: var(--red);
+}
+
+.mash.tug-pad:disabled {
+  background: var(--felt-dark);
+}
+
+/* ------------------------------------------------------------------ Hunter vs Hiders */
+.hunt-roles {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hunt-zones {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  align-content: center;
+}
+
+.hunt-zone {
+  min-height: 130px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #2f3e46;
+  color: var(--paper);
+}
+
+.hunt-zone[data-lit='true'] {
+  background: #fff3b0;
+  color: var(--ink);
+}
+
+.hunt-zone[data-hit='true'] {
+  background: var(--red);
+  color: var(--paper);
+}
+
+.hunt-n {
+  font-family: var(--font-display);
+  font-size: 40px;
+}

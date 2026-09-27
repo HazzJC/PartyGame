@@ -14,6 +14,8 @@ export default function DevRoutes({ path }: { path: string[] }) {
         <a href="/dev/minigame/lowest-unique">Lowest Unique Number</a>
         <a href="/dev/minigame/stopwatch-chicken">Stopwatch Chicken</a>
         <a href="/dev/minigame/count-to">Count Together</a>
+        <a href="/dev/minigame/tug-of-war">Tug of War</a>
+        <a href="/dev/minigame/hunter-vs-hiders">Hunter vs Hiders</a>
         <p className="muted">Unknown dev page: {path.join('/') || '(none)'}</p>
       </div>
     </div>

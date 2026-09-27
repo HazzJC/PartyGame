@@ -35,8 +35,9 @@ export default {
 
       // POST /api/rooms → create a room, returning its code and the host token.
       if (parts[1] === 'rooms' && parts.length === 2 && request.method === 'POST') {
-        const ip = request.headers.get('cf-connecting-ip') ?? 'local';
-        if (!allowCreate(ip, Date.now())) return json({ error: 'Too many rooms created. Try again in a few minutes.' }, 429);
+        // Local dev (no Cloudflare edge header) is exempt so test suites can create many rooms.
+        const ip = request.headers.get('cf-connecting-ip');
+        if (ip && !allowCreate(ip, Date.now())) return json({ error: 'Too many rooms created. Try again in a few minutes.' }, 429);
         for (let attempt = 0; attempt < 12; attempt++) {
           const code = randomCode();
           const hostToken = randomToken();

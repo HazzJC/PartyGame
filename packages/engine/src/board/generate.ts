@@ -22,7 +22,7 @@ export const BOARD_W = 1440;
 export const BOARD_H = 940;
 
 /** Spaces on the main loop grow with the room (the exact ratio is a playtest knob). */
-export const loopLength = (n: number): number => Math.max(30, Math.min(56, 24 + 2 * n));
+export const loopLength = (n: number): number => Math.max(24, Math.min(40, 18 + n));
 
 type Pt = { x: number; y: number };
 

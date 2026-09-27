@@ -49,6 +49,8 @@ export interface MinigameDef<D = any> {
   /** One or two sentences for the rules card. */
   blurb: string;
   minPlayers?: number;
+  /** Team games: how many teams it supports (default 2 and 4). 4 teams merge into 2 otherwise. */
+  teamCounts?: number[];
   setup(ctx: MgContext): D;
   intent?(ctx: MgContext, d: D, seatId: SeatId, intent: Intent, sentAt: number | null): void;
   /** Named timers set with ctx.setTimer. 'deadline' is also fired when the VIP skips. */

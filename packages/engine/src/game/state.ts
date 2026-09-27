@@ -48,6 +48,10 @@ export interface GameState {
   history: { round: number; gameId: string; format: Format }[];
   /** Board state, added by the board module. */
   board?: any;
+  /** The final-stretch twist the last-place player picked, once picked. */
+  twist?: 'cheapStars' | 'starMoves' | 'bottomItems' | null;
+  /** Bonus stars awarded at the end. */
+  bonus?: { id: string; winners: string[] }[];
 }
 
 export function newGamePlayer(id: SeatId): GamePlayer {

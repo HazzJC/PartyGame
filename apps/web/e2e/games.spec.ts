@@ -57,3 +57,27 @@ test('Count Together: saying a number blocks you from going twice; the VIP can s
   await player.getByRole('button', { name: 'Close' }).click();
   await expectPersonalResult(player);
 });
+
+test('Tug of War: taps pull the rope; hazards are judged on the phone', async ({ page }) => {
+  test.setTimeout(90_000);
+  const { host, player } = await openHarness(page, 'tug-of-war');
+  const pad = player.locator('.tug-pad');
+  await expect(pad).toBeEnabled({ timeout: 15_000 });
+  for (let i = 0; i < 30; i++) await pad.click();
+  await expect(player.locator('.chip', { hasText: 'pulls' })).not.toHaveText('0 pulls');
+  await page.screenshot({ path: 'test-results/game-tug.png' });
+  await expect(host.getByText(/team wins|dead heat/)).toBeVisible({ timeout: 40_000 });
+  await expectPersonalResult(player);
+});
+
+test('Hunter vs Hiders: pick zones and see the searchlights', async ({ page }) => {
+  test.setTimeout(90_000);
+  const { host, player } = await openHarness(page, 'hunter-vs-hiders', 5);
+  // The harness player is the hunter (first seat on the small side).
+  await expect(player.getByText('You are the hunter!')).toBeVisible();
+  for (const z of ['1', '2', '3']) await player.locator('.pick-tile', { has: player.locator('.pick-label', { hasText: new RegExp(`^${z}$`) }) }).click();
+  await player.getByRole('button', { name: 'Search 3/3' }).click();
+  await expect(host.locator('.hunt-zone[data-lit="true"]').first()).toBeVisible({ timeout: 30_000 });
+  await page.screenshot({ path: 'test-results/game-hunter.png' });
+  await expectPersonalResult(player);
+});

@@ -1,4 +1,4 @@
-import type { Format } from '@partygame/shared';
+import { oneVsManyMax, type Format } from '@partygame/shared';
 import { onStartGame, type LobbyPhase } from '../lobby.ts';
 import { definePhase, type PhaseBase } from '../phase.ts';
 import { onHostAction, setGameViews, type RoomEngine } from '../room.ts';
@@ -26,7 +26,15 @@ let afterPayout: Step = (room) => nextRound(room);
 /** When a new game's state is created (the board module builds the board here). */
 let onGameStart: (room: RoomEngine, g: GameState) => void = () => undefined;
 
+/**
+ * Later modules wrap these steps rather than replace them, e.g. the endgame inserts the
+ * last-place twist before the board: `setAfterRoundIntro((room) => twist ? … : prev(room))`.
+ */
 export const flowHooks = {
+  afterRoundIntro: () => afterRoundIntro,
+  afterLastRound: () => afterLastRound,
+  afterPayout: () => afterPayout,
+  onGameStart: () => onGameStart,
   setAfterRoundIntro: (s: Step) => (afterRoundIntro = s),
   setAfterLastRound: (s: Step) => (afterLastRound = s),
   setAfterPayout: (s: Step) => (afterPayout = s),
@@ -77,7 +85,13 @@ export function dealAndShowRules(room: RoomEngine, wanted: Format, teams?: strin
   if (forced) {
     // Testing a single game: keep its own format (teams are dealt by the board module when it applies).
     format = forced.formats.includes(wanted) ? wanted : forced.formats[0]!;
-    g.next = { gameId: forced.id, format, participants, ...(teams && format === wanted ? { teams } : {}) };
+    let forcedTeams = teams && format === wanted ? teams : undefined;
+    if (!forcedTeams && format === 'team') forcedTeams = [participants.filter((_, i) => i % 2 === 0), participants.filter((_, i) => i % 2 === 1)];
+    if (!forcedTeams && format === '1vN') {
+      const small = Math.max(1, oneVsManyMax(participants.length));
+      forcedTeams = [participants.slice(0, small), participants.slice(small)];
+    }
+    g.next = { gameId: forced.id, format, participants, ...(forcedTeams ? { teams: forcedTeams } : {}) };
     room.goto({ kind: 'rules', ...g.next, ready: [] });
     return;
   }
@@ -89,6 +103,11 @@ export function dealAndShowRules(room: RoomEngine, wanted: Format, teams?: strin
     gameId = deal(room, g, 'ffa', participants.length);
   }
   if (!gameId) throw new Error('No mini games available');
+  const def = getMinigame(gameId);
+  if (teams && teams.length === 4 && !(def.teamCounts ?? [2, 4]).includes(4)) {
+    // A two-team game dealt at 12+: each colour's halves play together again.
+    teams = [[...teams[0]!, ...teams[1]!], [...teams[2]!, ...teams[3]!]];
+  }
   g.next = { gameId, format, participants, ...(teams ? { teams } : {}), fallback: format !== wanted };
   room.goto({ kind: 'rules', ...g.next, ready: [] });
 }

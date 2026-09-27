@@ -55,3 +55,23 @@ A full game now: roll, move, mini game, repeat. Try **Quick** first.
 - [ ] Coin flips for purple/yellow/green spaces, then Blue vs Red decides the game format. Did that make sense?
 - [ ] Are the spotlight cards (stars, events) readable on the stream, and not too slow?
 - [ ] Does your phone hold back your landing result until the stream shows it?
+
+## v0.6 · Economy and endgame
+
+- [ ] Final stretch: whoever is last picks a twist (cheaper stars, a restless star, or free items). Did it help them?
+- [ ] Bonus stars at the end: were they a fun surprise, or did they feel unfair?
+- [ ] **Tug of War** (team): mash, but stop when the rope flashes red. Does the hazard feel fair on your device?
+- [ ] **Hunter vs Hiders** (1 vs many): is 15 coins for the hunter a good prize?
+- [ ] Failed co-op games fill the threat meter (shown under the players). Three fails = everyone loses 5 coins.
+
+Balance numbers from `pnpm --filter @partygame/sim sim 40 standard` (bots only, before items and duels):
+
+| Players | Leader stars | Median stars | Coins at end |
+| --- | --- | --- | --- |
+| 6 | 2.8 | 1.2 | 81 |
+| 8 | 2.6 | 0.9 | 84 |
+| 12 | 3.5 | 0.9 | 82 |
+| 16 | 3.1 | 0.7 | 83 |
+
+The doc targets 3 to 5 stars for the leader. Coins pile up until the shop, items, duels and bets arrive in v0.7.
+With the doc's thresholds, 6-player games are mostly team and 1-vs-many; free-for-all only happens when everyone lands on one colour.

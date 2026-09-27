@@ -1,0 +1,17 @@
+{
+  "name": "@partygame/sim",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sim": "node --experimental-transform-types --no-warnings src/sim.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@partygame/engine": "workspace:*",
+    "@partygame/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4"
+  }
+}

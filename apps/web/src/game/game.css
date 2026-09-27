@@ -425,3 +425,67 @@
   font-size: 28px;
   padding: 6px 18px;
 }
+
+/* ------------------------------------------------------------------ twist / threat */
+.twist {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  align-items: center;
+  width: 100%;
+}
+
+.twist-who {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  max-width: 1200px;
+}
+
+.twist-who .mg-host-lead {
+  text-align: left;
+}
+
+.twist-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1360px;
+}
+
+.twist-card {
+  padding: 28px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.twist-card h3 {
+  font-size: 44px;
+}
+
+.twist-card p {
+  margin: 0;
+  font-size: 30px;
+}
+
+.twist-card[data-chosen='true'] {
+  background: var(--star);
+  transform: scale(1.06) rotate(-1.5deg);
+}
+
+.twist-card[data-dim='true'] {
+  opacity: 0.35;
+}
+
+.threat-card {
+  background: #ffd6da;
+}
+
+.hg .chip {
+  font-size: 26px;
+  padding: 4px 16px;
+}

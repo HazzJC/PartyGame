@@ -25,7 +25,8 @@ export function Pick({
   locked = false,
 }: {
   options: PickOption[];
-  selected?: string | null;
+  /** One id, or several for multi-select pickers (e.g. search three zones). */
+  selected?: string | string[] | null;
   onPick: (id: string) => void;
   columns?: number;
   locked?: boolean;
@@ -66,10 +67,10 @@ export function Pick({
           key={o.id}
           type="button"
           role="radio"
-          aria-checked={selected === o.id}
+          aria-checked={Array.isArray(selected) ? selected.includes(o.id) : selected === o.id}
           className="pick-tile"
           data-cursor={showKeys && cursor === i}
-          disabled={o.disabled || (locked && selected !== o.id)}
+          disabled={o.disabled || (locked && (Array.isArray(selected) ? !selected.includes(o.id) : selected !== o.id))}
           onClick={() => {
             setCursor(i);
             choose(i);
