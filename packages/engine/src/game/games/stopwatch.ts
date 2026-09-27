@@ -45,7 +45,7 @@ export const stopwatchChicken = defineMinigame<StopwatchData>({
     // Can't stop before the clock started on the server's timeline (plus sync slack).
     if (ctx.now() < d.startAt + ms - 1500) return;
     d.stops[seatId] = Math.round(ms);
-    if (ctx.phase.participants.every((id) => id in d.stops)) ctx.setTimer('deadline', ctx.now() + 800);
+    if (ctx.phase.participants.every((id) => id in d.stops)) ctx.hurry('deadline', 800);
   },
   timer(ctx, d, key) {
     if (key !== 'deadline') return;

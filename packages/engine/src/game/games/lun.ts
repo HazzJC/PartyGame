@@ -46,7 +46,7 @@ export const lowestUnique = defineMinigame<LunData>({
     if (!Number.isInteger(n) || n < 1 || n > d.max) return;
     if (!inTime(d.closesAt, ctx.now(), sentAt)) return;
     d.picks[seatId] = n;
-    if (ctx.phase.participants.every((id) => id in d.picks)) ctx.setTimer('deadline', ctx.now() + 1200);
+    if (ctx.phase.participants.every((id) => id in d.picks)) ctx.hurry('deadline', 1200);
   },
   timer(ctx, d, key) {
     if (key !== 'deadline') return;

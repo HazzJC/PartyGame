@@ -37,6 +37,8 @@ export interface MgContext {
   now(): number;
   setTimer(name: string, at: number): void;
   clearTimer(name: string): void;
+  /** Brings a timer forward to `now + ms` (never pushes it later), e.g. once everyone has answered. */
+  hurry(name: string, ms: number): void;
   /** Ends play: shows the reveal for `revealMs`, then the payout. */
   finish(result: MinigameResult, revealMs: number): void;
 }
@@ -97,6 +99,11 @@ function ctxFor(room: RoomEngine, phase: MinigamePhase): MgContext {
     now: () => room.now(),
     setTimer: (name, at) => room.setPhaseTimer(`mg:${name}`, at),
     clearTimer: (name) => room.clearPhaseTimer(`mg:${name}`),
+    hurry: (name, ms) => {
+      const current = room.timers.at(`phase:mg:${name}`);
+      const at = room.now() + ms;
+      if (current === null || at < current) room.setPhaseTimer(`mg:${name}`, at);
+    },
     finish: (result, revealMs) => {
       if (phase.stage !== 'play') return;
       room.timers.clearPrefix('phase:mg:');
@@ -137,7 +144,8 @@ export const minigamePhase = definePhase<MinigamePhase>({
     return false;
   },
   awaiting(room, s, seatId) {
-    if (s.stage !== 'play' || !s.participants.includes(seatId)) return false;
+    // Games may schedule bots from inside setup, before their data exists.
+    if (s.data === undefined || s.stage !== 'play' || !s.participants.includes(seatId)) return false;
     return getMinigame(s.gameId).awaiting?.(ctxFor(room, s), s.data, seatId) ?? false;
   },
   bot(room, s, seatId) {

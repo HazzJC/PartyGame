@@ -55,7 +55,7 @@ export const hunterVsHiders = defineMinigame<HunterData>({
       if (zones.length === SEARCHES) d.searches[seatId] = zones;
     }
     const allIn = d.hiders.every((id) => id in d.hides) && d.hunters.every((id) => id in d.searches);
-    if (allIn) ctx.setTimer('deadline', ctx.now() + 1000);
+    if (allIn) ctx.hurry('deadline', 1000);
   },
   timer(ctx, d, key) {
     if (key !== 'deadline') return;

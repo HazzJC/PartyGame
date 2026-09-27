@@ -6,6 +6,7 @@ export interface CellLook {
   fill: string;
   /** Optional glyph drawn in the cell. */
   glyph?: string;
+  glyphColour?: string;
   stroke?: string;
 }
 
@@ -157,7 +158,7 @@ export function Grid({
         <g key={`${x},${y}`}>
           <rect x={x + 0.04} y={y + 0.04} width={0.92} height={0.92} rx={0.18} fill={look.fill} stroke={look.stroke ?? 'rgba(43,34,51,0.35)'} strokeWidth={0.06} />
           {look.glyph && (
-            <text x={x + 0.5} y={y + 0.68} textAnchor="middle" fontSize={0.55} fontFamily="var(--font-display)" fill="#2B2233">
+            <text x={x + 0.5} y={y + 0.68} textAnchor="middle" fontSize={0.55} fontFamily="var(--font-display)" fill={look.glyphColour ?? '#2B2233'}>
               {look.glyph}
             </text>
           )}

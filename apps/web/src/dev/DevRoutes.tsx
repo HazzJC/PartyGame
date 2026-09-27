@@ -19,6 +19,12 @@ export default function DevRoutes({ path }: { path: string[] }) {
         <a href="/dev/minigame/tug-of-war">Tug of War</a>
         <a href="/dev/minigame/hunter-vs-hiders">Hunter vs Hiders</a>
         <a href="/dev/minigame/quick-draw">Quick Draw</a>
+        <a href="/dev/minigame/silent-trample">Silent Trample</a>
+        <a href="/dev/minigame/pick-a-door">Pick a Door</a>
+        <a href="/dev/minigame/pick-a-door-setter">Pick a Door: Trap-setter</a>
+        <a href="/dev/minigame/deep-sea-sonar">Deep Sea Sonar</a>
+        <a href="/dev/minigame/raft-gamble">Raft Gamble</a>
+        <a href="/dev/minigame/crumble-tower">Crumble Tower</a>
         <p className="muted">Unknown dev page: {path.join('/') || '(none)'}</p>
       </div>
     </div>

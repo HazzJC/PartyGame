@@ -39,7 +39,7 @@ export const quickDraw = defineMinigame<QuickDrawData>({
   intent(ctx, d, seatId, intent) {
     if (intent.type !== 'react' || seatId in d.results) return;
     d.results[seatId] = judgeReaction(intent as { ms?: unknown; falseStart?: unknown }, WINDOW_MS);
-    if (ctx.phase.participants.every((id) => id in d.results)) ctx.setTimer('deadline', ctx.now() + 600);
+    if (ctx.phase.participants.every((id) => id in d.results)) ctx.hurry('deadline', 600);
   },
   timer(ctx, d, key) {
     if (key !== 'deadline') return;

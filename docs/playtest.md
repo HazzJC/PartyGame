@@ -87,3 +87,15 @@ Try it solo first with `/dev/board?n=4&dev=items,duel,shop` (hands you items, qu
 - [ ] Duels (green VS spaces, sharing a space, or a Duel Ticket): pick the wager, everyone else bets. Fun or too slow?
 - [ ] Bets: did underdog bets pay out more? Was the result on your phone in sync with the stream?
 - [ ] **Quick Draw**: hold, then let go on FIRE! Fair between phones and laptops?
+
+## v0.8 · Wave A: pick and grid games
+
+Each can be tried solo at `/dev/minigame/<id>?n=6`.
+
+- [ ] **Silent Trample** (`silent-trample`): do the zone rewards make you second-guess the crowd?
+- [ ] **Pick a Door** (`pick-a-door`): once you're out you rig the next doors. Is that more fun than waiting?
+- [ ] **Pick a Door: Trap-setter** (`pick-a-door-setter`, 1 vs many): is 3 rounds to knock out half fair?
+- [ ] **Deep Sea Sonar** (`deep-sea-sonar`): your phone shows exact fish in one patch. Did anyone share (or lie about) theirs?
+- [ ] **Raft Gamble** (`raft-gamble`): bank or stay? Are the side bets worth doing once you're ashore?
+- [ ] **Crumble Tower** (`crumble-tower`): is the "which row falls" rule clear on the phone?
+- [ ] **Quick Draw** (`quick-draw`) now appears as a free-for-all too.

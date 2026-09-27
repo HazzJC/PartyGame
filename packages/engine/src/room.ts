@@ -362,6 +362,8 @@ export class RoomEngine {
     }
     if (key.startsWith('phase:')) {
       getPhase(this.state.phase.kind).timer?.(this, this.state.phase, key.slice(6));
+      // A timer can open a new decision (next round, next stage): give bots their turn.
+      this.scheduleBots();
     }
   }
 

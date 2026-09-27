@@ -1,0 +1,380 @@
+.center-col {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ Silent Trample */
+.trample-zones {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+  align-content: center;
+}
+
+.trample-zone {
+  position: relative;
+  min-height: 190px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #d8f0c8;
+}
+
+.trample-name {
+  font-family: var(--font-display);
+  font-size: 30px;
+}
+
+.trample-pts {
+  font-family: var(--font-display);
+  font-size: 56px;
+  color: var(--good);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+}
+
+.trample-zone[data-fell='true'] {
+  background: #5b4636;
+  color: var(--paper);
+  transform: rotate(-2deg) translateY(10px);
+}
+
+.trample-zone[data-empty='true'] {
+  opacity: 0.55;
+}
+
+.trample-fell {
+  position: absolute;
+  top: 44%;
+  padding: 4px 16px;
+  border: 4px solid var(--ink);
+  border-radius: 10px;
+  background: var(--red);
+  font-family: var(--font-display);
+  font-size: 32px;
+  transform: rotate(-8deg);
+}
+
+/* ------------------------------------------------------------------ Pick a Door */
+.doors {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 18px;
+  padding: 10px 0;
+}
+
+.door {
+  position: relative;
+  flex: 1;
+  max-width: 190px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding-top: 20px;
+  background: #b5793d;
+  border-radius: 90px 90px 14px 14px;
+}
+
+.door-n {
+  font-family: var(--font-display);
+  font-size: 64px;
+  color: var(--paper);
+  -webkit-text-stroke: 8px var(--ink);
+  paint-order: stroke fill;
+}
+
+.door-knob {
+  position: absolute;
+  right: 22px;
+  top: 55%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--star);
+  border: 3px solid var(--ink);
+}
+
+.door[data-trap='true'] {
+  background: var(--ink);
+}
+
+.door[data-safe='true'] {
+  background: #7ed49a;
+}
+
+.door-boom {
+  position: absolute;
+  bottom: 18px;
+  padding: 4px 14px;
+  border: 4px solid var(--ink);
+  border-radius: 10px;
+  background: var(--red);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 30px;
+  transform: rotate(-6deg);
+}
+
+/* ------------------------------------------------------------------ Deep Sea Sonar */
+.sonar-grid {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  aspect-ratio: 1;
+  max-height: 100%;
+  align-self: center;
+  padding: 10px;
+  border: 5px solid var(--ink);
+  border-radius: 20px;
+  background: var(--ink);
+}
+
+.sonar-cell {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.sonar-cell[data-tangled='true'] {
+  outline: 6px solid var(--red);
+  outline-offset: -6px;
+}
+
+.sonar-fish {
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--paper);
+}
+
+/* ------------------------------------------------------------------ Raft Gamble */
+.raft-sea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+  border: 5px solid var(--ink);
+  border-radius: 24px;
+  background: #3178a3;
+}
+
+.raft-islands {
+  display: flex;
+  justify-content: space-between;
+}
+
+.raft-island {
+  width: 90px;
+  height: 90px;
+  display: grid;
+  place-items: center;
+  border: 5px solid var(--ink);
+  border-radius: 50%;
+  background: #e8c77a;
+  font-family: var(--font-display);
+  font-size: 40px;
+}
+
+.raft-island[data-here='true'] {
+  background: var(--star);
+  transform: scale(1.15);
+}
+
+.raft-island[data-past='true'] {
+  opacity: 0.5;
+}
+
+.raft {
+  align-self: center;
+  min-width: 400px;
+  min-height: 120px;
+  padding: 12px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  background: #b5793d;
+}
+
+.raft[data-sank='true'] {
+  transform: rotate(8deg) translateY(30px);
+  opacity: 0.6;
+}
+
+.raft-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.raft-shore {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.raft-banked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 26px;
+}
+
+.raft-choices {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+.raft-choice {
+  appearance: none;
+  min-height: 110px;
+  border: 5px solid var(--ink);
+  border-radius: 26px;
+  box-shadow: 0 7px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--paper);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+  cursor: pointer;
+}
+
+.raft-choice.bank {
+  background: var(--shop);
+}
+
+.raft-choice.stay {
+  background: var(--blue);
+}
+
+.raft-choice[aria-pressed='true'] {
+  transform: translateY(5px);
+  box-shadow: 0 2px 0 var(--ink), 0 0 0 6px var(--star);
+}
+
+/* ------------------------------------------------------------------ Crumble Tower */
+.tower-host {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.tower {
+  width: 460px;
+  display: grid;
+  gap: 3px;
+  padding: 6px;
+  align-self: center;
+  height: 100%;
+  transition: transform 700ms ease-in;
+}
+
+.tower[data-toppled='true'] {
+  transform: rotate(14deg) translateX(80px);
+}
+
+.tower-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  min-height: 0;
+}
+
+.tower-block {
+  display: grid;
+  place-items: center;
+  border: 3px solid transparent;
+  border-radius: 6px;
+}
+
+.tower-block[data-present='true'] {
+  background: #d9a066;
+  border-color: var(--ink);
+}
+
+.tower-row[data-odd='true'] .tower-block[data-present='true'] {
+  background: #c98d52;
+}
+
+.tower-block[data-mark='took'] {
+  background: var(--star) !important;
+}
+
+.tower-block[data-mark='toppled'] {
+  background: var(--red) !important;
+}
+
+.tower-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.tower-pick {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  border: 4px solid var(--ink);
+  border-radius: 16px;
+  background: var(--felt-dark);
+}
+
+.tower-pick-row {
+  display: grid;
+  grid-template-columns: 44px repeat(3, 1fr);
+  gap: 3px;
+  align-items: center;
+}
+
+.tower-pts {
+  font-family: var(--font-display);
+  font-size: 15px;
+  text-align: right;
+  padding-right: 4px;
+}
+
+.tower-pick-block {
+  appearance: none;
+  height: 34px;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  background: #d9a066;
+  cursor: pointer;
+}
+
+.tower-pick-block:disabled {
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(43, 34, 51, 0.25);
+  cursor: default;
+}
+
+.tower-pick-block[aria-pressed='true'] {
+  background: var(--star);
+  box-shadow: 0 0 0 3px var(--blue);
+}
