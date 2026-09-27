@@ -6,6 +6,9 @@ test('a doodle drawn on a phone appears behind that sticker on the host screen',
   const p = await joinAsPlayer(browser, code, 'Doodler');
   await p.page.getByRole('button', { name: 'Doodle a flag' }).tap();
   const canvas = p.page.locator('.draw-canvas');
+  await expect(canvas).toBeVisible();
+  // The pad sizes itself from its container on the next frame; measure after it settles.
+  await p.page.waitForTimeout(300);
   const c = (await canvas.boundingBox())!;
   await p.page.mouse.move(c.x + 30, c.y + 30);
   await p.page.mouse.down();

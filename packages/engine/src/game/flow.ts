@@ -23,11 +23,14 @@ let afterRoundIntro: Step = (room) => dealAndShowRules(room, chooseFormatWithout
 let afterLastRound: Step = (room) => room.goto({ kind: 'podium' });
 /** After each payout, before the next round (duels, shop and spotlight hook in here). */
 let afterPayout: Step = (room) => nextRound(room);
+/** When a new game's state is created (the board module builds the board here). */
+let onGameStart: (room: RoomEngine, g: GameState) => void = () => undefined;
 
 export const flowHooks = {
   setAfterRoundIntro: (s: Step) => (afterRoundIntro = s),
   setAfterLastRound: (s: Step) => (afterLastRound = s),
   setAfterPayout: (s: Step) => (afterPayout = s),
+  setOnGameStart: (s: (room: RoomEngine, g: GameState) => void) => (onGameStart = s),
 };
 
 export function nextRound(room: RoomEngine): void {
@@ -219,7 +222,9 @@ export const podiumPhase = definePhase<PodiumPhase>({
 // ------------------------------------------------------------------ wiring
 
 export function startGame(room: RoomEngine): void {
-  room.state.game = createGameState(room);
+  const g = createGameState(room);
+  room.state.game = g;
+  onGameStart(room, g);
   room.goto({ kind: 'roundIntro' });
 }
 

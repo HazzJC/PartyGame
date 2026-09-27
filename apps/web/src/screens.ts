@@ -1,4 +1,6 @@
 /** Registers every phase's host and player screens. Imported once by the host page and the player shell. */
+import { BoardHost } from './board/BoardHost.tsx';
+import { BoardPlayer } from './board/BoardPlayer.tsx';
 import { MinigameHost, PayoutHost, PodiumHost, RoundIntroHost, RulesHost } from './game/HostFlow.tsx';
 import { MinigamePlayer, PayoutPlayer, PodiumPlayer, RoundIntroPlayer, RulesPlayer } from './game/PlayerFlow.tsx';
 import { registerHostScreen } from './host/registry.tsx';
@@ -22,3 +24,5 @@ registerHostScreen('payout', PayoutHost);
 registerPlayerScreen('payout', PayoutPlayer);
 registerHostScreen('podium', PodiumHost);
 registerPlayerScreen('podium', PodiumPlayer);
+registerHostScreen('board', BoardHost);
+registerPlayerScreen('board', BoardPlayer);

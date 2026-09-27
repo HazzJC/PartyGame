@@ -7,6 +7,7 @@ import './flow.ts';
 import './games/lun.ts';
 import './games/stopwatch.ts';
 import './games/count.ts';
+import '../board/board.ts';
 
 export * from './state.ts';
 export * from './minigame.ts';
@@ -15,3 +16,6 @@ export * from './flow.ts';
 export { lunPlaces } from './games/lun.ts';
 export { stopwatchScore } from './games/stopwatch.ts';
 export { countGrade } from './games/count.ts';
+export * from '../board/generate.ts';
+export * from '../board/state.ts';
+export { formatFromColours, initBoard } from '../board/board.ts';

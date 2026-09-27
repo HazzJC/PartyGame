@@ -44,3 +44,14 @@ The VIP presses **Start game** (add bots if you're few). No board yet: every rou
 - [ ] **Count Together**: did clashes feel fair? (They're judged by when you tapped, not when it arrived.)
 - [ ] Is the standings screen after each game readable on the stream?
 - [ ] Solo testing: `/dev/minigame/lowest-unique?n=6` (also `stopwatch-chicken`, `count-to`) plays one game against bots.
+
+## v0.5 · The board
+
+A full game now: roll, move, mini game, repeat. Try **Quick** first.
+
+- [ ] Rolling: does everyone roll at once, and does the board phase stay under a minute?
+- [ ] At a fork your phone shows a small map with two coloured paths. Is it clear which is which?
+- [ ] Stars: pass one with 20 coins to buy it. Did anyone get a **star contest** (two players reaching it together)?
+- [ ] Coin flips for purple/yellow/green spaces, then Blue vs Red decides the game format. Did that make sense?
+- [ ] Are the spotlight cards (stars, events) readable on the stream, and not too slow?
+- [ ] Does your phone hold back your landing result until the stream shows it?
