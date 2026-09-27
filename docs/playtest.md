@@ -127,3 +127,15 @@ All physics runs once on the server and is played back, so every screen shows th
 - [ ] **Radar Beacon** (`radar-beacon`): three pings, taken in turns. Could your team find the beacon from the rings?
 - [ ] **Blind Architect** (`blind-architect`): the architect types short messages instead of talking, so all teams play at once. Enough messages?
 - [ ] At 12+ players, team games split into four teams (two-team games like Tug of War merge back into two).
+
+## v0.12 · Wave E: co-op games (all 33 games are in)
+
+Co-op pays everyone the same (gold 8, silver 5, bronze 3). Failures fill the threat meter.
+
+- [ ] **Recipe Assembly Line** (`recipe-assembly`): does "claim the next slot" stop people clashing?
+- [ ] **Runaway Switchboard** (`runaway-switchboard`): can you coordinate junctions without shouting over each other?
+- [ ] **Pressure Valve Balancer** (`pressure-valve`): are the cooldowns too long or short?
+- [ ] **The Mind** (`the-mind`): no talking! Did the timestamp ordering ever feel wrong?
+- [ ] **Collaborative Quilt** (`collaborative-quilt`): did seeing your neighbours' edges make lines join up?
+- [ ] **Defuse the Circuit** (`defuse-circuit`): this one needs talking. Is the manual readable on a phone?
+- [ ] **Meteor Shield Array** (`meteor-shield`): the one real-time game. Does it feel responsive on your connection?

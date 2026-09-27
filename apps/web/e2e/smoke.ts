@@ -39,6 +39,12 @@ async function tryClick(frame: FrameLocator, selector: string, index = 0): Promi
 }
 
 async function poke(player: FrameLocator): Promise<boolean> {
+  // Co-op buttons: claim/add, play, pump, cut a wire.
+  if (await tryClick(player, 'button:has-text("Claim the next slot")')) return true;
+  if (await tryClick(player, '.recipe-card:not(:disabled)')) return true;
+  if (await tryClick(player, 'button.count-say:has-text("Play")')) return true;
+  if (await tryClick(player, '.valve-btn:not(:disabled)')) return true;
+  if (await tryClick(player, '.defuse-wire:not(:disabled)')) return true;
   // Rhythm: tap the beat pad; maps: tap the middle.
   if (await tryClick(player, '[aria-label="Tap on the beat"]')) return true;
   const radar = player.locator('.radar-svg');
