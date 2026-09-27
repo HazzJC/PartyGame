@@ -61,6 +61,7 @@ export const SPOTLIGHT_MS = 3800;
 export const LANDING_MS = 2600;
 export const FLIP_MS = 2400;
 export const SUMMARY_MS = 3000;
+export const SIDES_MS = 2500;
 export const SPOTLIGHT_CAP = 3;
 export const ITEMS_REVEAL_MS = 4500;
 
@@ -249,7 +250,8 @@ function resolve(room: RoomEngine, s: BoardPhase): void {
   s.stage = 'resolve';
   s.resolveAt = room.now();
   const flipMs = s.flipped.length ? FLIP_MS : 0;
-  s.endsAt = room.now() + LANDING_MS + flipMs + s.spotlights.length * SPOTLIGHT_MS + (s.summary.length ? SUMMARY_MS : 0);
+  // Always end on the Blue vs Red tally, which decides the mini game format.
+  s.endsAt = room.now() + LANDING_MS + flipMs + s.spotlights.length * SPOTLIGHT_MS + (s.summary.length ? SUMMARY_MS : 0) + SIDES_MS;
   room.setPhaseTimer('resolved', s.endsAt);
 }
 
