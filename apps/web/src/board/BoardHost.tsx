@@ -17,6 +17,7 @@ interface HostWalk {
 interface BoardHostPhase {
   stage: 'roll' | 'items' | 'move' | 'bid' | 'resolve';
   itemLines: string[];
+  cards?: boolean;
   def: BoardDef;
   stars: number[];
   starPrice: number;
@@ -95,7 +96,11 @@ export function BoardHost({ conn, view }: HostScreenProps) {
   const inSummary = p.stage === 'resolve' && p.summary.length > 0 && spotIndex >= p.spotlights.length;
   const colourShown = p.stage === 'resolve' && since >= tl.landingMs + tl.flipMs;
 
-  const pawns: Pawn[] = view.seats.map((s) => {
+  // Pawns belong to board pieces: players, or teams in team board mode.
+  const pieces = Object.keys(p.positions)
+    .map((id) => seats.get(id))
+    .filter((s): s is NonNullable<typeof s> => !!s);
+  const pawns: Pawn[] = pieces.map((s) => {
     const w = p.walks[s.id];
     const at = w ? pawnXY(def, w, now, p.stepMs) : def.nodes[p.positions[s.id] ?? def.start]!;
     let badge: Pawn['badge'];
@@ -119,7 +124,7 @@ export function BoardHost({ conn, view }: HostScreenProps) {
       view={view}
       title={
         p.stage === 'roll' ? (
-          `Tap Roll on your phone · ${rolled}/${view.seats.length}`
+          `${p.cards ? 'Play a movement card' : 'Tap Roll'} on your phone · ${rolled}/${pieces.length}`
         ) : p.stage === 'move' ? (
           Object.values(p.walks).some((w) => w.deciding) ? 'Players marked ? are choosing a path' : 'Moving'
         ) : p.stage === 'bid' ? (
@@ -137,7 +142,7 @@ export function BoardHost({ conn, view }: HostScreenProps) {
       right={p.stage === 'roll' || p.stage === 'bid' ? <Countdown conn={conn} until={p.endsAt} /> : <span className="chip">★ {p.starPrice} coins</span>}
     >
       <div className="board-host">
-        <BoardSvg className="board-svg" def={def} stars={p.stars} pawns={pawns} />
+        <BoardSvg className="board-svg" def={def} stars={p.stars} pawns={pawns} pawnSize={pawns.length > 10 ? 46 : 56} />
         {p.stage === 'bid' &&
           p.contests.map((c, i) => (
             <div key={i} className="spot-back">

@@ -6,6 +6,7 @@ import { joinLink } from '../net/storage.ts';
 import { Avatar } from '../ui/Avatar.tsx';
 import { Qr } from '../ui/Qr.tsx';
 import { PlayHere, useHostSeat } from './PlayHere.tsx';
+import { GameOptions } from '../ui/GameSettings.tsx';
 
 const LENGTHS = [
   { id: 'quick', label: 'Quick', detail: '8 rounds · ~25 min' },
@@ -56,6 +57,7 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
               </button>
             ))}
           </div>
+          <GameOptions conn={conn} view={view} />
         </div>
 
         <button className={`btn big ${hostSeat ? 'white' : 'purple'}`} onClick={() => setPlayOpen(true)} style={{ alignSelf: 'flex-start' }}>

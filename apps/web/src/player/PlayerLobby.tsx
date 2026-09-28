@@ -3,6 +3,7 @@ import type { Stroke } from '@partygame/shared';
 import { useEffect, useState } from 'react';
 import { Direction, Draw } from '../input/index.ts';
 import type { Connection } from '../net/connection.ts';
+import { GameOptions } from '../ui/GameSettings.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 
 const LENGTHS = [
@@ -36,6 +37,7 @@ export function PlayerLobby({ conn, view }: { conn: Connection<PlayerView>; view
               </button>
             ))}
           </div>
+          <GameOptions conn={conn} view={view} compact />
           <div className="row" style={{ flexWrap: 'wrap' }}>
             <button className="btn white small" onClick={() => conn.host({ action: 'addBot' })} disabled={view.seats.length >= 16}>
               + Bot

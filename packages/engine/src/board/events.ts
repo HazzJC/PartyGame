@@ -1,5 +1,5 @@
 import type { RoomEngine } from '../room.ts';
-import { addCoins, game } from '../game/state.ts';
+import { addCoins, entityName, game } from '../game/state.ts';
 import { board, moveStar, type Spotlight } from './state.ts';
 
 /** Board events from event spaces. Each is shown in the spotlight (or the summary past the cap). */
@@ -8,7 +8,7 @@ export type BoardEvent = (typeof BOARD_EVENTS)[number];
 
 export function applyBoardEvent(room: RoomEngine, id: string, ev: BoardEvent): Spotlight {
   const g = game(room);
-  const name = room.seat(id)?.name ?? 'Someone';
+  const name = entityName(room, g, id);
   switch (ev) {
     case 'lucky': {
       const got = addCoins(g, id, 8);
@@ -27,7 +27,7 @@ export function applyBoardEvent(room: RoomEngine, id: string, ev: BoardEvent): S
     case 'charity': {
       const poorest = [...g.order].filter((x) => x !== id).sort((a, b) => g.players[a]!.coins - g.players[b]!.coins).slice(0, 3);
       for (const p of poorest) addCoins(g, p, 3);
-      return { kind: 'event', seats: [id, ...poorest], title: 'Charity drive', text: `${name} starts a charity: the 3 poorest players get 3 coins each` };
+      return { kind: 'event', seats: [id, ...poorest], title: 'Charity drive', text: `${name} starts a charity: the 3 poorest ${g.teamBoard ? 'teams' : 'players'} get 3 coins each` };
     }
     case 'starShuffle': {
       const b = board(g);

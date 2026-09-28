@@ -48,7 +48,7 @@ export { stopwatchScore } from './games/stopwatch.ts';
 export { countGrade } from './games/count.ts';
 export * from '../board/generate.ts';
 export * from '../board/state.ts';
-export { formatFromColours, initBoard } from '../board/board.ts';
+export { formatFromColours, initBoard, teamBoardFormat } from '../board/board.ts';
 export * from './endgame.ts';
 export { hunterZones, caught } from './games/hunter.ts';
 export * from '../simulate.ts';

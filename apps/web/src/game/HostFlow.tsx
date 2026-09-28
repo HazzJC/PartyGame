@@ -7,6 +7,14 @@ import { Avatar } from '../ui/Avatar.tsx';
 import { minigameUi, type MgHostPhase } from './registry.ts';
 import './game.css';
 
+export interface EntityInfo {
+  id: string;
+  name: string;
+  avatar: number;
+  team: number | null;
+  members: string[];
+}
+
 interface GameHostView {
   round: number;
   rounds: number;
@@ -14,9 +22,42 @@ interface GameHostView {
   threat: number;
   threatMax: number;
   players: { id: string; coins: number; stars: number; items: number }[];
+  entities?: EntityInfo[];
+  teamBoard?: boolean;
 }
 
-export const seatMap = (view: { seats: PublicSeat[] }) => new Map(view.seats.map((s) => [s.id, s]));
+/**
+ * Seats by id. In team board mode the board, purse and stars belong to teams, so each team is
+ * added as a pseudo-seat (with a team badge avatar); everything that names a board piece works for both.
+ */
+export const seatMap = (view: { seats: PublicSeat[]; game?: unknown }) => {
+  const map = new Map(view.seats.map((s) => [s.id, s]));
+  const g = view.game as { teamBoard?: boolean; entities?: EntityInfo[] } | null | undefined;
+  if (g?.teamBoard && g.entities)
+    for (const e of g.entities) {
+      const members = e.members.map((id) => map.get(id)).filter((s): s is PublicSeat => !!s);
+      map.set(e.id, { id: e.id, name: e.name, avatar: e.avatar, isBot: members.every((m) => m.isBot), vip: false, connected: members.some((m) => m.connected), device: null, streamDelayMs: 0 });
+    }
+  return map;
+};
+
+/** The board piece this player plays for (their team in team board mode), and the others. */
+export function myEntity(view: { me: { id: string }; game?: unknown }): string {
+  return (view.game as { entity?: string } | null | undefined)?.entity ?? view.me.id;
+}
+
+export function otherPieces(view: { me: { id: string }; seats: PublicSeat[]; game?: unknown }): { id: string; name: string; avatar: number }[] {
+  const g = view.game as { teamBoard?: boolean; entities?: EntityInfo[] } | null | undefined;
+  const mine = myEntity(view);
+  if (g?.teamBoard && g.entities) return g.entities.filter((e) => e.id !== mine);
+  return view.seats.filter((s) => s.id !== view.me.id);
+}
+
+/** Members of a team (or just the player), for small avatar rows. */
+export function membersOfEntity(view: { game?: unknown }, id: string): string[] {
+  const g = view.game as { entities?: EntityInfo[] } | null | undefined;
+  return g?.entities?.find((e) => e.id === id)?.members ?? [id];
+}
 
 export function Coin({ size = 28 }: { size?: number }) {
   return (
@@ -40,7 +81,7 @@ export function HostGameFrame({ view, title, right, children, rail = true }: { v
   const g = view.game as GameHostView | null;
   const seats = seatMap(view);
   return (
-    <div className="hg" data-rail={rail}>
+    <div className="hg" data-rail={rail} data-dense={(g?.players.length ?? 0) > 10} data-teams={!!g?.teamBoard}>
       <header className="hg-top">
         <div className="hg-round">
           {g && (
@@ -61,7 +102,17 @@ export function HostGameFrame({ view, title, right, children, rail = true }: { v
           return (
             <div key={p.id} className="hg-player" data-away={!s.connected}>
               <Avatar avatar={s.avatar} size={44} dim={!s.connected} />
-              <span className="hg-name">{s.name}</span>
+              <span className="hg-name">
+                {s.name}
+                {g.teamBoard && (
+                  <span className="hg-members">
+                    {membersOfEntity(view, p.id).map((m) => {
+                      const ms = seats.get(m);
+                      return ms ? <Avatar key={m} avatar={ms.avatar} size={22} sticker={false} dim={!ms.connected} title={ms.name} /> : null;
+                    })}
+                  </span>
+                )}
+              </span>
               <span className="hg-stat">
                 <StarIcon size={22} />
                 {p.stars}
@@ -125,6 +176,7 @@ export function RulesHost({ conn, view }: HostScreenProps) {
         <h1>{p.name}</h1>
         <p className="rules-blurb">{p.blurb}</p>
         {p.fallback && <p className="muted">No games of that format yet, so it's a free-for-all instead.</p>}
+        {(view.game as GameHostView | null)?.teamBoard && p.format === 'ffa' && <p className="muted">Team board: everyone plays for themselves, and each team scores its members' average placing.</p>}
         <div className="rules-cols">
           <ControlsColumn title="📱 Touch" inputs={p.inputs} scheme="touch" />
           <ControlsColumn title="💻 Keyboard" inputs={p.inputs} scheme="keys" />

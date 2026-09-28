@@ -1,7 +1,7 @@
 import { ITEMS, MAX_ITEMS, STAR_DISCOUNT, STEAL_AMOUNT, TRAP_AMOUNT, type ItemId } from '@partygame/shared';
 import type { RoomEngine } from '../room.ts';
 import type { BoardState } from '../board/state.ts';
-import { addCoins, type GameState } from './state.ts';
+import { addCoins, entityName, type GameState } from './state.ts';
 
 /** An item a player has queued during the roll step. Revealed and resolved together. */
 export interface ItemUse {
@@ -46,7 +46,7 @@ export interface WalkLike {
  * Mutual swaps cancel. Returns public reveal lines (hidden traps say only that one was hidden).
  */
 export function resolveItems(room: RoomEngine, g: GameState, b: BoardState, walks: Record<string, WalkLike>, uses: Record<string, ItemUse>, rollDie: () => number): string[] {
-  const name = (id: string) => room.seat(id)?.name ?? 'Someone';
+  const name = (id: string) => entityName(room, g, id);
   const lines: string[] = [];
   const ids = Object.keys(uses);
   for (const id of ids) consume(g, id, uses[id]!.item);

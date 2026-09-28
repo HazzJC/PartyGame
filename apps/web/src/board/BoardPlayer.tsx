@@ -6,7 +6,8 @@ import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { BoardSvg } from './BoardSvg.tsx';
 import { ItemPicker, type ItemUseView } from './ItemPicker.tsx';
-import type { ItemId } from '@partygame/shared';
+import { TEAM_AVATAR_BASE, type ItemId } from '@partygame/shared';
+import { Avatar, avatarColour } from '../ui/Avatar.tsx';
 import './board.css';
 
 interface Junction {
@@ -35,6 +36,45 @@ interface BoardPlayerPhase {
   colourKnownAt: number | null;
   starPrice: number;
   endsAt: number | null;
+  cards: number[] | null;
+  myCard: number | null;
+  myBranch: number | null;
+  team: { name: string; index: number } | null;
+  targets: { id: string; name: string; avatar: number }[];
+}
+
+/** Team board mode: a banner saying you're choosing with your team (choices are votes). */
+function TeamBanner({ p }: { p: BoardPlayerPhase }) {
+  if (!p.team) return null;
+  return (
+    <div className="bp-team" style={{ ['--team' as string]: avatarColour(TEAM_AVATAR_BASE + p.team.index) }}>
+      <Avatar avatar={TEAM_AVATAR_BASE + p.team.index} size={34} sticker={false} />
+      <span>
+        <b>{p.team.name}</b> · your picks are votes, the team's majority wins
+      </span>
+    </div>
+  );
+}
+
+/** Movement-card variant: play one of three cards instead of rolling. */
+function CardHand({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlayerPhase }) {
+  const cards = p.cards!;
+  const locked = p.roll !== null;
+  useVirtualKeys((e) => {
+    if (!e.down || locked) return;
+    const i = ['1', '2', '3'].indexOf(e.raw ?? '');
+    if (i >= 0) conn.intent({ type: 'card', index: i });
+  }, !locked);
+  return (
+    <div className="bp-cards" role="group" aria-label="Movement cards">
+      {cards.map((v, i) => (
+        <button key={i} type="button" className="bp-card" aria-pressed={p.myCard === i} disabled={locked} onClick={() => conn.intent({ type: 'card', index: i })}>
+          <span className="bp-card-value">{v}</span>
+          <span className="muted">spaces</span>
+        </button>
+      ))}
+    </div>
+  );
 }
 
 const PATH_COLOURS = ['#FF7A1A', '#9B5DE5'];
@@ -61,13 +101,26 @@ export function Die({ value, size = 120 }: { value: number; size?: number }) {
 
 function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: BoardPlayerPhase; view: PlayerScreenProps['view'] }) {
   const device = useDevice();
+  const cards = !!p.cards?.length;
   useVirtualKeys((e) => {
-    if (e.down && e.key === 'confirm' && p.roll === null) conn.intent({ type: 'roll' });
-  }, p.roll === null);
+    if (e.down && e.key === 'confirm' && p.roll === null && !cards) conn.intent({ type: 'roll' });
+  }, p.roll === null && !cards);
+  const title = cards
+    ? p.roll !== null
+      ? `Moving ${p.roll}!`
+      : p.myCard !== null
+        ? 'Waiting for your team…'
+        : 'Play a card'
+    : p.roll === null
+      ? p.team
+        ? 'Roll for your team'
+        : 'Your turn to roll'
+      : `${p.team ? 'Your team' : 'You'} rolled ${p.roll}!`;
   return (
     <div className="bp">
+      <TeamBanner p={p} />
       <div className="mg-player-head">
-        <h2>{p.roll === null ? 'Your turn to roll' : `You rolled ${p.roll}!`}</h2>
+        <h2>{title}</h2>
         <Countdown conn={conn} until={p.endsAt} />
       </div>
       {p.def && (
@@ -78,9 +131,11 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
           highlights={[{ nodes: [p.position], colour: '#FFD23F' }, ...(p.trap !== null ? [{ nodes: [p.trap], colour: '#E5484D' }] : [])]}
         />
       )}
-      {p.def && <ItemPicker conn={conn} view={view} hand={p.hand} use={p.use} def={p.def} position={p.position} stars={p.stars} />}
+      {p.def && <ItemPicker conn={conn} view={view} hand={p.hand} use={p.use} def={p.def} position={p.position} stars={p.stars} targets={p.targets} />}
       {p.coupon && <span className="chip">Star coupon ready: your next star is cheaper</span>}
-      {p.roll === null ? (
+      {cards && p.roll === null ? (
+        <CardHand conn={conn} p={p} />
+      ) : p.roll === null ? (
         <button type="button" className="bp-roll" onPointerDown={() => conn.intent({ type: 'roll' })}>
           Roll!
           {!wantsOnScreenControls(device) && <KeyHint k="Space" />}
@@ -110,8 +165,9 @@ function JunctionStage({ conn, p, j }: { conn: PlayerScreenProps['conn']; p: Boa
   });
   return (
     <div className="bp">
+      <TeamBanner p={p} />
       <div className="mg-player-head">
-        <h2>Which way? {p.remaining} to go</h2>
+        <h2>{p.myBranch !== null ? 'Voted! Waiting for your team…' : `Which way? ${p.remaining} to go`}</h2>
         <Countdown conn={conn} until={j.since + 10_000} />
       </div>
       <BoardSvg
@@ -125,7 +181,7 @@ function JunctionStage({ conn, p, j }: { conn: PlayerScreenProps['conn']; p: Boa
         {j.options.map((o, i) => {
           const star = o.preview.some((id) => p.stars.includes(id));
           return (
-            <button key={o.next} type="button" className="bp-choice" style={{ ['--path' as string]: PATH_COLOURS[i] }} onClick={() => conn.intent({ type: 'branch', next: o.next })}>
+            <button key={o.next} type="button" className="bp-choice" aria-pressed={p.myBranch === o.next} style={{ ['--path' as string]: PATH_COLOURS[i] }} onClick={() => conn.intent({ type: 'branch', next: o.next })}>
               {PATH_NAMES[i]}
               {star && <span className="chip">★ star</span>}
             </button>
@@ -147,6 +203,7 @@ function BidStage({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlayer
       </div>
       <p style={{ margin: 0 }}>
         {b.rivals.length + 1} of you reached the same star. Sealed bid: the highest bid buys it and pays their own bid. Ties go to whoever has fewer stars.
+        {p.team && ' Your team bids the highest amount any teammate seals.'}
       </p>
       <Aim params={[{ id: 'bid', label: 'Your bid', min: b.min, max: Math.max(b.min, b.max), step: 1, unit: ' coins' }]} values={{ bid: value }} onChange={(v) => setValue(v.bid!)} locked={b.mine !== null} />
       <div className="row" style={{ flexWrap: 'wrap' }}>
@@ -180,9 +237,9 @@ export function BoardPlayer({ conn, view }: PlayerScreenProps) {
         <div className="bp center pop-in">
           {p.landing !== null && p.landing !== 0 && <div className={`pf-coins ${p.landing < 0 ? 'neg' : ''}`}>{p.landing > 0 ? `+${p.landing}` : p.landing}</div>}
           <div className="bp-colour" data-colour={p.colour}>
-            You're {p.colour === 'blue' ? 'BLUE' : 'RED'} this round
+            {p.team ? 'Your team landed on' : "You're"} {p.colour === 'blue' ? 'BLUE' : 'RED'}
           </div>
-          <span className="muted">The mini game format comes from the colours everyone landed on.</span>
+          <span className="muted">{p.team ? 'Team board: the next mini game is a team game, co-op or everyone for their team.' : 'The mini game format comes from the colours everyone landed on.'}</span>
         </div>
       </SpoilerGate>
     );

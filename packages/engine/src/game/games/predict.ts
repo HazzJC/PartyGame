@@ -1,5 +1,6 @@
 import { placesFromScores } from '@partygame/shared';
 import { defineMinigame, type MgContext } from '../minigame.ts';
+import { gamePlayerFor } from '../state.ts';
 import { PREDICT_QUESTIONS } from '../packs.ts';
 
 /**
@@ -91,7 +92,7 @@ export const predictTheCrowd = defineMinigame<PredictData>({
         const p = order ? scorePrediction(order, d.counts) : 0;
         d.roundPoints[id] = p;
         d.points[id] = (d.points[id] ?? 0) + p;
-        const gp = ctx.room.state.game?.players?.[id];
+        const gp = gamePlayerFor(ctx.room, id);
         if (gp) gp.stats.crowdScore += p;
       }
       d.stage = 'show';

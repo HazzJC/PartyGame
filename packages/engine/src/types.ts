@@ -29,6 +29,8 @@ export interface Settings {
   forceGame?: string | null;
   /** Dev/testing: allow the 'dev' host actions (give items, queue a duel, open the shop). */
   devTools?: boolean;
+  /** Team board mode for big rooms: teams share a pawn, purse, items and stars. */
+  teamBoard?: boolean;
 }
 
 export interface Timer {

@@ -1,6 +1,12 @@
 import { DRAW_PALETTE, sanitiseStrokes, type Stroke } from '@partygame/shared';
 import { definePhase, type PhaseBase } from './phase.ts';
 import type { RoomEngine } from './room.ts';
+import { allMinigames } from './game/minigame.ts';
+
+/** Every mini game, for the host's deck editor. */
+function catalogue() {
+  return allMinigames().map((m) => ({ id: m.id, name: m.name, formats: m.formats.filter((f) => f !== 'duel'), minPlayers: m.minPlayers ?? 2 }));
+}
 
 export interface LobbyPhase extends PhaseBase {
   kind: 'lobby';
@@ -57,6 +63,6 @@ export const lobbyPhase = definePhase<LobbyPhase>({
     startHandler(room);
     return true;
   },
-  hostView: (_room, s) => ({ notice: s.notice ?? null, doodles: s.doodles ?? {}, nudges: s.nudges ?? {} }),
-  playerView: (_room, s, seatId) => ({ notice: s.notice ?? null, myDoodle: s.doodles?.[seatId] ?? [] }),
+  hostView: (_room, s) => ({ notice: s.notice ?? null, doodles: s.doodles ?? {}, nudges: s.nudges ?? {}, catalogue: catalogue() }),
+  playerView: (room, s, seatId) => ({ notice: s.notice ?? null, myDoodle: s.doodles?.[seatId] ?? [], ...(room.seat(seatId)?.vip ? { catalogue: catalogue() } : {}) }),
 });

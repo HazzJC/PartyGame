@@ -1,10 +1,11 @@
-import { oneVsManyMax, type Format } from '@partygame/shared';
+import { oneVsManyMax, teamCoins, type Format } from '@partygame/shared';
 import { onStartGame, type LobbyPhase } from '../lobby.ts';
 import { definePhase, type PhaseBase } from '../phase.ts';
 import { onHostAction, setGameViews, type RoomEngine } from '../room.ts';
 import { getMinigame, allMinigames, onMinigameFinish, onMinigameFlowTimer, type MinigamePhase } from './minigame.ts';
 import { computePayout } from './payout.ts';
-import { addCoins, createGameState, game, isFinalStretch, standings, type GameState, type NextMinigame } from './state.ts';
+import { addCoins, createGameState, entityList, entityOf, game, isFinalStretch, membersOf, standings, type GameState, type NextMinigame } from './state.ts';
+import type { MinigameResult } from './minigame.ts';
 import { buyItem } from './items.ts';
 import { ITEMS, MAX_ITEMS, type ItemId } from '@partygame/shared';
 
@@ -60,9 +61,10 @@ function chooseFormatWithoutBoard(room: RoomEngine): Format {
 
 export function eligibleGames(room: RoomEngine, format: Format, n: number): string[] {
   const removed = new Set(room.state.settings.removedGames);
-  return allMinigames()
-    .filter((m) => m.formats.includes(format) && !removed.has(m.id) && (m.minPlayers ?? 2) <= n)
-    .map((m) => m.id);
+  const fits = allMinigames().filter((m) => m.formats.includes(format) && (m.minPlayers ?? 2) <= n);
+  const kept = fits.filter((m) => !removed.has(m.id));
+  // Free-for-all is the fallback for every format, so it can never be emptied by deck editing.
+  return (kept.length || format !== 'ffa' ? kept : fits).map((m) => m.id);
 }
 
 /** Each format has its own shuffled deck; nothing repeats until that deck runs out. */
@@ -83,7 +85,8 @@ export function deal(room: RoomEngine, g: GameState, format: Format, n: number):
 
 export function dealAndShowRules(room: RoomEngine, wanted: Format, teams?: string[][]): void {
   const g = game(room);
-  const participants = g.order.filter((id) => room.seat(id));
+  // Everyone plays mini games, even in team board mode where the board belongs to teams.
+  const participants = (g.teamBoard ? g.teamBoard.teams.flat() : g.order).filter((id) => room.seat(id));
   let format = wanted;
   const forced = room.state.settings.forceGame ? allMinigames().find((m) => m.id === room.state.settings.forceGame) : undefined;
   if (forced) {
@@ -217,8 +220,9 @@ export const payoutPhase = definePhase<PayoutPhase>({
   },
   intent(room, _s, seatId, intent) {
     const g = game(room);
-    if (intent.type === 'buy' && g.shoppers.includes(seatId)) buyItem(g, seatId, String(intent.item) as ItemId);
-    if (intent.type === 'shopDone') g.shoppers = g.shoppers.filter((x) => x !== seatId);
+    const id = entityOf(g, seatId);
+    if (intent.type === 'buy' && g.shoppers.includes(id)) buyItem(g, id, String(intent.item) as ItemId);
+    if (intent.type === 'shopDone') g.shoppers = g.shoppers.filter((x) => x !== id);
   },
   timer(room, _s, key) {
     if (key === 'next') endPayout(room);
@@ -228,11 +232,13 @@ export const payoutPhase = definePhase<PayoutPhase>({
     endPayout(room);
     return true;
   },
-  awaiting: (room, _s, seatId) => game(room).shoppers.includes(seatId),
+  awaiting: (room, _s, seatId) => game(room).shoppers.includes(entityOf(game(room), seatId)),
   botDelay: [1500, 5000],
   bot(room, _s, seatId) {
     const g = game(room);
-    const p = g.players[seatId]!;
+    // The autopilot for a dropped player doesn't spend their coins.
+    if (!room.seat(seatId)?.isBot) return { type: 'shopDone' };
+    const p = g.players[entityOf(g, seatId)]!;
     const affordable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].price <= p.coins - 20);
     if (p.items.length < MAX_ITEMS && affordable.length && room.rng.chance(0.7)) return { type: 'buy', item: room.rng.pick(affordable) };
     return { type: 'shopDone' };
@@ -240,12 +246,13 @@ export const payoutPhase = definePhase<PayoutPhase>({
   hostView: (room) => ({ standings: standings(game(room)), lastPayout: game(room).lastPayout, shoppers: game(room).shoppers }),
   playerView: (room, _s, seatId) => {
     const g = game(room);
-    const shopping = g.shoppers.includes(seatId);
+    const id = entityOf(g, seatId);
+    const shopping = g.shoppers.includes(id);
     return {
-      gained: g.lastPayout?.[seatId] ?? 0,
-      rank: standings(g).indexOf(seatId) + 1,
+      gained: g.lastPayout?.[id] ?? 0,
+      rank: standings(g).indexOf(id) + 1,
       of: g.order.length,
-      shop: shopping ? { items: ITEMS, hand: g.players[seatId]!.items, coins: g.players[seatId]!.coins, max: MAX_ITEMS } : null,
+      shop: shopping ? { items: ITEMS, hand: g.players[id]!.items, coins: g.players[id]!.coins, max: MAX_ITEMS } : null,
     };
   },
 });
@@ -264,8 +271,36 @@ export const podiumPhase = definePhase<PodiumPhase>({
     return false;
   },
   hostView: (room) => ({ standings: standings(game(room)) }),
-  playerView: (room, _s, seatId) => ({ rank: standings(game(room)).indexOf(seatId) + 1, of: game(room).order.length }),
+  playerView: (room, _s, seatId) => ({ rank: standings(game(room)).indexOf(entityOf(game(room), seatId)) + 1, of: game(room).order.length }),
 });
+
+// ------------------------------------------------------------------ team board payouts
+
+/**
+ * Team board mode: free-for-all games rank the teams by their members' average placement and
+ * pay the 4-team table (8/5/3/2); other formats pay each team what one of its members earned.
+ */
+export function teamPayout(g: GameState, participants: string[], result: MinigameResult, seatPayout: Record<string, number>): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (result.kind === 'ffa') {
+    const worst = participants.length;
+    const avg = g.order.map((id) => {
+      const places = membersOf(g, id)
+        .filter((m) => participants.includes(m))
+        .map((m) => result.places[m] ?? worst);
+      return { id, avg: places.length ? places.reduce((a, b) => a + b, 0) / places.length : worst };
+    });
+    for (const { id, avg: a } of avg) out[id] = teamCoins(1 + avg.filter((x) => x.avg < a).length, g.order.length);
+    return out;
+  }
+  for (const id of g.order) {
+    const got = membersOf(g, id)
+      .filter((m) => m in seatPayout)
+      .map((m) => seatPayout[m]!);
+    out[id] = got.length ? Math.round(got.reduce((a, b) => a + b, 0) / got.length) : 0;
+  }
+  return out;
+}
 
 // ------------------------------------------------------------------ wiring
 
@@ -295,6 +330,7 @@ onMinigameFinish((room, phase, result, revealMs) => {
     phase.stage = 'reveal';
     phase.result = result;
     phase.payout = Object.fromEntries(phase.participants.map((id) => [id, 0]));
+    g.revealPayout = null;
     phase.revealEndsAt = room.now() + revealMs;
     phase.endsAt = phase.revealEndsAt;
     room.setPhaseTimer('revealDone', phase.revealEndsAt + REVEAL_TAIL_MS);
@@ -305,7 +341,9 @@ onMinigameFinish((room, phase, result, revealMs) => {
     const seat = room.seat(id);
     if (seat && !seat.isBot && !seat.connected && !phase.autopiloted.includes(id)) phase.autopiloted.push(id);
   }
-  const payout = computePayout(phase, result);
+  const seatPayout = computePayout(phase, result);
+  // In team board mode the purse belongs to the team: convert the seats' payout to team coins.
+  const payout = g.teamBoard ? teamPayout(g, phase.participants, result, seatPayout) : seatPayout;
   for (const [id, coins] of Object.entries(payout)) {
     const gained = addCoins(g, id, coins);
     const p = g.players[id];
@@ -313,13 +351,15 @@ onMinigameFinish((room, phase, result, revealMs) => {
   }
   if (result.kind === 'coop') {
     if (result.grade === 'fail') g.threat++;
-    else for (const id of phase.participants) g.players[id] && g.players[id]!.stats.coopWins++;
+    else for (const id of Object.keys(payout)) g.players[id] && g.players[id]!.stats.coopWins++;
   }
   g.lastPayout = payout;
+  g.revealPayout = payout;
   g.history.push({ round: g.round, gameId: phase.gameId, format: phase.format });
   phase.stage = 'reveal';
   phase.result = result;
-  phase.payout = payout;
+  // Each player's screen shows what their side gained.
+  phase.payout = g.teamBoard ? Object.fromEntries(phase.participants.map((id) => [id, payout[entityOf(g, id)] ?? 0])) : payout;
   phase.revealEndsAt = room.now() + revealMs;
   phase.endsAt = phase.revealEndsAt;
   room.setPhaseTimer('revealDone', phase.revealEndsAt + REVEAL_TAIL_MS);
@@ -340,8 +380,8 @@ onHostAction((room, action) => {
 /** Coins still being revealed: shown only once the payout phase starts, so the rail can't spoil results. */
 function pendingCoins(room: RoomEngine, id: string): number {
   const ph = room.phase;
-  if (ph.kind !== 'minigame' || ph.stage !== 'reveal') return 0;
-  return (ph as MinigamePhase).payout?.[id] ?? 0;
+  if (ph.kind !== 'minigame' || (ph as MinigamePhase).stage !== 'reveal') return 0;
+  return game(room).revealPayout?.[id] ?? 0;
 }
 
 setGameViews({
@@ -354,20 +394,26 @@ setGameViews({
       threat: g.threat,
       threatMax: g.threatMax,
       players: g.order.map((id) => ({ id, coins: g.players[id]!.coins - pendingCoins(room, id), stars: g.players[id]!.stars, items: g.players[id]!.items.length })),
+      entities: entityList(room, g),
+      teamBoard: !!g.teamBoard,
     };
   },
   player(room, seatId) {
     const g = game(room);
-    const p = g.players[seatId];
+    const entity = entityOf(g, seatId);
+    const p = g.players[entity];
     return {
       round: g.round,
       rounds: g.rounds,
       finalStretch: isFinalStretch(g),
       threat: g.threat,
       threatMax: g.threatMax,
-      coins: (p?.coins ?? 0) - pendingCoins(room, seatId),
+      coins: (p?.coins ?? 0) - pendingCoins(room, entity),
       stars: p?.stars ?? 0,
       items: p?.items ?? [],
+      entity,
+      entities: entityList(room, g),
+      teamBoard: !!g.teamBoard,
     };
   },
 });

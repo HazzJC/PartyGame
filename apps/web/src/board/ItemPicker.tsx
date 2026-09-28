@@ -35,23 +35,23 @@ export function ItemChip({ item, onClick, active, disabled }: { item: ItemId; on
  * Secret item choice during the roll step: tap an item, pick a player or a space if it needs one.
  * Nothing is revealed until everyone's roll is locked in.
  */
-export function ItemPicker({ conn, view, hand, use, def, position, stars }: { conn: Connection<PlayerView>; view: PlayerView; hand: ItemId[]; use: ItemUseView | null; def: BoardDef; position: number; stars: number[] }) {
+export function ItemPicker({ conn, view, hand, use, def, position, stars, targets }: { conn: Connection<PlayerView>; view: PlayerView; hand: ItemId[]; use: ItemUseView | null; def: BoardDef; position: number; stars: number[]; targets?: { id: string; name: string; avatar: number }[] }) {
   const [picking, setPicking] = useState<ItemId | null>(null);
   if (hand.length === 0) return null;
   const send = (u: ItemUseView | null) => {
     conn.intent(u ? { type: 'useItem', ...u } : { type: 'useItem', item: null });
     setPicking(null);
   };
-  const name = (id?: string) => view.seats.find((s) => s.id === id)?.name ?? '';
+  // Other board pieces: players, or the other teams in team board mode.
+  const others = targets ?? view.seats.filter((s) => s.id !== view.me.id);
+  const name = (id?: string) => others.find((s) => s.id === id)?.name ?? '';
 
   if (picking && ITEMS[picking].target === true)
     return (
       <div className="item-pick panel">
-        <h3>{ITEMS[picking].name}: pick a player</h3>
+        <h3>{ITEMS[picking].name}: pick a target</h3>
         <div className="item-targets">
-          {view.seats
-            .filter((s) => s.id !== view.me.id)
-            .map((s) => (
+          {others.map((s) => (
               <button key={s.id} type="button" className="item-target" onClick={() => send({ item: picking, target: s.id })}>
                 <Avatar avatar={s.avatar} size={40} />
                 {s.name}

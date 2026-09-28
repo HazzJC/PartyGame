@@ -29,3 +29,8 @@ export const PLAYER_COLOURS = [
 ] as const;
 
 export const MAX_PLAYERS = 16;
+
+/** Team board mode: team colours (red, blue, green, gold) and their badge "avatar" ids. */
+export const TEAM_COLOURS = ['#FF4D5E', '#3D7BFF', '#3DBE4B', '#FFB703'] as const;
+export const TEAM_AVATAR_BASE = 100;
+export const isTeamAvatar = (avatar: number): boolean => avatar >= TEAM_AVATAR_BASE;

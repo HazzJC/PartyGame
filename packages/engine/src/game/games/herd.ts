@@ -1,5 +1,6 @@
 import { cleanAnswer, groupAnswers, placesFromScores, type AnswerGroup } from '@partygame/shared';
 import { defineMinigame, type MgContext } from '../minigame.ts';
+import { gamePlayerFor } from '../state.ts';
 import { HERD_PROMPTS, UNIQUE_CATEGORIES } from '../packs.ts';
 
 /**
@@ -115,7 +116,7 @@ export const herdMentality = defineMinigame<HerdData>({
       d.roundPoints = scoreHerd(d.groups, d.mode);
       for (const [id, p] of Object.entries(d.roundPoints)) {
         d.points[id] = (d.points[id] ?? 0) + p;
-        const gp = ctx.room.state.game?.players?.[id];
+        const gp = gamePlayerFor(ctx.room, id);
         if (gp && d.mode === 'herd') gp.stats.crowdScore += p;
       }
       d.stage = 'show';

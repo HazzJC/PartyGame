@@ -676,3 +676,43 @@
   gap: 12px;
   align-content: start;
 }
+
+/* ------------------------------------------------------------------ 16 players and team board */
+.hg[data-dense='true'] .hg-rail {
+  gap: 4px;
+  padding: 12px 14px;
+}
+
+.hg[data-dense='true'] .hg-player {
+  height: 46px;
+  font-size: 19px;
+  gap: 8px;
+}
+
+.hg[data-dense='true'] .hg-player > svg {
+  width: 36px;
+  height: 36px;
+}
+
+.hg[data-dense='true'] .hg-stat svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hg[data-teams='true'] .hg-player {
+  height: auto;
+  min-height: 84px;
+  padding: 8px 12px 8px 6px;
+}
+
+.hg[data-teams='true'] .hg-player > svg {
+  width: 60px;
+  height: 60px;
+}
+
+.hg-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 4px;
+}

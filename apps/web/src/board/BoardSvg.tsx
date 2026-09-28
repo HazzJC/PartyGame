@@ -52,10 +52,14 @@ export function fanOut(pawns: Pawn[], radius = 26): Pawn[] {
       out.push(g[0]!);
       continue;
     }
-    const r = radius + g.length * 2;
-    g.forEach((p, i) => {
-      const a = (i / g.length) * Math.PI * 2 - Math.PI / 2;
-      out.push({ ...p, x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r });
+    // Up to 6 in a ring; bigger crowds (16 players on the start space) get a second, wider ring.
+    const rings = g.length <= 7 ? [g] : [g.slice(0, 6), g.slice(6)];
+    rings.forEach((ring, k) => {
+      const r = k === 0 ? radius + Math.min(ring.length, 7) * 2 : radius * 2.3 + ring.length * 1.5;
+      ring.forEach((p, i) => {
+        const a = (i / ring.length) * Math.PI * 2 - Math.PI / 2 + (k ? Math.PI / ring.length : 0);
+        out.push({ ...p, x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r });
+      });
     });
   }
   return out;
@@ -86,7 +90,9 @@ export function BoardSvg({
   /** Makes spaces tappable (e.g. to place a hidden trap). */
   onNodeClick?: (id: number) => void;
 }) {
-  const vb = focus ?? { x: 0, y: 0, w: def.width, h: def.height };
+  // Big crowds fan out past the edge spaces (16 pawns on the start), so leave a margin for them.
+  const margin = pawns.length > 7 ? 70 : 0;
+  const vb = focus ?? { x: -margin, y: -margin, w: def.width + margin * 2, h: def.height + margin * 2 };
   const edges: ReactNode[] = [];
   for (const node of def.nodes)
     for (const nx of node.next) {

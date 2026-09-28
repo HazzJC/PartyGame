@@ -5,7 +5,7 @@ import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
-import { Coin, HostGameFrame, seatMap } from './HostFlow.tsx';
+import { Coin, HostGameFrame, otherPieces, seatMap } from './HostFlow.tsx';
 import './game.css';
 
 const REASON: Record<string, string> = { space: 'landed on a duel space', meet: 'met on the same space', ticket: 'used a Duel Ticket' };
@@ -51,7 +51,7 @@ export function DuelSetupPlayer({ conn, view }: PlayerScreenProps) {
   const b = p.b ? seats.get(p.b) : undefined;
 
   if (p.stage === 'challenge' && p.role === 'a') {
-    const others = view.seats.filter((s) => s.id !== view.me.id);
+    const others = otherPieces(view);
     return (
       <div className="pf">
         <div className="row" style={{ justifyContent: 'space-between' }}>

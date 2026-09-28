@@ -2,7 +2,7 @@ import { definePhase, type PhaseBase } from '../phase.ts';
 import { onHostAction, type RoomEngine } from '../room.ts';
 import { flowHooks, onDuelWinner } from './flow.ts';
 import { allMinigames, getMinigame } from './minigame.ts';
-import { addCoins, game, type GameState, type PendingDuel } from './state.ts';
+import { actingMember, addCoins, entityOf, game, type GameState, type PendingDuel } from './state.ts';
 
 export const STAKES = [5, 10, 20] as const;
 export const MAX_BET = 3;
@@ -16,8 +16,11 @@ export interface Bet {
 }
 
 export interface DuelState {
+  /** Duelling entities (players, or teams in team board mode). */
   a: string;
   b: string;
+  /** The seats who actually play the duel game for a and b. */
+  seats: [string, string];
   stake: number;
   gameId: string;
   reason: PendingDuel['reason'];
@@ -71,6 +74,8 @@ export interface DuelSetupPhase extends PhaseBase {
   stake: number | null;
   gameId: string;
   bets: Record<string, Bet>;
+  /** The seat who issued the challenge (team board mode: they play the duel). */
+  challenger?: string;
 }
 
 function toBets(room: RoomEngine, s: DuelSetupPhase): void {
@@ -86,8 +91,16 @@ function spectators(room: RoomEngine, s: DuelSetupPhase): string[] {
 
 function startDuelGame(room: RoomEngine, s: DuelSetupPhase): void {
   const g = game(room);
-  g.duel = { a: s.a, b: s.b!, stake: s.stake ?? 0, gameId: s.gameId, reason: s.reason, bets: s.bets };
-  room.goto({ kind: 'rules', gameId: s.gameId, format: 'duel', participants: [s.a, s.b!], ready: [] });
+  // A team sends its challenger (or a connected teammate) to play the duel.
+  const seats: [string, string] = [s.challenger && entityOf(g, s.challenger) === s.a ? s.challenger : actingMember(room, g, s.a), actingMember(room, g, s.b!)];
+  g.duel = { a: s.a, b: s.b!, seats, stake: s.stake ?? 0, gameId: s.gameId, reason: s.reason, bets: s.bets };
+  room.goto({ kind: 'rules', gameId: s.gameId, format: 'duel', participants: seats, ready: [] });
+}
+
+/** Team board mode has no spectator bets: every team is a player, so the pool would be tiny. */
+function afterChallenge(room: RoomEngine, s: DuelSetupPhase): void {
+  if (game(room).teamBoard) startDuelGame(room, s);
+  else toBets(room, s);
 }
 
 export const duelSetupPhase = definePhase<DuelSetupPhase>({
@@ -102,15 +115,16 @@ export const duelSetupPhase = definePhase<DuelSetupPhase>({
   },
   intent(room, s, seatId, intent) {
     const g = game(room);
-    if (intent.type === 'challenge' && s.stage === 'challenge' && seatId === s.a) {
+    if (intent.type === 'challenge' && s.stage === 'challenge' && entityOf(g, seatId) === s.a) {
       if (!s.b) {
         const opp = String(intent.opponent ?? '');
         if (!g.players[opp] || opp === s.a) return;
         s.b = opp;
       }
       s.stake = capStake(g, s.a, s.b, Number(intent.stake));
+      s.challenger = seatId;
       room.clearPhaseTimer('challenge');
-      toBets(room, s);
+      afterChallenge(room, s);
     } else if (intent.type === 'bet' && s.stage === 'bet' && seatId !== s.a && seatId !== s.b && !(seatId in s.bets)) {
       const side = intent.side === 'b' ? 'b' : 'a';
       const coins = Math.max(1, Math.min(MAX_BET, Math.round(Number(intent.coins) || 1)));
@@ -126,7 +140,7 @@ export const duelSetupPhase = definePhase<DuelSetupPhase>({
       const g = game(room);
       if (!s.b) s.b = room.rng.pick(g.order.filter((id) => id !== s.a));
       s.stake = capStake(g, s.a, s.b, STAKES[0]);
-      toBets(room, s);
+      afterChallenge(room, s);
     } else if (key === 'bets' && s.stage === 'bet') startDuelGame(room, s);
   },
   hostAction(room, s, action) {
@@ -134,7 +148,7 @@ export const duelSetupPhase = definePhase<DuelSetupPhase>({
     room.setPhaseTimer(s.stage === 'challenge' ? 'challenge' : 'bets', room.now());
     return true;
   },
-  awaiting: (room, s, seatId) => (s.stage === 'challenge' ? seatId === s.a : s.stage === 'bet' && seatId !== s.a && seatId !== s.b && !(seatId in s.bets)),
+  awaiting: (room, s, seatId) => (s.stage === 'challenge' ? entityOf(game(room), seatId) === s.a : s.stage === 'bet' && seatId !== s.a && seatId !== s.b && !(seatId in s.bets)),
   botDelay: [900, 4000],
   bot(room, s, seatId) {
     const g = game(room);
@@ -151,7 +165,8 @@ export const duelSetupPhase = definePhase<DuelSetupPhase>({
   },
   playerView(room, s, seatId) {
     const g = game(room);
-    const role = seatId === s.a ? 'a' : seatId === s.b ? 'b' : 'spectator';
+    const me = entityOf(g, seatId);
+    const role = me === s.a ? 'a' : me === s.b ? 'b' : 'spectator';
     return {
       stage: s.stage,
       role,
@@ -164,7 +179,8 @@ export const duelSetupPhase = definePhase<DuelSetupPhase>({
       stakes: STAKES,
       maxStake: s.b ? Math.min(g.players[s.a]!.coins, g.players[s.b]!.coins) : g.players[s.a]!.coins,
       myBet: s.bets[seatId] ?? null,
-      maxBet: Math.min(MAX_BET, g.players[seatId]?.coins ?? 0),
+      maxBet: Math.min(MAX_BET, g.players[me]?.coins ?? 0),
+      teamBoard: !!g.teamBoard,
     };
   },
 });
@@ -215,7 +231,10 @@ export const duelResultPhase = definePhase<DuelResultPhase>({
     return true;
   },
   hostView: (_room, s) => ({ a: s.a, b: s.b, winner: s.winner, moved: s.moved, betNet: s.betNet }),
-  playerView: (_room, s, seatId) => ({ a: s.a, b: s.b, winner: s.winner, moved: s.moved, won: s.winner === seatId, dueled: seatId === s.a || seatId === s.b, betNet: s.betNet[seatId] ?? null }),
+  playerView: (room, s, seatId) => {
+    const me = entityOf(game(room), seatId);
+    return { a: s.a, b: s.b, winner: s.winner, moved: s.moved, won: s.winner === me, dueled: me === s.a || me === s.b, betNet: s.betNet[seatId] ?? null };
+  },
 });
 
 // ------------------------------------------------------------------ scheduling
@@ -229,7 +248,7 @@ function startNextDuel(room: RoomEngine): boolean {
   const allowed = Math.max(1, 3 - g.spotlightsThisRound);
   while (g.pendingDuels.length && (g.duelsThisRound ?? 0) < allowed) {
     const d = g.pendingDuels.shift()!;
-    if (!room.seat(d.a) || (d.b && (!room.seat(d.b) || d.b === d.a))) continue;
+    if (!g.players[d.a] || (d.b && (!g.players[d.b] || d.b === d.a))) continue;
     g.duelsThisRound = (g.duelsThisRound ?? 0) + 1;
     room.goto({ kind: 'duelSetup', a: d.a, b: d.b, reason: d.reason });
     return true;
@@ -244,13 +263,14 @@ function nextDuelOr(room: RoomEngine): void {
 /** Called by the flow controller when a duel mini game finishes. */
 onDuelWinner((room, winner) => {
   const g = game(room);
-  if (g.duel) g.duel.winner = winner;
+  // The mini game reports the winning seat; the duel is won by that seat's side.
+  if (g.duel) g.duel.winner = winner === null ? null : winner === g.duel.seats[0] ? g.duel.a : winner === g.duel.seats[1] ? g.duel.b : null;
 });
 
 onHostAction((room, action) => {
   if (action.action !== 'dev' || !room.state.settings.devTools || !room.state.game) return false;
   const g = game(room);
-  const humans = g.order.filter((id) => !room.seat(id)?.isBot);
+  const humans = [...new Set(room.seats.filter((x) => !x.isBot).map((x) => entityOf(g, x.id)))];
   if (action.op === 'giveItems') for (const id of humans) g.players[id]!.items = ['duelTicket', 'swap', 'trap'];
   if (action.op === 'queueDuel' && humans[0]) g.pendingDuels.push({ a: humans[0], b: null, reason: 'space' });
   if (action.op === 'shop') g.shoppers = [...new Set([...g.shoppers, ...humans])];

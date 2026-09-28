@@ -6,6 +6,8 @@ import { minigameUi, type MgPlayerPhase } from './registry.ts';
 import { Shop } from './Shop.tsx';
 import './game.css';
 
+const TEAM_NAMES = ['Red team', 'Blue team', 'Green team', 'Gold team'];
+
 const ordinal = (n: number) => {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
@@ -21,6 +23,7 @@ export function RulesPlayer({ conn, view }: PlayerScreenProps) {
   useVirtualKeys((e) => {
     if (e.down && e.key === 'confirm' && !p.ready) conn.intent({ type: 'ready' });
   }, !p.ready);
+  const teamBoard = !!(view.game as { teamBoard?: boolean } | null)?.teamBoard;
   if (!p.playing) return <WatchScreen text={`${p.name}: you're watching this one`} />;
   return (
     <div className="pf">
@@ -28,8 +31,9 @@ export function RulesPlayer({ conn, view }: PlayerScreenProps) {
         <h2 className="pf-title">{p.name}</h2>
         <Countdown conn={conn} until={p.endsAt} />
       </div>
-      {p.team !== null && p.team >= 0 && <span className="chip pf-team">Team {p.team + 1}</span>}
+      {p.team !== null && p.team >= 0 && <span className="chip pf-team">{teamBoard && p.teams?.length === 4 ? TEAM_NAMES[p.team] : `Team ${p.team + 1}`}</span>}
       <p className="pf-blurb">{p.blurb}</p>
+      {teamBoard && p.format === 'ffa' && <p className="muted" style={{ margin: 0 }}>Team board: your placing counts towards your team's average.</p>}
       <div className="panel">
         <ControlsCard inputs={p.inputs} />
       </div>

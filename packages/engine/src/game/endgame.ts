@@ -3,7 +3,7 @@ import { definePhase, type PhaseBase } from '../phase.ts';
 import type { RoomEngine } from '../room.ts';
 import { board, moveStar } from '../board/state.ts';
 import { flowHooks, nextRound } from './flow.ts';
-import { addCoins, game, standings, type GameState } from './state.ts';
+import { addCoins, entityOf, game, standings, type GameState } from './state.ts';
 
 // ------------------------------------------------------------------ final-stretch twist
 
@@ -56,7 +56,9 @@ export const twistPhase = definePhase<TwistPhase>({
     room.setPhaseTimer('pick', s.endsAt);
   },
   intent(room, s, seatId, intent) {
-    if (intent.type !== 'twist' || seatId !== s.chooser || s.choice) return;
+    if (intent.type !== 'twist' || s.choice) return;
+    // Any member of the last-place team may choose (the timer passes the chooser id itself).
+    if (seatId !== s.chooser && entityOf(game(room), seatId) !== s.chooser) return;
     const id = String(intent.twist) as TwistId;
     if (!(id in TWISTS)) return;
     s.choice = id;
@@ -78,10 +80,10 @@ export const twistPhase = definePhase<TwistPhase>({
     room.setPhaseTimer('pick', room.now());
     return true;
   },
-  awaiting: (_room, s, seatId) => seatId === s.chooser && !s.choice,
+  awaiting: (room, s, seatId) => entityOf(game(room), seatId) === s.chooser && !s.choice,
   bot: (room) => ({ type: 'twist', twist: room.rng.pick(Object.keys(TWISTS)) }),
   hostView: (_room, s) => ({ chooser: s.chooser, choice: s.choice, twists: TWISTS }),
-  playerView: (_room, s, seatId) => ({ chooser: s.chooser, choosing: seatId === s.chooser, choice: s.choice, twists: TWISTS }),
+  playerView: (room, s, seatId) => ({ chooser: s.chooser, choosing: entityOf(game(room), seatId) === s.chooser, choice: s.choice, twists: TWISTS }),
 });
 
 // ------------------------------------------------------------------ threat meter
@@ -112,7 +114,7 @@ export const threatPhase = definePhase<ThreatPhase>({
     return true;
   },
   hostView: (_room, s) => ({ losses: s.losses, amount: THREAT_LOSS }),
-  playerView: (_room, s, seatId) => ({ lost: s.losses[seatId] ?? 0, amount: THREAT_LOSS }),
+  playerView: (room, s, seatId) => ({ lost: s.losses[entityOf(game(room), seatId)] ?? 0, amount: THREAT_LOSS }),
 });
 
 function afterThreat(room: RoomEngine): void {
@@ -184,7 +186,10 @@ export const bonusPhase = definePhase<BonusPhase>({
     return true;
   },
   hostView: (_room, s) => ({ awards: s.awards, revealAt: s.revealAt, info: BONUS_STARS }),
-  playerView: (_room, s, seatId) => ({ revealAt: s.revealAt, awards: s.awards.map((a) => ({ id: a.id, mine: a.winners.includes(seatId) })), info: BONUS_STARS }),
+  playerView: (room, s, seatId) => {
+    const me = entityOf(game(room), seatId);
+    return { revealAt: s.revealAt, awards: s.awards.map((a) => ({ id: a.id, mine: a.winners.includes(me) })), info: BONUS_STARS };
+  },
 });
 
 // ------------------------------------------------------------------ wiring

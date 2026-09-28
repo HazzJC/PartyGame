@@ -139,3 +139,17 @@ Co-op pays everyone the same (gold 8, silver 5, bronze 3). Failures fill the thr
 - [ ] **Collaborative Quilt** (`collaborative-quilt`): did seeing your neighbours' edges make lines join up?
 - [ ] **Defuse the Circuit** (`defuse-circuit`): this one needs talking. Is the manual readable on a phone?
 - [ ] **Meteor Shield Array** (`meteor-shield`): the one real-time game. Does it feel responsive on your connection?
+
+## v0.13 · Large lobbies
+
+Aim for a 12 to 16 player night, with bots topping up if people drop.
+
+- [ ] **16 players on one board:** can you find your pawn in the crowd on the start space? Does the rail stay readable on the stream?
+- [ ] **Team board** (lobby option, 8+ players): four teams share a pawn, purse, items and stars. Your phone shows your team.
+  - [ ] Rolls: the first teammate to tap rolls. Paths, cards, bids and items are votes: the majority wins, and ties are random. Did voting feel fast enough?
+  - [ ] Every seat still plays every mini game. In free-for-alls, each team scores its members' average placing (8/5/3/2). Did that feel fair?
+  - [ ] Duels: any teammate can issue the challenge, and they play it. There are no spectator bets in team mode.
+- [ ] **Movement cards** (lobby option): play one of three cards instead of rolling, then draw a fresh one. Does it add strategy, or just slow things down?
+- [ ] **Deck editing** (lobby, "Mini games: N/33 on"): untick games you don't want. Free-for-all can't be emptied.
+- [ ] **Autopilot:** if you drop, your seat now makes random path choices and never spends your items or coins. Only real bots use items and shop.
+- [ ] Try `/dev/board?n=16&team=1&cards=1` to see team board and cards with bots.
