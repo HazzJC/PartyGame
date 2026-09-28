@@ -16,10 +16,10 @@ function Board({ layout, board, colour, small }: { layout: MirrorLayout; board: 
   return (
     <svg className={`mirror-svg ${small ? 'small' : ''}`} viewBox={`-1.2 -0.2 ${size + 1.4} ${size + 0.4}`}>
       {Array.from({ length: size * size }, (_, c) => (
-        <rect key={c} x={(c % size) + 0.04} y={Math.floor(c / size) + 0.04} width={0.92} height={0.92} rx={0.12} fill={walls.includes(c) ? '#2B2233' : targets.includes(c) ? (trace?.hits.includes(c) ? '#FFD23F' : '#ffe9a8') : '#e9dcc3'} />
+        <rect key={c} x={(c % size) + 0.04} y={Math.floor(c / size) + 0.04} width={0.92} height={0.92} rx={0.12} fill={walls.includes(c) ? '#4b3f8f' : targets.includes(c) ? (trace?.hits.includes(c) ? '#FFD23F' : '#c9f1fa') : '#f4f1fb'} />
       ))}
       {targets.map((c) => (
-        <circle key={`t${c}`} cx={(c % size) + 0.5} cy={Math.floor(c / size) + 0.5} r={0.22} fill="none" stroke="#2B2233" strokeWidth={0.07} />
+        <path key={`t${c}`} transform={`translate(${(c % size) + 0.5} ${Math.floor(c / size) + 0.5})`} d="M0 -0.3 L0.2 0 L0 0.3 L-0.2 0 Z" fill={trace?.hits.includes(c) ? '#FFF6CC' : '#9fe7f5'} stroke="#2B2233" strokeWidth={0.06} strokeLinejoin="round" />
       ))}
       {slots.map((c, i) => {
         const m = board?.[i] ?? '';
@@ -28,8 +28,10 @@ function Board({ layout, board, colour, small }: { layout: MirrorLayout; board: 
         return (
           <g key={`s${c}`}>
             <rect x={x + 0.1} y={y + 0.1} width={0.8} height={0.8} rx={0.1} fill="none" stroke="#9B5DE5" strokeWidth={0.06} strokeDasharray="0.12 0.08" />
-            {m === '/' && <line x1={x + 0.15} y1={y + 0.85} x2={x + 0.85} y2={y + 0.15} stroke="#2B2233" strokeWidth={0.14} strokeLinecap="round" />}
-            {m === '\\' && <line x1={x + 0.15} y1={y + 0.15} x2={x + 0.85} y2={y + 0.85} stroke="#2B2233" strokeWidth={0.14} strokeLinecap="round" />}
+            {m === '/' && <line x1={x + 0.15} y1={y + 0.85} x2={x + 0.85} y2={y + 0.15} stroke="#2B2233" strokeWidth={0.2} strokeLinecap="round" />}
+            {m === '/' && <line x1={x + 0.15} y1={y + 0.85} x2={x + 0.85} y2={y + 0.15} stroke="#dde3ee" strokeWidth={0.1} strokeLinecap="round" />}
+            {m === '\\' && <line x1={x + 0.15} y1={y + 0.15} x2={x + 0.85} y2={y + 0.85} stroke="#2B2233" strokeWidth={0.2} strokeLinecap="round" />}
+            {m === '\\' && <line x1={x + 0.15} y1={y + 0.15} x2={x + 0.85} y2={y + 0.85} stroke="#dde3ee" strokeWidth={0.1} strokeLinecap="round" />}
           </g>
         );
       })}

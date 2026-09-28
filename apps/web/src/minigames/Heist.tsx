@@ -6,6 +6,7 @@ import { Grid, Sequence } from '../input/index.ts';
 import { useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import { RoundHead, RoundResult, SubmittedRow } from './common.tsx';
+import { star } from './theme/paper.tsx';
 import './minigames.css';
 import './wave-c.css';
 
@@ -21,9 +22,8 @@ function Guard({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x + 0.5} ${y + 0.5})`}>
       <circle r={0.4} fill="#1e3a8a" stroke="#2B2233" strokeWidth={0.07} />
-      <text y={0.17} textAnchor="middle" fontSize={0.5} fontFamily="Fredoka, sans-serif" fontWeight={700} fill="#fff">
-        G
-      </text>
+      <path d="M-0.38 -0.08 Q0 -0.58 0.38 -0.08 Z" fill="#101c45" stroke="#2B2233" strokeWidth={0.06} strokeLinejoin="round" />
+      <path d={star(0, 0.14, 0.15)} fill="#FFD23F" stroke="#2B2233" strokeWidth={0.03} />
     </g>
   );
 }
@@ -63,11 +63,12 @@ function Host({ conn, view, mg }: MgHostProps) {
     <div className="mg-host heist-host">
       <svg className="heist-svg" viewBox={`-0.1 -0.1 ${d.size + 0.2} ${d.size + 0.2}`}>
         {Array.from({ length: d.size * d.size }, (_, c) => (
-          <rect key={c} x={(c % d.size) + 0.03} y={Math.floor(c / d.size) + 0.03} width={0.94} height={0.94} rx={0.12} fill={d.walls.includes(c) ? '#2B2233' : '#e9dcc3'} />
+          <rect key={c} x={(c % d.size) + 0.03} y={Math.floor(c / d.size) + 0.03} width={0.94} height={0.94} rx={0.12} fill={d.walls.includes(c) ? '#4a3b5c' : ((c % d.size) + Math.floor(c / d.size)) % 2 ? '#e9dcc3' : '#d5c6a8'} />
         ))}
         {Object.entries(d.gems).map(([c, v]) => (
           <g key={c} transform={`translate(${(Number(c) % d.size) + 0.5} ${Math.floor(Number(c) / d.size) + 0.5})`}>
-            <path d="M0 -0.32 L0.3 0 L0 0.32 L-0.3 0 Z" fill="#48cae4" stroke="#2B2233" strokeWidth={0.06} />
+            <path d="M0 -0.32 L0.3 0 L0 0.32 L-0.3 0 Z" fill="#48cae4" stroke="#2B2233" strokeWidth={0.06} strokeLinejoin="round" />
+            <path d="M-0.3 0 H0.3 M-0.12 0 L0 -0.32 L0.12 0" fill="none" stroke="#2B2233" strokeWidth={0.03} opacity={0.5} />
             <text y={0.12} textAnchor="middle" fontSize={0.3} fontFamily="Fredoka, sans-serif" fontWeight={700}>
               {v}
             </text>

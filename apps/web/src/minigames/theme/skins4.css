@@ -1,0 +1,94 @@
+/* Per-game skins, pack 4 (see skins1.css). */
+
+/* ------------------------------------------------------------------ Heist: the gallery floor plan */
+:is(.mg-themed, .mg-player-themed):is([data-game='heist'], [data-game='heist-guard']) .heist-svg {
+  background: #3b3346;
+  box-shadow: 0 0 0 10px #c9892b, 0 0 0 14px var(--ink), 8px 12px 0 14px var(--ink);
+  margin: 14px;
+}
+
+/* ------------------------------------------------------------------ Land Grab: the explorers' map */
+.mg-themed[data-game='land-grab'] .land-svg {
+  background: #ead9b0;
+  box-shadow: 8px 12px 0 var(--ink);
+  transform: rotate(-0.6deg);
+}
+
+.mg-themed[data-game='land-grab'] .land-scores li {
+  padding: 4px 12px;
+  border: 4px solid var(--ink);
+  border-radius: 12px;
+  background: #fff6e5;
+}
+
+/* ------------------------------------------------------------------ Synchronised Pulse: the disco ball */
+:is(.mg-themed, .mg-player-themed)[data-game='synchronised-pulse'] :is(.pulse-orb, .pulse-pad) {
+  background-color: #c9ced8;
+  background-image:
+    linear-gradient(90deg, rgba(43, 34, 51, 0.28) 3px, transparent 3px),
+    linear-gradient(rgba(43, 34, 51, 0.28) 3px, transparent 3px);
+  background-size: 34px 34px;
+  background-position: center;
+}
+
+:is(.mg-themed, .mg-player-themed)[data-game='synchronised-pulse'] :is(.pulse-orb, .pulse-pad)[data-flash='true'] {
+  background-color: #ffd23f;
+  box-shadow: 0 0 0 18px rgba(255, 210, 63, 0.35), 0 0 0 36px rgba(255, 77, 141, 0.2);
+}
+
+.mg-player-themed[data-game='synchronised-pulse'] {
+  background: #2a1b4a;
+}
+
+/* The pad stays a round ball whatever the phone's shape. */
+.mg-player-themed[data-game='synchronised-pulse'] .pulse-pad {
+  flex: none;
+  width: min(100%, 50vh);
+  height: auto;
+  min-height: 0;
+  margin: auto;
+}
+
+.mg-player-themed[data-game='synchronised-pulse'] .mg-player {
+  color: var(--paper);
+}
+
+.mg-player-themed[data-game='synchronised-pulse'] :is(.muted, .mg-player-head h2) {
+  color: #e6dcff;
+}
+
+.mg-player-themed[data-game='synchronised-pulse'] .countdown {
+  color: var(--ink);
+}
+
+.mg-themed[data-game='synchronised-pulse'] .pulse-team {
+  background: #fff;
+}
+
+/* ------------------------------------------------------------------ Mirror Maze: a crystal floor */
+:is(.mg-themed, .mg-player-themed)[data-game='mirror-maze'] .mirror-svg {
+  border: 5px solid var(--ink);
+  border-radius: 18px;
+  background: #2a1f4f;
+}
+
+/* ------------------------------------------------------------------ Radar Beacon: the lighthouse's chart screen */
+.mg-themed[data-game='radar-beacon'] .radar-svg {
+  margin: 14px;
+  box-shadow: 0 0 0 12px #c9892b, 0 0 0 17px var(--ink), 8px 12px 0 17px var(--ink);
+}
+
+/* ------------------------------------------------------------------ Blind Architect: site plans */
+:is(.mg-themed, .mg-player-themed)[data-game='blind-architect'] .arch-svg {
+  background: #3d7bff;
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 2px, transparent 2px),
+    linear-gradient(rgba(255, 255, 255, 0.18) 2px, transparent 2px);
+  background-size: 24px 24px;
+  border: 5px solid var(--ink);
+  border-radius: 14px;
+}
+
+.mg-themed[data-game='blind-architect'] .arch-team {
+  background: #fff6e5;
+}

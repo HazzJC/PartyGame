@@ -7,7 +7,7 @@ import { TEAM_COLOURS, TEAM_NAMES } from './TugOfWar.tsx';
 import './minigames.css';
 import './wave-d.css';
 
-const HEIGHT_FILL = ['#f4e9d3', '#ffd6a5', '#ff9f80', '#9b5de5'];
+const HEIGHT_FILL = ['#e8e0cf', '#f4c27a', '#e0874f', '#b5541e'];
 
 function Heights({ size, cells, small }: { size: number; cells: number[]; small?: boolean }) {
   return (
