@@ -4,6 +4,7 @@ import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { minigameUi, type MgPlayerPhase } from './registry.ts';
 import { Shop } from './Shop.tsx';
+import { FormatBadge } from '../ui/FormatBadge.tsx';
 import './game.css';
 
 const TEAM_NAMES = ['Red team', 'Blue team', 'Green team', 'Gold team'];
@@ -31,6 +32,7 @@ export function RulesPlayer({ conn, view }: PlayerScreenProps) {
         <h2 className="pf-title">{p.name}</h2>
         <Countdown conn={conn} until={p.endsAt} />
       </div>
+      <FormatBadge format={p.format} compact />
       {p.team !== null && p.team >= 0 && <span className="chip pf-team">{teamBoard && p.teams?.length === 4 ? TEAM_NAMES[p.team] : `Team ${p.team + 1}`}</span>}
       <p className="pf-blurb">{p.blurb}</p>
       {teamBoard && p.format === 'ffa' && <p className="muted" style={{ margin: 0 }}>Team board: your placing counts towards your team's average.</p>}
@@ -54,6 +56,7 @@ function PersonalResult({ mg }: { mg: MgPlayerPhase }) {
   else if (r.result?.kind === '1vN' || r.result?.kind === 'team') headline = r.coins >= 8 ? 'Your side won!' : 'Your side lost';
   return (
     <div className="pf center pop-in">
+      <FormatBadge format={mg.format} compact />
       <h2 className="pf-title" style={{ textAlign: 'center' }}>
         {headline}
       </h2>

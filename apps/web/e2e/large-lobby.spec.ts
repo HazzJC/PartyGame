@@ -48,9 +48,31 @@ test('16 players fit on the host rail', async ({ page, browser }) => {
   await p.page.getByRole('button', { name: 'Start game' }).tap();
   const rail = page.locator('.hg-rail');
   await expect(page.locator('.hg-player')).toHaveCount(16, { timeout: 15_000 });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await expect(page.getByLabel('Board space legend')).toBeVisible();
+  await expect(page.getByLabel('16 players on one space')).toBeVisible();
   // The last card sits inside the rail (nothing is cut off at 1080p).
   const railBox = (await rail.boundingBox())!;
   const last = (await page.locator('.hg-player').last().boundingBox())!;
   expect(last.y + last.height).toBeLessThanOrEqual(railBox.y + railBox.height + 1);
+  const denseSize = await page.locator('.hg-player').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize) * el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).height));
+  expect(denseSize).toBeGreaterThanOrEqual(15.9); // transformed 24px text at 2/3 scale; allow browser rounding
+  await page.screenshot({ path: 'test-results/board-16-720.png' });
+  await p.ctx.close();
+});
+
+for (const count of [2, 4, 8]) test(`${count} players: host rail and board fit at 1280×720`, async ({ page, browser }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const code = await hostGame(page);
+  const p = await joinAsPlayer(browser, code, `P${count}`);
+  for (let i = 1; i < count; i++) await p.page.getByRole('button', { name: '+ Bot' }).tap();
+  await p.page.getByRole('button', { name: 'Start game' }).tap();
+  await expect(page.locator('.hg-player')).toHaveCount(count, { timeout: 15_000 });
+  await expect(page.getByLabel('Board space legend')).toBeVisible({ timeout: 15_000 });
+  const rail = (await page.locator('.hg-rail').boundingBox())!;
+  const stage = (await page.locator('.stage').boundingBox())!;
+  expect(rail.x + rail.width).toBeLessThanOrEqual(stage.x + stage.width + 1);
+  await page.screenshot({ path: `test-results/board-${count}-720.png` });
   await p.ctx.close();
 });

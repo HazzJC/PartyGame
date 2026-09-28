@@ -47,9 +47,18 @@ test('host lobby fits a laptop window: Start is on screen and the join QR scans'
   const box = (await start.boundingBox())!;
   expect(box.y + box.height).toBeLessThanOrEqual(720);
   await expect(page.getByRole('img', { name: /^Join [A-Z]{4}$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Test sound' })).toBeVisible();
+  await expect(page.getByText(/Share this tab with audio in Discord/)).toBeVisible();
   // Options live in a dialog so the lobby never grows past the stage.
   await page.getByRole('button', { name: 'Options' }).click();
   await expect(page.getByRole('dialog', { name: 'Game options' }).getByRole('button', { name: 'Cards' })).toBeVisible();
+});
+
+test('host sound check enables browser audio and reports readiness', async ({ page }) => {
+  await page.goto('/host');
+  await page.getByRole('button', { name: 'Test sound' }).click();
+  await expect(page.getByRole('status')).toHaveText('Audio ready');
+  await expect(page.getByText('Sound check played on this host.')).toBeVisible();
 });
 
 test('the host volume slider is saved in this browser', async ({ page }) => {

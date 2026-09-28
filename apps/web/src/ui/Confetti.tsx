@@ -45,7 +45,7 @@ export function Confetti({ count = 70, seed = 1 }: { count?: number; seed?: numb
 }
 
 /** A burst of coins or stars flying up from a point (e.g. buying a star in the spotlight). */
-export function Burst({ kind = 'star', count = 10 }: { kind?: 'star' | 'coin'; count?: number }) {
+export function Burst({ kind = 'star', count = 10, delayMs = 0 }: { kind?: 'star' | 'coin'; count?: number; delayMs?: number }) {
   if (motionReduced()) return null;
   return (
     <div className="burst" aria-hidden>
@@ -55,7 +55,7 @@ export function Burst({ kind = 'star', count = 10 }: { kind?: 'star' | 'coin'; c
           <span
             key={i}
             className={`burst-${kind}`}
-            style={{ ['--dx' as string]: `${Math.cos(a) * 160}px`, ['--dy' as string]: `${Math.sin(a) * 160 - 60}px`, animationDelay: `${(i % 3) * 60}ms` }}
+            style={{ ['--dx' as string]: `${Math.cos(a) * 160}px`, ['--dy' as string]: `${Math.sin(a) * 160 - 60}px`, animationDelay: `${delayMs + (i % 3) * 60}ms` }}
           />
         );
       })}

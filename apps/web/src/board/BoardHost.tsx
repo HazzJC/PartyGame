@@ -3,7 +3,7 @@ import { HostGameFrame, seatMap, StarIcon } from '../game/HostFlow.tsx';
 import type { HostScreenProps } from '../host/registry.tsx';
 import { Countdown, useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
-import { BoardSvg, type Pawn } from './BoardSvg.tsx';
+import { BoardSvg, BoardLegend, type Pawn } from './BoardSvg.tsx';
 import { useEffect } from 'react';
 import { sound } from '../audio/sound.ts';
 import { Burst } from '../ui/Confetti.tsx';
@@ -60,11 +60,12 @@ function SpotlightCard({ spot, view }: { spot: Spotlight; view: HostView }) {
   const seats = seatMap(view);
   const data = spot.data as { winner?: string; bids?: Record<string, number> } | undefined;
   const starry = spot.kind === 'star' || spot.kind === 'contest';
-  useEffect(() => sound.play(starry ? 'star' : 'pop'), [spot, starry]);
+  useEffect(() => sound.play(starry ? 'motifStar' : /lost|drops|paid|trap/i.test(spot.text) ? 'motifLoss' : 'pop'), [spot, starry]);
   return (
     <div className="spot-back">
       <div className="spot-card sticker pop-in" data-kind={spot.kind}>
-        {starry && <Burst kind="star" count={12} />}
+        <div className="spot-announcement">{starry ? '★ Star moment!' : 'Board event!'}</div>
+        {starry && <div className="spot-celebration"><Burst kind="star" count={12} delayMs={1050} /></div>}
         <div className="spot-title">
           {(spot.kind === 'star' || spot.kind === 'contest') && <StarIcon size={70} />}
           {spot.title}
@@ -118,7 +119,8 @@ export function BoardHost({ conn, view }: HostScreenProps) {
       badge = p.landing[s.id]! > 0 ? `+${p.landing[s.id]}` : `${p.landing[s.id]}`;
       badgeTone = p.landing[s.id]! > 0 ? 'good' : 'bad';
     }
-    return { id: s.id, avatar: s.avatar, x: at.x, y: at.y, dim: !s.connected, badge, badgeTone };
+    const moving = p.stage === 'move' && !!w?.finalAt && now >= w.finalAt && now < w.finalAt + w.path.length * p.stepMs;
+    return { id: s.id, avatar: s.avatar, x: at.x, y: at.y, dim: !s.connected, badge, badgeTone, stationary: !moving };
   });
 
   const rolled = Object.values(p.walks).filter((w) => w.roll !== null).length;
@@ -148,7 +150,8 @@ export function BoardHost({ conn, view }: HostScreenProps) {
       right={p.stage === 'roll' || p.stage === 'bid' ? <Countdown conn={conn} until={p.endsAt} /> : <span className="chip">★ {p.starPrice} coins</span>}
     >
       <div className="board-host">
-        <BoardSvg className="board-svg" def={def} stars={p.stars} pawns={pawns} pawnSize={pawns.length > 10 ? 46 : 56} />
+        <BoardSvg className="board-svg" def={def} stars={p.stars} pawns={pawns} pawnSize={pawns.length > 10 ? 46 : 56} presentation="host" />
+        <BoardLegend />
         {p.stage === 'bid' &&
           p.contests.map((c, i) => (
             <div key={i} className="spot-back">

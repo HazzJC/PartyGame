@@ -1,5 +1,17 @@
 # Playtest checklists
 
+## Sticker Party visual and sound release gate
+
+Use the combined visual and sound build on staging with at least two people on a real Discord screen share before publishing it. Check the stream at 1280×720 or lower and capture the actual compressed feed, not just a local browser screenshot.
+
+- [ ] Host lobby: press **Test sound**, confirm **Audio ready**, share the host tab with audio, and ask a remote player to confirm they hear the motif. Check mute and saved volume after refresh.
+- [ ] Run 2, 4, 8, and 16 seat boards. At 16, the Start space shows one count marker; as pawns move away, individual pawns return. The rail stays inside the screen and names, stars, and coins are readable during movement.
+- [ ] Verify the Paper Pier, Doodle Grove, Patchwork Plaza, and Lantern Hill scenery stays behind the routes, star stickers, and spaces. Read every legend symbol after compression.
+- [ ] On a 390×844 phone and in landscape, use **Near me** and **Full map**, select **Main loop** and **Shortcut** by tap and keyboard, and check the solid/dashed preview and visible star. Place a trap and use a team board.
+- [ ] Repeat phone map and event views with high contrast and reduced motion. Event announcement, result, and celebration information must still appear.
+- [ ] Ask remote players whether effects remain clear over music during rules, rolling, bids, and play. Open a second host tab and confirm music plays from only one. Confirm the podium's recorded fanfare plays once.
+- [ ] Record the staging build, two participants, screenshots, and audio observations. Publish only after these visual and streamed-audio checks pass, then verify the production URL and live response separately.
+
 Each stage is tagged `v0.<stage>` and deployed to production. Use the in-game **⋯ → Report a problem** button
 for anything odd: it attaches the room state automatically.
 
@@ -50,7 +62,7 @@ The VIP presses **Start game** (add bots if you're few). No board yet: every rou
 A full game now: roll, move, mini game, repeat. Try **Quick** first.
 
 - [ ] Rolling: does everyone roll at once, and does the board phase stay under a minute?
-- [ ] At a fork your phone shows a small map with two coloured paths. Is it clear which is which?
+- [ ] At a fork your phone shows **Main loop** (solid) and **Shortcut** (dashed). Is it clear which is which, including in high contrast?
 - [ ] Stars: pass one with 20 coins to buy it. Did anyone get a **star contest** (two players reaching it together)?
 - [ ] Coin flips for purple/yellow/green spaces, then Blue vs Red decides the game format. Did that make sense?
 - [ ] Are the spotlight cards (stars, events) readable on the stream, and not too slow?
@@ -83,8 +95,8 @@ Try it solo first with `/dev/board?n=4&dev=items,duel,shop` (hands you items, qu
 - [ ] Items: during the roll, tap an item (and a target) before rolling. Is it clear it's secret until everyone has rolled?
 - [ ] The reveal lists every item used. Two people swapping with each other cancels out. Did anyone see that happen?
 - [ ] Hidden traps: place one from your map. Nobody else should ever see where it is until someone steps on it.
-- [ ] Shop spaces (yellow $): the shop opens on your phone at the standings screen for 15 seconds.
-- [ ] Duels (green VS spaces, sharing a space, or a Duel Ticket): pick the wager, everyone else bets. Fun or too slow?
+- [ ] Shop spaces (yellow diamond): the shop opens on your phone at the standings screen for 15 seconds.
+- [ ] Duels (green crossed-swords spaces, sharing a space, or a Duel Ticket): pick the wager, everyone else bets. Fun or too slow?
 - [ ] Bets: did underdog bets pay out more? Was the result on your phone in sync with the stream?
 - [ ] **Quick Draw**: hold, then let go on FIRE! Fair between phones and laptops?
 

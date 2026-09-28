@@ -110,6 +110,11 @@
   gap: 18px;
 }
 
+.hl-sound { padding: 12px 20px; font-size: 22px; }
+.hl-sound-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hl-sound-head .chip { font-size: 20px; }
+.hl-sound p { margin: 6px 0 0; font-size: 18px; }
+
 .hl-right {
   display: flex;
   flex-direction: column;
