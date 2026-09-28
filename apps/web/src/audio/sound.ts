@@ -4,7 +4,7 @@
  * reaches players through the stream. Volume settings are saved per browser.
  */
 
-export type Sfx = 'coin' | 'coinLoss' | 'star' | 'roll' | 'whoosh' | 'card' | 'fanfare' | 'fail' | 'tick' | 'drum' | 'pop' | 'blip';
+export type Sfx = 'coin' | 'coinLoss' | 'star' | 'roll' | 'whoosh' | 'card' | 'fanfare' | 'fail' | 'tick' | 'drum' | 'pop' | 'blip' | 'motifRound' | 'motifStar' | 'motifLoss';
 export type Mood = 'off' | 'lobby' | 'board' | 'minigame' | 'tense' | 'podium';
 
 interface Prefs {
@@ -70,6 +70,7 @@ class SoundEngine {
   private noise: AudioBuffer | null = null;
   private prefs: Prefs = loadPrefs();
   private listeners = new Set<() => void>();
+  private phaseMusicLevel = 0.55;
 
   private mood: Mood = 'off';
   private playing: { mood: Mood; gain: GainNode; sources: AudioBufferSourceNode[] } | null = null;
@@ -121,6 +122,21 @@ class SoundEngine {
     if (ctx && ctx.state === 'suspended') void ctx.resume();
   }
 
+  async testSound(): Promise<boolean> {
+    const ctx = this.ensure();
+    if (!ctx) return false;
+    if (ctx.state === 'suspended') await ctx.resume();
+    if (ctx.state !== 'running' || this.prefs.muted || this.prefs.volume === 0 || this.prefs.sfx === 0) return false;
+    this.play('motifRound');
+    return true;
+  }
+
+  setPhaseMusicLevel(level: number): void {
+    if (this.phaseMusicLevel === level) return;
+    this.phaseMusicLevel = level;
+    this.applyGains();
+  }
+
   private ensure(): AudioContext | null {
     if (this.ctx) return this.ctx;
     const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -156,7 +172,7 @@ class SoundEngine {
     // Squared, so the slider feels even to the ear.
     const master = this.prefs.muted ? 0 : this.prefs.volume * this.prefs.volume;
     this.master.gain.setTargetAtTime(master, t, 0.05);
-    this.musicBus.gain.setTargetAtTime(this.prefs.music * 0.8, t, 0.05);
+    this.musicBus.gain.setTargetAtTime(this.prefs.music * this.phaseMusicLevel, t, 0.12);
     this.sfxBus.gain.setTargetAtTime(this.prefs.sfx * 0.6, t, 0.05);
   }
 
@@ -200,6 +216,14 @@ class SoundEngine {
     const t = ctx.currentTime + 0.01;
     const bus = this.sfxBus;
     switch (name) {
+      case 'motifRound':
+      case 'motifStar':
+      case 'motifLoss': {
+        const notes = name === 'motifLoss' ? [79, 76, 72, 67] : name === 'motifStar' ? [72, 76, 79, 84, 88] : [72, 76, 79, 84];
+        notes.forEach((note, i) => this.tone(bus, 'triangle', midiHz(note), t + i * 0.105, i === notes.length - 1 ? 0.34 : 0.18, name === 'motifLoss' ? 0.14 : 0.19));
+        if (name === 'motifStar') this.hiss(bus, t + 0.28, 0.32, 0.055, 6500, 2, 10000);
+        break;
+      }
       case 'coin':
         this.tone(bus, 'square', 988, t, 0.08, 0.25);
         this.tone(bus, 'square', 1319, t + 0.07, 0.22, 0.25);

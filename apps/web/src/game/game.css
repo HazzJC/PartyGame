@@ -3,7 +3,7 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 460px;
   grid-template-rows: 112px 1fr;
   grid-template-areas: 'top top' 'stage rail';
 }
@@ -45,6 +45,11 @@
   font-size: 46px;
   text-align: center;
 }
+
+.hg-game-title { display: inline-flex; align-items: center; gap: 16px; }
+.hg-banner .format-parade { margin-top: 22px; }
+.rules-card > .format-badge { align-self: center; }
+.podium > .format-parade { margin-bottom: 6px; }
 
 .hg-format {
   font-size: 26px;
@@ -91,7 +96,7 @@
   border: 3px solid var(--ink);
   border-radius: 16px;
   background: var(--paper);
-  font-size: 22px;
+  font-size: 24px;
   flex: none;
 }
 
@@ -685,9 +690,11 @@
 
 .hg[data-dense='true'] .hg-player {
   height: 46px;
-  font-size: 19px;
+  font-size: 25px;
   gap: 8px;
 }
+
+.hg[data-dense='true'] .hg-stat { min-width: 62px; }
 
 .hg[data-dense='true'] .hg-player > svg {
   width: 36px;

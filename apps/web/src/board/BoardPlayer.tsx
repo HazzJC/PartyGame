@@ -4,7 +4,8 @@ import { KeyHint, useDevice, useVirtualKeys, wantsOnScreenControls, Aim } from '
 import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
-import { BoardSvg } from './BoardSvg.tsx';
+import { BoardSvg, BoardLegend } from './BoardSvg.tsx';
+import { focusedView, ROUTES } from './boardVisual.ts';
 import { ItemPicker, type ItemUseView } from './ItemPicker.tsx';
 import { TEAM_AVATAR_BASE, type ItemId } from '@partygame/shared';
 import { Avatar, avatarColour } from '../ui/Avatar.tsx';
@@ -77,8 +78,6 @@ function CardHand({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlayer
   );
 }
 
-const PATH_COLOURS = ['#FF7A1A', '#9B5DE5'];
-const PATH_NAMES = ['Orange path', 'Purple path'];
 const DIE_PIPS: Record<number, [number, number][]> = {
   1: [[50, 50]],
   2: [[28, 28], [72, 72]],
@@ -101,6 +100,7 @@ export function Die({ value, size = 120 }: { value: number; size?: number }) {
 
 function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: BoardPlayerPhase; view: PlayerScreenProps['view'] }) {
   const device = useDevice();
+  const [fullMap, setFullMap] = useState(false);
   const cards = !!p.cards?.length;
   useVirtualKeys((e) => {
     if (e.down && e.key === 'confirm' && p.roll === null && !cards) conn.intent({ type: 'roll' });
@@ -124,13 +124,22 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
         <Countdown conn={conn} until={p.endsAt} />
       </div>
       {p.def && (
+        <div className="bp-map-tools">
+          <span>{fullMap ? 'Whole board' : 'Near your space'}</span>
+          <button type="button" className="btn white small" aria-pressed={fullMap} onClick={() => setFullMap((v) => !v)}>{fullMap ? 'Near me' : 'Full map'}</button>
+        </div>
+      )}
+      {p.def && (
         <BoardSvg
           className="bp-map"
           def={p.def}
           stars={p.stars}
+          focus={fullMap ? undefined : focusedView(p.def, p.position)}
+          presentation="phone"
           highlights={[{ nodes: [p.position], colour: '#FFD23F' }, ...(p.trap !== null ? [{ nodes: [p.trap], colour: '#E5484D' }] : [])]}
         />
       )}
+      {p.def && <BoardLegend />}
       {p.def && <ItemPicker conn={conn} view={view} hand={p.hand} use={p.use} def={p.def} position={p.position} stars={p.stars} targets={p.targets} />}
       {p.coupon && <span className="chip">Star coupon ready: your next star is cheaper</span>}
       {cards && p.roll === null ? (
@@ -175,14 +184,16 @@ function JunctionStage({ conn, p, j }: { conn: PlayerScreenProps['conn']; p: Boa
         def={def}
         stars={p.stars}
         focus={focus}
-        highlights={j.options.map((o, i) => ({ nodes: [j.node, ...o.preview], colour: PATH_COLOURS[i]! }))}
+        presentation="focus"
+        highlights={j.options.map((o, i) => ({ nodes: [j.node, ...o.preview], colour: ROUTES[i]?.colour ?? ROUTES[0].colour, dash: ROUTES[i]?.dash }))}
       />
       <div className="bp-choices">
         {j.options.map((o, i) => {
           const star = o.preview.some((id) => p.stars.includes(id));
           return (
-            <button key={o.next} type="button" className="bp-choice" aria-pressed={p.myBranch === o.next} style={{ ['--path' as string]: PATH_COLOURS[i] }} onClick={() => conn.intent({ type: 'branch', next: o.next })}>
-              {PATH_NAMES[i]}
+            <button key={o.next} type="button" className="bp-choice" aria-pressed={p.myBranch === o.next} style={{ ['--path' as string]: ROUTES[i]?.colour ?? ROUTES[0].colour }} onClick={() => conn.intent({ type: 'branch', next: o.next })}>
+              <span className={`bp-route-mark ${i === 1 ? 'dashed' : ''}`} aria-hidden="true" />
+              {ROUTES[i]?.label ?? 'Route'}
               {star && <span className="chip">★ star</span>}
             </button>
           );

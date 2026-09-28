@@ -1,6 +1,8 @@
 import type { BoardDef, BoardNode } from '@partygame/engine';
 import type { ReactNode } from 'react';
 import { Avatar } from '../ui/Avatar.tsx';
+import { MapSceneryArt } from './MapSceneryArt.tsx';
+import { clusteredPawns, SPACE_SYMBOL, SYMBOL_INK, SYMBOL_PAPER } from './boardVisual.ts';
 
 export const SPACE_FILL: Record<BoardNode['type'], string> = {
   blue: '#3D7BFF',
@@ -11,8 +13,6 @@ export const SPACE_FILL: Record<BoardNode['type'], string> = {
   slot: '#FFFFFF',
 };
 
-const GLYPH: Partial<Record<BoardNode['type'], string>> = { event: '?', shop: '$', duel: 'VS', red: '−', blue: '+' };
-
 export interface Pawn {
   id: string;
   avatar: number;
@@ -22,11 +22,19 @@ export interface Pawn {
   /** Small bubble above the pawn (dice roll, "?" while choosing, +3…). */
   badge?: ReactNode;
   badgeTone?: 'good' | 'bad' | 'plain';
+  stationary?: boolean;
 }
 
 export interface Highlight {
   nodes: number[];
   colour: string;
+  dash?: string;
+}
+
+export function BoardLegend() {
+  return <div className="board-legend" aria-label="Board space legend">
+    <span><b>+</b> coins</span><span><b>−</b> lose coins</span><span><b>?</b> event</span><span><b>◆</b> shop</span><span><b>⚔</b> duel</span><span><b>★</b> star</span>
+  </div>;
 }
 
 export function StarShape({ x, y, size }: { x: number; y: number; size: number }) {
@@ -78,6 +86,7 @@ export function BoardSvg({
   className,
   focus,
   onNodeClick,
+  presentation = 'host',
 }: {
   def: BoardDef;
   stars: number[];
@@ -89,6 +98,7 @@ export function BoardSvg({
   focus?: { x: number; y: number; w: number; h: number };
   /** Makes spaces tappable (e.g. to place a hidden trap). */
   onNodeClick?: (id: number) => void;
+  presentation?: 'host' | 'phone' | 'focus' | 'trap';
 }) {
   // Big crowds fan out past the edge spaces (16 pawns on the start), so leave a margin for them.
   const margin = pawns.length > 7 ? 70 : 0;
@@ -101,9 +111,13 @@ export function BoardSvg({
     }
   const hl = new Map<number, string>();
   for (const h of highlights) for (const id of h.nodes) hl.set(id, h.colour);
+  const groups = clusteredPawns(pawns);
+  const singles = fanOut(groups.filter((g) => g.members.length <= 4).flatMap((g) => g.members));
+  const crowds = groups.filter((g) => g.members.length > 4);
 
   return (
-    <svg className={className} viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Game board">
+    <svg className={className} data-presentation={presentation} viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Game board">
+      <MapSceneryArt />
       <g stroke="#2B2233" strokeWidth={26} strokeLinecap="round">
         {edges}
       </g>
@@ -119,6 +133,7 @@ export function BoardSvg({
           strokeWidth={14}
           strokeLinecap="round"
           strokeLinejoin="round"
+          strokeDasharray={h.dash}
           opacity={0.9}
         />
       ))}
@@ -131,14 +146,15 @@ export function BoardSvg({
         return (
           <g key={node.id} onClick={onNodeClick ? () => onNodeClick(node.id) : undefined} style={onNodeClick ? { cursor: 'pointer' } : undefined} role={onNodeClick ? 'button' : undefined} aria-label={onNodeClick ? `Space ${node.id}` : undefined}>
             <circle cx={node.x} cy={node.y} r={31} fill={ring ?? '#FFFFFF'} stroke="#2B2233" strokeWidth={4} />
-            <circle cx={node.x} cy={node.y} r={22} fill={SPACE_FILL[node.type]} stroke="#2B2233" strokeWidth={3} />
-            {GLYPH[node.type] && (
-              <text x={node.x} y={node.y + (node.type === 'duel' ? 6 : 8)} textAnchor="middle" fontSize={node.type === 'duel' ? 15 : 24} fontFamily="Fredoka, sans-serif" fontWeight={700} fill="#FFFFFF" opacity={node.type === 'blue' || node.type === 'red' ? 0.85 : 1}>
-                {GLYPH[node.type]}
+            <circle cx={node.x} cy={node.y} r={25} fill={SPACE_FILL[node.type]} stroke="#2B2233" strokeWidth={2} />
+            <circle cx={node.x} cy={node.y} r={19} fill={SYMBOL_PAPER} stroke="#2B2233" strokeWidth={2} />
+            {SPACE_SYMBOL[node.type] && (
+              <text x={node.x} y={node.y + 8} textAnchor="middle" fontSize={node.type === 'duel' ? 22 : 26} fontFamily="Fredoka, sans-serif" fontWeight={700} fill={SYMBOL_INK}>
+                {SPACE_SYMBOL[node.type]}
               </text>
             )}
             {node.id === def.start && (
-              <text x={node.x} y={node.y - 40} textAnchor="middle" fontSize={20} fontFamily="Fredoka, sans-serif" fontWeight={700} fill="#2B2233">
+              <text x={node.x + 80} y={node.y - 36} textAnchor="start" fontSize={20} fontFamily="Fredoka, sans-serif" fontWeight={700} fill="#2B2233">
                 START
               </text>
             )}
@@ -149,7 +165,7 @@ export function BoardSvg({
         const n = def.nodes[id];
         return n ? <StarShape key={id} x={n.x} y={n.y} size={64} /> : null;
       })}
-      {fanOut(pawns).map((p) => (
+      {singles.map((p) => (
         <g key={p.id} transform={`translate(${p.x - pawnSize / 2} ${p.y - pawnSize / 2})`}>
           <Avatar avatar={p.avatar} size={pawnSize} dim={p.dim} />
           {p.badge !== undefined && p.badge !== null && (
@@ -162,6 +178,10 @@ export function BoardSvg({
           )}
         </g>
       ))}
+      {crowds.map((g) => <g key={`crowd-${g.x}-${g.y}`} className="pawn-crowd" aria-label={`${g.members.length} players on one space`}>
+        <circle cx={g.x} cy={g.y} r={35} fill="#FFFFFF" stroke="#2B2233" strokeWidth={6} />
+        <text x={g.x} y={g.y + 10} textAnchor="middle" fontSize="32" fontFamily="Fredoka, sans-serif" fontWeight="700" fill="#2B2233">×{g.members.length}</text>
+      </g>)}
     </svg>
   );
 }

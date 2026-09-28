@@ -1,6 +1,6 @@
 import type { HostView } from '@partygame/engine';
 import { DRAW_PALETTE, MAX_PLAYERS, strokePath, type Stroke } from '@partygame/shared';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import type { Connection } from '../net/connection.ts';
 import { joinLink } from '../net/storage.ts';
 import { Avatar } from '../ui/Avatar.tsx';
@@ -8,6 +8,7 @@ import { Qr } from '../ui/Qr.tsx';
 import { PlayHere, useHostSeat } from './PlayHere.tsx';
 import { GameOptions } from '../ui/GameSettings.tsx';
 import { Logo } from '../ui/Logo.tsx';
+import { sound } from '../audio/sound.ts';
 
 const LENGTHS = [
   { id: 'quick', label: 'Quick', detail: '8 rounds · ~25 min' },
@@ -18,6 +19,9 @@ const LENGTHS = [
 export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: HostView }) {
   const [playOpen, setPlayOpen] = useState(false);
   const [optsOpen, setOptsOpen] = useState(false);
+  const [soundMessage, setSoundMessage] = useState('');
+  const audioState = useSyncExternalStore((fn) => sound.subscribe(fn), () =>
+    !sound.running ? 'Click to enable audio' : sound.settings.muted || sound.settings.volume === 0 || sound.settings.sfx === 0 ? 'Muted' : 'Audio ready');
   const hostSeat = useHostSeat(view.code, view);
   const url = joinLink(view.code);
   const humans = view.seats.filter((s) => !s.isBot).length;
@@ -68,6 +72,15 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
               Options
             </button>
           </div>
+        </div>
+
+        <div className="hl-sound sticker">
+          <div className="hl-sound-head"><b>Host audio</b><span className="chip" role="status">{audioState}</span></div>
+          <div className="hl-sound-head">
+            <button type="button" className="btn white small" onClick={async () => setSoundMessage(await sound.testSound() ? 'Sound check played on this host.' : 'Unmute and raise volume, then try again.')}>Test sound</button>
+            <span>{soundMessage}</span>
+          </div>
+          <p>Share this tab with audio in Discord so remote players can hear music and effects.</p>
         </div>
 
         <button className={`btn big ${hostSeat ? 'white' : 'purple'}`} onClick={() => setPlayOpen(true)} style={{ alignSelf: 'flex-start' }}>

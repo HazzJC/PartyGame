@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Connection } from '../net/connection.ts';
 import { Avatar } from '../ui/Avatar.tsx';
 import { BoardSvg } from './BoardSvg.tsx';
+import { focusedView } from './boardVisual.ts';
 
 export interface ItemUseView {
   item: ItemId;
@@ -65,12 +66,11 @@ export function ItemPicker({ conn, view, hand, use, def, position, stars, target
     );
 
   if (picking === 'trap') {
-    const me = def.nodes[position]!;
-    const focus = { x: me.x - 360, y: me.y - 240, w: 720, h: 480 };
+    const focus = focusedView(def, position, 720, 480);
     return (
       <div className="item-pick panel">
         <h3>Hide a trap: tap a space</h3>
-        <BoardSvg className="bp-map trap-map" def={def} stars={stars} focus={focus} highlights={[{ nodes: [position], colour: '#FFD23F' }]} onNodeClick={(id) => send({ item: 'trap', space: id })} />
+        <BoardSvg className="bp-map trap-map" def={def} stars={stars} focus={focus} presentation="trap" highlights={[{ nodes: [position], colour: '#FFD23F' }]} onNodeClick={(id) => send({ item: 'trap', space: id })} />
         <button className="btn white small" onClick={() => setPicking(null)}>
           Back
         </button>

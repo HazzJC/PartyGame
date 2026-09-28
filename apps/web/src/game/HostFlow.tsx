@@ -6,6 +6,7 @@ import { Countdown } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import { minigameUi, type MgHostPhase } from './registry.ts';
 import { Confetti } from '../ui/Confetti.tsx';
+import { FormatBadge, FormatParade } from '../ui/FormatBadge.tsx';
 import './game.css';
 
 export interface EntityInfo {
@@ -145,6 +146,7 @@ export function RoundIntroHost({ view }: HostScreenProps) {
           {p.round}
           <span className="muted">/{p.rounds}</span>
         </span>
+        <FormatParade />
       </div>
     </HostGameFrame>
   );
@@ -165,15 +167,14 @@ function ControlsColumn({ title, inputs, scheme }: { title: string; inputs: Inpu
   );
 }
 
-const FORMAT_LABEL: Record<string, string> = { ffa: 'Free-for-all', team: 'Team game', '1vN': '1 vs many', coop: 'Co-op', duel: 'Duel' };
-
 export function RulesHost({ conn, view }: HostScreenProps) {
   const p = view.phase;
   const seats = seatMap(view);
   const ready = new Set(p.ready as string[]);
   return (
-    <HostGameFrame view={view} title={<span className="chip hg-format">{FORMAT_LABEL[p.format] ?? p.format}</span>} right={<Countdown conn={conn} until={p.endsAt} />}>
+    <HostGameFrame view={view} title={<FormatBadge format={p.format} />} right={<Countdown conn={conn} until={p.endsAt} />}>
       <div className="rules-card sticker pop-in">
+        <FormatBadge format={p.format} compact />
         <h1>{p.name}</h1>
         <p className="rules-blurb">{p.blurb}</p>
         {p.fallback && <p className="muted">No games of that format yet, so it's a free-for-all instead.</p>}
@@ -202,7 +203,7 @@ export function MinigameHost({ conn, view }: HostScreenProps) {
   const mg = view.phase as unknown as MgHostPhase;
   const ui = minigameUi(mg.gameId);
   return (
-    <HostGameFrame view={view} title={mg.name} right={mg.stage === 'play' ? <Countdown conn={conn} until={mg.endsAt} /> : <span className="chip">Results</span>}>
+    <HostGameFrame view={view} title={<span className="hg-game-title"><FormatBadge format={mg.format} compact />{mg.name}</span>} right={mg.stage === 'play' ? <Countdown conn={conn} until={mg.endsAt} /> : <span className="chip">Results</span>}>
       {ui ? <ui.Host conn={conn} view={view} mg={mg} /> : <div className="center">Missing UI for {mg.gameId}</div>}
     </HostGameFrame>
   );
@@ -266,6 +267,7 @@ export function PodiumHost({ conn, view }: HostScreenProps) {
     <HostGameFrame view={view} title="Final results" rail={false}>
       <div className="podium">
         <Confetti />
+        <FormatParade />
         <div className="podium-row">
           <PodiumBlock s={seats.get(order[1]!)} place={2} height={220} />
           <PodiumBlock s={seats.get(order[0]!)} place={1} height={320} />
