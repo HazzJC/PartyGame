@@ -5,8 +5,10 @@ const MUSIC: { what: string; who: string; url: string; use: string }[] = [
   { what: 'Flowerbed Fields [Loop]', who: 'Zane Little Music', url: 'https://opengameart.org/content/flowerbed-fields-loop', use: 'lobby' },
   { what: 'Happy Clappy Loop', who: 'OwlishMedia', url: 'https://opengameart.org/content/happy-clappy-loop', use: 'board' },
   { what: 'Dance Field', who: 'Centurion_of_war', url: 'https://opengameart.org/content/dance-field', use: 'mini games' },
-  { what: 'Joyfully', who: 'MintoDog', url: 'https://opengameart.org/content/joyfully', use: 'mini games and podium' },
+  { what: 'Joyfully', who: 'MintoDog', url: 'https://opengameart.org/content/joyfully', use: 'mini games' },
   { what: 'Porkymon Battle Theme', who: 'Joth', url: 'https://opengameart.org/content/porkymon-battle-theme', use: 'duels' },
+  { what: 'Victory', who: 'celestialghost8', url: 'https://opengameart.org/content/victory', use: 'podium fanfare' },
+  { what: 'Happy Adventure (Loop)', who: 'TinyWorlds', url: 'https://opengameart.org/content/happy-adventure-loop', use: 'podium' },
 ];
 
 const CREDITS: { what: string; who: string; licence: string; url: string }[] = [

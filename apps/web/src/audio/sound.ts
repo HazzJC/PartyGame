@@ -32,8 +32,8 @@ const TRACKS: Record<Exclude<Mood, 'off'>, { loops: string[]; intro?: string }> 
   board: { loops: ['/music/board.mp3'] },
   minigame: { loops: ['/music/minigame.mp3', '/music/minigame2.mp3'] },
   tense: { loops: ['/music/tense.mp3'], intro: '/music/tense-intro.mp3' },
-  // Until a podium track is chosen, the celebration borrows the party mini game track.
-  podium: { loops: ['/music/minigame2.mp3'] },
+  // A victory fanfare as the podium appears, then a happy loop.
+  podium: { loops: ['/music/podium.mp3'], intro: '/music/podium-intro.mp3' },
 };
 
 const CROSSFADE_S = 0.9;

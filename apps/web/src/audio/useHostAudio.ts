@@ -23,7 +23,7 @@ function moodFor(p: PhaseLike): Mood {
       return 'tense';
     case 'rules':
       return p.format === 'duel' ? 'tense' : 'board';
-    case 'bonus':
+    // Bonus stars keep the board music, so the podium's own fanfare lands when the winners appear.
     case 'podium':
       return 'podium';
     default:
@@ -43,8 +43,8 @@ function cueFor(p: PhaseLike, prev: PhaseLike | null): Sfx | null {
         return 'coin';
       case 'duelSetup':
         return 'drum';
+      // The podium music starts with a recorded fanfare, so no synthesised one there.
       case 'duelResult':
-      case 'podium':
         return 'fanfare';
       case 'threat':
         return 'fail';
