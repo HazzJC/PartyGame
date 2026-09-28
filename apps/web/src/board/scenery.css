@@ -201,3 +201,12 @@ svg[data-presentation='host'] .star-bob {
 :root[data-contrast='high'] .map-scenery {
   opacity: 0.35;
 }
+
+/* Low animation (slower PCs): keep walking and dice, drop the ambient decoration. */
+:root[data-motion='low'] :is(.map-scenery *, .pawn-idle, .star-glow, .star-bob, .flag-wave) {
+  animation: none !important;
+}
+
+:root[data-motion='low'] .sc-flock {
+  display: none;
+}

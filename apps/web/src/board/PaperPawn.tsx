@@ -16,6 +16,11 @@ export function PaperPawn({ avatar, size = 56, dim = false, facing = 1, walking 
       <ellipse cy={2} rx={30} ry={8} fill={INK} opacity={0.22} />
       <g className={walking ? 'pawn-walk' : 'pawn-idle'} style={{ animationDelay: `${-phase}s` }}>
         <g className="pawn-flip" style={{ transform: `scaleX(${facing})` }}>
+          {/* Depth like the logo: a hard ink shadow of the whole cut-out, offset down and right. */}
+          <g stroke={INK} strokeWidth={17} strokeLinejoin="round" fill={INK} transform="translate(4 5)">
+            <path d="M-17 -6 Q-19 -34 -12 -46 H12 Q19 -34 17 -6 Z" />
+            <circle cy={-78} r={34} />
+          </g>
           {/* The cut-paper edge: the whole silhouette in ink, then white, under the colours. */}
           <g stroke={INK} strokeWidth={17} strokeLinejoin="round" fill={INK}>
             <path d="M-17 -6 Q-19 -34 -12 -46 H12 Q19 -34 17 -6 Z" />
@@ -36,9 +41,8 @@ export function PaperPawn({ avatar, size = 56, dim = false, facing = 1, walking 
           <path d="M-17 -6 Q-19 -34 -12 -46 H12 Q19 -34 17 -6 Z" fill={colour} stroke={INK} strokeWidth={3.5} strokeLinejoin="round" />
           <ellipse cy={-22} rx={9} ry={11} fill={PAPER} opacity={0.45} />
           <path d="M-11 -45 Q0 -38 11 -45" fill="none" stroke={INK} strokeWidth={3} strokeLinecap="round" />
-          {/* The head: the animal sticker, its white disc doubling as the paper cut. */}
-          <g transform="translate(0 -78) scale(0.6) translate(-50 -50)">
-            <circle cx={50} cy={50} r={53} fill={PAPER} stroke={INK} strokeWidth={5} />
+          {/* The head: the animal, on the white paper disc cut out with the body above. */}
+          <g transform="translate(0 -78) scale(0.7) translate(-50 -50)">
             <AvatarFace avatar={avatar} />
           </g>
         </g>

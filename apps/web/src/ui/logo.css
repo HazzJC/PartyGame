@@ -1,0 +1,51 @@
+/* The logo is always slightly alive; hovering it gives a squash-and-bounce. */
+.logo .logo-float,
+.logo .logo-word,
+.logo .logo-star {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+.logo .logo-float {
+  animation: logo-float 5s ease-in-out infinite alternate;
+}
+
+.logo .logo-word {
+  animation: logo-word 3.2s ease-in-out infinite alternate;
+}
+
+.logo .logo-star {
+  animation: logo-star 2.6s ease-in-out infinite;
+}
+
+.logo:hover .logo-float {
+  animation: logo-boing 520ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes logo-float {
+  from { transform: translateY(0) rotate(-1deg); }
+  to { transform: translateY(-6px) rotate(1deg); }
+}
+
+@keyframes logo-word {
+  from { transform: rotate(-1.2deg) translateY(0); }
+  to { transform: rotate(1.2deg) translateY(-4px); }
+}
+
+@keyframes logo-star {
+  0%, 100% { transform: rotate(0) scale(1); }
+  40% { transform: rotate(18deg) scale(1.15); }
+  60% { transform: rotate(-6deg) scale(1.05); }
+}
+
+@keyframes logo-boing {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.08, 0.92); }
+  60% { transform: scale(0.96, 1.05); }
+  100% { transform: scale(1, 1); }
+}
+
+/* Low animation (slower PCs) keeps the logo still. */
+:root[data-motion='low'] .logo * {
+  animation: none !important;
+}

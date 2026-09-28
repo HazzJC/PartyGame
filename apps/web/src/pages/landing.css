@@ -20,17 +20,51 @@
   gap: 4px;
 }
 
-.landing-avatars svg:nth-child(odd) {
-  transform: translateY(6px);
+.landing-avatar {
+  display: block;
+  animation: landing-hop 2.4s ease-in-out infinite;
+}
+
+@keyframes landing-hop {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px) rotate(-4deg); }
+}
+
+.landing-top {
+  align-self: stretch;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -20px;
 }
 
 .landing-title {
-  font-size: clamp(48px, 11vw, 96px);
-  color: var(--paper);
-  -webkit-text-stroke: 10px var(--ink);
-  paint-order: stroke fill;
-  text-shadow: 0 7px 0 var(--ink);
-  transform: rotate(-2deg);
+  margin: 0;
+  line-height: 0;
+}
+
+/* Big and friendly: most of a laptop screen's width, and still the hero on a phone. */
+.landing-title .logo {
+  width: min(92vw, 640px);
+  height: auto;
+}
+
+.landing-card {
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+.landing-card:hover,
+.landing-card:focus-within {
+  transform: translateY(-5px) rotate(-0.6deg);
+  box-shadow: 0 12px 0 var(--ink);
+}
+
+.landing-card:nth-child(2):hover,
+.landing-card:nth-child(2):focus-within {
+  transform: translateY(-5px) rotate(0.6deg);
+}
+
+:root[data-motion='low'] .landing-avatar {
+  animation: none;
 }
 
 .landing-tag {

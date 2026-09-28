@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { motionReduced } from './prefs.ts';
+import { decorationOff } from './prefs.ts';
 import './juice.css';
 
 const COLOURS = ['#FF4D5E', '#FFB703', '#3DBE4B', '#3D7BFF', '#9B5DE5', '#FFD23F', '#1B998B'];
@@ -21,7 +21,7 @@ export function Confetti({ count = 70, seed = 1 }: { count?: number; seed?: numb
       colour: COLOURS[i % COLOURS.length]!,
     }));
   }, [count, seed]);
-  if (motionReduced()) return null;
+  if (decorationOff()) return null;
   return (
     <div className="confetti" aria-hidden>
       {pieces.map((p, i) => (
@@ -46,7 +46,7 @@ export function Confetti({ count = 70, seed = 1 }: { count?: number; seed?: numb
 
 /** A burst of coins or stars flying up from a point (e.g. buying a star in the spotlight). */
 export function Burst({ kind = 'star', count = 10, delayMs = 0 }: { kind?: 'star' | 'coin'; count?: number; delayMs?: number }) {
-  if (motionReduced()) return null;
+  if (decorationOff()) return null;
   return (
     <div className="burst" aria-hidden>
       {Array.from({ length: count }, (_, i) => {

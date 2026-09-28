@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { navigate } from '../router.ts';
 import { Avatar } from '../ui/Avatar.tsx';
 import { Logo } from '../ui/Logo.tsx';
+import { TitleMusic } from '../audio/TitleMusic.tsx';
 import './landing.css';
 
 export function Landing({ notFound = false }: { notFound?: boolean }) {
@@ -18,15 +19,20 @@ export function Landing({ notFound = false }: { notFound?: boolean }) {
 
   return (
     <main className="landing">
+      <div className="landing-top">
+        <TitleMusic />
+      </div>
       <header className="landing-hero">
+        <h1 className="landing-title">
+          <Logo height={300} />
+        </h1>
         <div className="landing-avatars" aria-hidden>
           {[0, 2, 4, 11, 1, 9].map((a, i) => (
-            <Avatar key={a} avatar={a} size={64} className="pop-in" />
+            <span key={a} className="landing-avatar" style={{ animationDelay: `${i * 0.18}s` }}>
+              <Avatar avatar={a} size={64} />
+            </span>
           ))}
         </div>
-        <h1 className="landing-title">
-          <Logo height={170} />
-        </h1>
         <p className="landing-tag">A board game for 2 to 16 friends. One shared screen, everyone plays on their own phone or laptop.</p>
       </header>
 
@@ -67,10 +73,7 @@ export function Landing({ notFound = false }: { notFound?: boolean }) {
         </div>
       </section>
       <footer className="landing-foot muted">
-        <a href="/dev/input-lab">Try your device</a> · Nothing to install · Free
-      </footer>
-      <footer className="landing-foot">
-        <a href="/credits">Credits</a>
+        <a href="/dev/input-lab">Try your device</a> · Nothing to install · Free · <a href="/credits">Credits</a>
       </footer>
     </main>
   );

@@ -1,0 +1,74 @@
+.dice {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* A felt tray with a wooden rim: the die bounces off its inner edge. */
+.dice-tray {
+  position: relative;
+  height: 180px;
+  border: 5px solid var(--ink);
+  border-radius: 22px;
+  background: #3f8f5f;
+  box-shadow: inset 0 0 0 8px #b57b4e, inset 0 0 0 11px var(--ink), 0 6px 0 var(--ink);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.dice-tray::after {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.06) 0 2px, transparent 3px) 0 0 / 18px 18px;
+  pointer-events: none;
+}
+
+.dice-die {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 84px;
+  height: 84px;
+  z-index: 1;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 6px 0 rgba(43, 34, 51, 0.35));
+  will-change: transform;
+}
+
+.dice-tray[data-stage='held'] .dice-die {
+  cursor: grabbing;
+  filter: drop-shadow(0 14px 0 rgba(43, 34, 51, 0.3));
+}
+
+.dice-tray[data-stage='ready'] .dice-die > div {
+  animation: dice-wiggle 1.6s ease-in-out infinite;
+}
+
+.dice-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-display);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+@keyframes dice-wiggle {
+  0%, 70%, 100% { transform: rotate(0); }
+  78% { transform: rotate(-8deg); }
+  86% { transform: rotate(8deg); }
+  94% { transform: rotate(-4deg); }
+}
+
+@media (max-height: 640px) {
+  .dice-tray {
+    height: 130px;
+  }
+}

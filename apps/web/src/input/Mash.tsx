@@ -1,41 +1,56 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDevice, wantsOnScreenControls } from './device.ts';
 import { useVirtualKeys } from './keys.ts';
-import { TapLimiter } from './tapLimiter.ts';
+import { isMashPointer, MashGate, mashStyleOfKey, type MashStyle } from './tapLimiter.ts';
 
 const BATCH_MS = 250;
 
+/**
+ * Taps are counted on this device the moment they happen (the pad and its counter react
+ * instantly, never waiting on the server) and sent in the background in small batches, with a
+ * final send when the pad goes away so no taps are lost at the buzzer.
+ */
+export function useMashSender<T>(send: (batch: T) => void, empty: () => T, isEmpty: (b: T) => boolean) {
+  const pending = useRef<T>(empty());
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  useEffect(() => {
+    const flush = () => {
+      if (isEmpty(pending.current)) return;
+      sendRef.current(pending.current);
+      pending.current = empty();
+    };
+    const t = setInterval(flush, BATCH_MS);
+    return () => {
+      clearInterval(t);
+      flush();
+    };
+    // Only mount and unmount matter: the helpers are pure and `send` is read through a ref.
+  }, []);
+  return pending;
+}
 
 /**
- * Mash pad: tap anywhere on the pad, or any key / button. Counted taps are capped and sent in
- * small batches so mashing doesn't flood the network.
+ * Mash pad: tap or left-click the pad, or press Space (or a pad's A button). Taps count from one
+ * of those styles at a time, up to 30 a second (see MashGate), and the count shows immediately.
  */
-export function Mash({ onMash, disabled = false, label = 'TAP!' }: { onMash: (count: number) => void; disabled?: boolean; label?: string }) {
+export function Mash({ onMash, disabled = false, label = 'TAP!', showCount = true }: { onMash: (count: number) => void; disabled?: boolean; label?: string; showCount?: boolean }) {
   const device = useDevice();
-  const limiter = useRef(new TapLimiter());
-  const pending = useRef(0);
+  const gate = useRef(new MashGate());
   const [pulse, setPulse] = useState(0);
-  const onMashRef = useRef(onMash);
-  onMashRef.current = onMash;
+  const [count, setCount] = useState(0);
+  const pending = useMashSender<number>(onMash, () => 0, (n) => n === 0);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      if (pending.current > 0) {
-        onMashRef.current(pending.current);
-        pending.current = 0;
-      }
-    }, BATCH_MS);
-    return () => clearInterval(t);
-  }, []);
-
-  const tap = (ts: number) => {
-    if (disabled) return;
+  const tap = (style: MashStyle, ts: number) => {
+    if (disabled || !gate.current.accept(style, ts)) return;
     setPulse((p) => p + 1);
-    if (limiter.current.accept(ts)) pending.current++;
+    pending.current++;
+    setCount((c) => c + 1);
   };
 
   useVirtualKeys((e) => {
-    if (e.down && !e.repeat) tap(e.timeStamp);
+    const style = e.down ? mashStyleOfKey(e) : null;
+    if (style) tap(style, e.timeStamp);
   }, !disabled);
 
   return (
@@ -43,12 +58,17 @@ export function Mash({ onMash, disabled = false, label = 'TAP!' }: { onMash: (co
       type="button"
       className="mash"
       disabled={disabled}
-      onPointerDown={(e) => tap(e.timeStamp)}
+      onPointerDown={(e) => isMashPointer(e) && tap('pointer', e.timeStamp)}
       onContextMenu={(e) => e.preventDefault()}
       data-pulse={pulse % 2}
     >
       <span className="mash-label">{label}</span>
-      {!wantsOnScreenControls(device) && <span className="mash-sub">any key</span>}
+      {showCount && (
+        <span className="mash-count" key={count}>
+          {count}
+        </span>
+      )}
+      {!wantsOnScreenControls(device) && <span className="mash-sub">Space or click, one at a time</span>}
     </button>
   );
 }

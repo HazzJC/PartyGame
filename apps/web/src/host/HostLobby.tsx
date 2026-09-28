@@ -24,6 +24,7 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
     !sound.running ? 'Click to enable audio' : sound.settings.muted || sound.settings.volume === 0 || sound.settings.sfx === 0 ? 'Muted' : 'Audio ready');
   const hostSeat = useHostSeat(view.code, view);
   const url = joinLink(view.code);
+  const site = url.replace(/^https?:\/\//, '').replace(/\/[A-Z]{4}$/, '');
   const humans = view.seats.filter((s) => !s.isBot).length;
   const length = LENGTHS.find((l) => l.id === view.settings.length) ?? LENGTHS[1];
   const doodles = (view.phase.doodles ?? {}) as Record<string, Stroke[]>;
@@ -33,18 +34,19 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
     <div className="hl">
       <div className="hl-left">
         <h1 className="hl-title">
-          <Logo height={124} />
+          <Logo height={168} />
         </h1>
         <div className="sticker hl-join">
-          <div className="stack" style={{ gap: 8 }}>
-            <div className="hl-join-url">Join at {url.replace(/^https?:\/\//, '').replace(/\/[A-Z]{4}$/, '')}</div>
-            <div className="hl-code" aria-label="Room code">
-              {view.code}
-            </div>
+          {/* The address gets its own full-width line, sized to stay on one line however long the domain. */}
+          <div className="hl-join-url" style={{ fontSize: joinFont(site) }}>
+            Join at <b>{site}</b>
+          </div>
+          <div className="hl-code" aria-label="Room code">
+            {view.code}
           </div>
           <div className="hl-qr">
             {/* Upper case fits QR's denser alphanumeric mode: fewer, bigger squares that scan better off a stream. */}
-            <Qr text={url.toUpperCase()} size={210} label={`Join ${view.code}`} />
+            <Qr text={url.toUpperCase()} size={190} label={`Join ${view.code}`} />
           </div>
         </div>
 
@@ -74,13 +76,18 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
           </div>
         </div>
 
+        {/* Compact, so the column still fits the stage: one row of status, then a hint (or the test result). */}
         <div className="hl-sound sticker">
-          <div className="hl-sound-head"><b>Host audio</b><span className="chip" role="status">{audioState}</span></div>
           <div className="hl-sound-head">
-            <button type="button" className="btn white small" onClick={async () => setSoundMessage(await sound.testSound() ? 'Sound check played on this host.' : 'Unmute and raise volume, then try again.')}>Test sound</button>
-            <span>{soundMessage}</span>
+            <b>Host audio</b>
+            <span className="chip" role="status">
+              {audioState}
+            </span>
+            <button type="button" className="btn white small" onClick={async () => setSoundMessage((await sound.testSound()) ? 'Sound check played on this host.' : 'Unmute and raise volume, then try again.')}>
+              Test sound
+            </button>
           </div>
-          <p>Share this tab with audio in Discord so remote players can hear music and effects.</p>
+          <p>{soundMessage || 'Share this tab with audio in Discord so remote players can hear music and effects.'}</p>
         </div>
 
         <button className={`btn big ${hostSeat ? 'white' : 'purple'}`} onClick={() => setPlayOpen(true)} style={{ alignSelf: 'flex-start' }}>
@@ -168,8 +175,15 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
 }
 
 /** One line under the game length: the other options at a glance. */
+/** Font size (px) for "Join at <site>" to fit the join card's width on one line. */
+function joinFont(site: string): number {
+  const chars = site.length + 8;
+  // Fredoka averages about 0.56 em per character; the card's text width is about 560 px.
+  return Math.max(18, Math.min(34, Math.floor(560 / (chars * 0.56))));
+}
+
 function optionSummary(s: HostView['settings'], total: number): string {
-  const parts = [s.movement === 'cards' ? 'Movement cards' : 'Dice'];
+  const parts = [`Movement: ${s.movement === 'cards' ? 'cards' : 'dice'}`];
   if (s.teamBoard) parts.push('Team board');
   if (s.tutorial) parts.push('Intro on');
   const off = s.removedGames.length;

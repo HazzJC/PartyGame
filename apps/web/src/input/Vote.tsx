@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { ArrowIcon } from './ArrowIcon.tsx';
 import { useDevice, wantsOnScreenControls } from './device.ts';
 import { useVirtualKeys } from './keys.ts';
 
@@ -114,10 +115,10 @@ export function Rank({ items, order, onChange, locked = false }: { items: VoteIt
             <span className="rank-label">{byId.get(id)?.label ?? id}</span>
             <span className="rank-arrows">
               <button type="button" onClick={() => move(i, i - 1)} disabled={locked || i === 0} aria-label="Move up">
-                ▲
+                <ArrowIcon dir="up" size={24} />
               </button>
               <button type="button" onClick={() => move(i, i + 1)} disabled={locked || i === order.length - 1} aria-label="Move down">
-                ▼
+                <ArrowIcon dir="down" size={24} />
               </button>
             </span>
           </li>

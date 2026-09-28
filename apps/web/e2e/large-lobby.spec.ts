@@ -19,7 +19,7 @@ test('team board with movement cards: teams on the rail, a card played by vote',
   await p.page.getByRole('button', { name: 'Done' }).tap();
   await expect(p.page.getByRole('button', { name: /Mini games: 32\/33 on/ })).toBeVisible();
   // The host screen summarises the options under the game length.
-  await expect(page.locator('.hl-opts-row')).toContainText('Movement cards · Team board');
+  await expect(page.locator('.hl-opts-row')).toContainText('Movement: cards · Team board');
   await p.page.getByRole('button', { name: 'Start game' }).tap();
 
   // Four teams on the host rail, and a hand of three cards on the phone.

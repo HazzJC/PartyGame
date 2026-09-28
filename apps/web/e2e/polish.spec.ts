@@ -50,7 +50,7 @@ test('host lobby fits a laptop window: Start is on screen and the join QR scans'
   await expect(page.getByRole('button', { name: 'Test sound' })).toBeVisible();
   await expect(page.getByText(/Share this tab with audio in Discord/)).toBeVisible();
   // Options live in a dialog so the lobby never grows past the stage.
-  await page.getByRole('button', { name: 'Options' }).click();
+  await page.getByRole('button', { name: 'Options', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Game options' }).getByRole('button', { name: 'Cards' })).toBeVisible();
 });
 
@@ -61,14 +61,22 @@ test('host sound check enables browser audio and reports readiness', async ({ pa
   await expect(page.getByText('Sound check played on this host.')).toBeVisible();
 });
 
-test('the host volume slider is saved in this browser', async ({ page }) => {
+test('host options: volume and animation level are saved in this browser', async ({ page }) => {
   await page.goto('/host');
-  const volume = page.getByRole('slider', { name: 'Volume' });
-  await expect(volume).toBeVisible({ timeout: 15_000 });
-  await volume.fill('0.3');
+  const options = page.getByRole('button', { name: 'Host options: sound and animation' });
+  await expect(options).toBeVisible({ timeout: 15_000 });
+  await options.click();
+  await page.getByRole('slider', { name: 'Volume' }).fill('0.3');
+  await page.getByRole('group', { name: 'Animation' }).getByRole('button', { name: 'Low' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-motion', 'low');
   await page.getByRole('button', { name: 'Mute' }).click();
   await page.reload();
+  await page.getByRole('button', { name: 'Host options: sound and animation' }).click();
   await expect(page.getByRole('button', { name: 'Unmute' })).toBeVisible({ timeout: 15_000 });
   await page.getByRole('button', { name: 'Unmute' }).click();
   await expect(page.getByRole('slider', { name: 'Volume' })).toHaveValue('0.3');
+  await expect(page.locator('html')).toHaveAttribute('data-motion', 'low');
+  // Clicking away closes the panel.
+  await page.mouse.click(400, 300);
+  await expect(page.getByRole('dialog', { name: 'Host options' })).toBeHidden();
 });

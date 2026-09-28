@@ -3,6 +3,8 @@ import { BINDABLE, azertyPreset, extraBindings, keyLabel, resetBindings, setBind
 import { displayPrefs, setDisplayPrefs, subscribeDisplayPrefs, type Motion } from './prefs.ts';
 import './settings.css';
 
+export const MOTION_LABEL: Record<Motion, string> = { system: 'Auto', full: 'Full', low: 'Low', reduce: 'None' };
+
 /** Accessibility and control preferences for this device: motion, contrast and extra key bindings. */
 export function Preferences({ onClose, keys = true }: { onClose(): void; keys?: boolean }) {
   const d = useSyncExternalStore(subscribeDisplayPrefs, displayPrefs);
@@ -34,9 +36,9 @@ export function Preferences({ onClose, keys = true }: { onClose(): void; keys?: 
         <section className="deck-group">
           <h3>Motion</h3>
           <div className="seg small" role="group" aria-label="Motion">
-            {(['system', 'reduce', 'full'] as Motion[]).map((m) => (
+            {(['system', 'full', 'low', 'reduce'] as Motion[]).map((m) => (
               <button key={m} aria-pressed={d.motion === m} onClick={() => setDisplayPrefs({ motion: m })}>
-                {m === 'system' ? 'Device setting' : m === 'reduce' ? 'Reduced' : 'Full'}
+                {MOTION_LABEL[m]}
               </button>
             ))}
           </div>

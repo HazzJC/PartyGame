@@ -1,10 +1,11 @@
 import type { BoardDef } from '@partygame/engine';
 import { useState } from 'react';
-import { KeyHint, useDevice, useVirtualKeys, wantsOnScreenControls, Aim } from '../input/index.ts';
+import { useDevice, useVirtualKeys, wantsOnScreenControls, Aim } from '../input/index.ts';
 import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { BoardSvg, BoardLegend } from './BoardSvg.tsx';
+import { DiceTray, Die } from './DiceTray.tsx';
 import { focusedView, ROUTES } from './boardVisual.ts';
 import { ItemPicker, type ItemUseView } from './ItemPicker.tsx';
 import { TEAM_AVATAR_BASE, type ItemId } from '@partygame/shared';
@@ -78,33 +79,13 @@ function CardHand({ conn, p }: { conn: PlayerScreenProps['conn']; p: BoardPlayer
   );
 }
 
-const DIE_PIPS: Record<number, [number, number][]> = {
-  1: [[50, 50]],
-  2: [[28, 28], [72, 72]],
-  3: [[25, 25], [50, 50], [75, 75]],
-  4: [[28, 28], [72, 28], [28, 72], [72, 72]],
-  5: [[25, 25], [75, 25], [50, 50], [25, 75], [75, 75]],
-  6: [[28, 22], [72, 22], [28, 50], [72, 50], [28, 78], [72, 78]],
-};
-
-export function Die({ value, size = 120 }: { value: number; size?: number }) {
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-label={`Rolled ${value}`}>
-      <rect x="4" y="4" width="92" height="92" rx="18" fill="#FFFFFF" stroke="#2B2233" strokeWidth="6" />
-      {(DIE_PIPS[value] ?? []).map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="9" fill="#2B2233" />
-      ))}
-    </svg>
-  );
-}
-
 function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: BoardPlayerPhase; view: PlayerScreenProps['view'] }) {
   const device = useDevice();
   const [fullMap, setFullMap] = useState(false);
   const cards = !!p.cards?.length;
-  useVirtualKeys((e) => {
-    if (e.down && e.key === 'confirm' && p.roll === null && !cards) conn.intent({ type: 'roll' });
-  }, p.roll === null && !cards);
+  // The title waits for the die to stop tumbling, so it never gives the number away early.
+  const [landed, setLanded] = useState(p.roll !== null);
+  // Space throws the die (handled by the dice tray).
   const title = cards
     ? p.roll !== null
       ? `Moving ${p.roll}!`
@@ -115,7 +96,9 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
       ? p.team
         ? 'Roll for your team'
         : 'Your turn to roll'
-      : `${p.team ? 'Your team' : 'You'} rolled ${p.roll}!`;
+      : !landed
+        ? 'Rolling…'
+        : `${p.team ? 'Your team' : 'You'} rolled ${p.roll}!`;
   return (
     <div className="bp">
       <TeamBanner p={p} />
@@ -142,17 +125,16 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
       {p.def && <BoardLegend />}
       {p.def && <ItemPicker conn={conn} view={view} hand={p.hand} use={p.use} def={p.def} position={p.position} stars={p.stars} targets={p.targets} />}
       {p.coupon && <span className="chip">Star coupon ready: your next star is cheaper</span>}
-      {cards && p.roll === null ? (
-        <CardHand conn={conn} p={p} />
-      ) : p.roll === null ? (
-        <button type="button" className="bp-roll" onPointerDown={() => conn.intent({ type: 'roll' })}>
-          Roll!
-          {!wantsOnScreenControls(device) && <KeyHint k="Space" />}
-        </button>
+      {cards ? (
+        p.roll === null ? (
+          <CardHand conn={conn} p={p} />
+        ) : (
+          <div className="bp-rolled pop-in">
+            <Die value={p.roll} />
+          </div>
+        )
       ) : (
-        <div className="bp-rolled pop-in">
-          <Die value={p.roll} />
-        </div>
+        <DiceTray value={p.roll} onThrow={() => conn.intent({ type: 'roll' })} onLanded={() => setLanded(true)} keyHint={!wantsOnScreenControls(device)} />
       )}
     </div>
   );

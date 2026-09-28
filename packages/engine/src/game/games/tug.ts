@@ -54,9 +54,10 @@ export const tugOfWar = defineMinigame<TugData>({
     if (intent.type !== 'mash' || ctx.now() < d.startAt - 500) return;
     const team = ctx.phase.teams?.findIndex((t) => t.includes(seatId)) ?? -1;
     if (team < 0) return;
-    // The controller caps taps at 10/s and splits them into good pulls and hazard slips locally.
-    const good = Math.max(0, Math.min(10, Math.round(Number(intent.good) || 0)));
-    const bad = Math.max(0, Math.min(10, Math.round(Number(intent.bad) || 0)));
+    // The phone counts taps locally (one input style, capped at 30/s), judges good pulls vs
+    // hazard slips by synced time, and sends ~250 ms batches; 40 per batch allows a delayed one.
+    const good = Math.max(0, Math.min(40, Math.round(Number(intent.good) || 0)));
+    const bad = Math.max(0, Math.min(40, Math.round(Number(intent.bad) || 0)));
     d.pending[team]![0] += good;
     d.pending[team]![1] += bad;
     d.taps[seatId] = (d.taps[seatId] ?? 0) + good;

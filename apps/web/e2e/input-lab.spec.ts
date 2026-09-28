@@ -74,8 +74,13 @@ test.describe('input kit on a keyboard laptop', () => {
     await expect(log(page)).toContainText('program[U]');
 
     await page.getByRole('button', { name: 'Mash' }).click();
-    for (let i = 0; i < 40; i++) await page.keyboard.press('k');
+    // Only Space mashes on a keyboard: other keys don't count.
+    for (let i = 0; i < 10; i++) await page.keyboard.press('k');
+    await page.waitForTimeout(400);
+    await expect(page.locator('.lab-log')).not.toContainText('mash{');
+    for (let i = 0; i < 40; i++) await page.keyboard.press('Space');
     await expect(page.locator('.lab-log')).toContainText('mash{');
+    await expect(page.locator('.mash-count')).not.toHaveText('0');
     await page.screenshot({ path: 'test-results/lab-desktop.png' });
   });
 });

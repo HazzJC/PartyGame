@@ -76,18 +76,25 @@
 }
 
 .hl-join {
-  padding: 28px 32px;
+  padding: 22px 30px;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 24px;
+  gap: 12px 24px;
   align-items: center;
 }
 
 .hl-join-url {
+  grid-column: 1 / -1;
   font-family: var(--font-display);
   font-size: 34px;
   color: var(--ink-soft);
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hl-join-url b {
+  color: var(--ink);
 }
 
 .hl-code {
@@ -110,8 +117,9 @@
   gap: 18px;
 }
 
-.hl-sound { padding: 12px 20px; font-size: 22px; }
-.hl-sound-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hl-sound { padding: 10px 20px; font-size: 22px; }
+.hl-sound-head { display: flex; align-items: center; gap: 12px; }
+.hl-sound-head .btn { margin-left: auto; }
 .hl-sound-head .chip { font-size: 20px; }
 .hl-sound p { margin: 6px 0 0; font-size: 18px; }
 

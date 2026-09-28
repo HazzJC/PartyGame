@@ -15,11 +15,13 @@ import {
   Rank,
   Rotate,
   Sequence,
+  ArrowIcon,
   TextAnswer,
   Vote,
   useDevice,
   type AimValues,
 } from '../input/index.ts';
+import { navigate } from '../router.ts';
 import './lab.css';
 
 type Log = (entry: string) => void;
@@ -219,6 +221,13 @@ const ITEMS: LabItem[] = [
 ];
 
 /** /dev/input-lab: every input primitive on this device, with a live intent log. */
+/** Back to wherever the lab was opened from (e.g. a lobby's "Test your device"), or home. */
+function goBack() {
+  const fromHere = document.referrer && new URL(document.referrer).origin === location.origin;
+  if (fromHere && history.length > 1) history.back();
+  else navigate('/');
+}
+
 export default function InputLab() {
   const device = useDevice();
   const [active, setActive] = useState(() => (location.hash.slice(1) && ITEMS.some((i) => i.id === location.hash.slice(1)) ? location.hash.slice(1) : 'pick'));
@@ -229,6 +238,9 @@ export default function InputLab() {
   return (
     <div className="lab">
       <header className="lab-head">
+        <button type="button" className="btn white small" onClick={goBack}>
+          <ArrowIcon dir="left" size={20} /> Back
+        </button>
         <h1>Input Lab</h1>
         <span className="chip">
           {device.kind} · {device.size} · last: {device.last}

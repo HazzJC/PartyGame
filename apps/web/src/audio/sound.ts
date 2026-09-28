@@ -4,7 +4,7 @@
  * reaches players through the stream. Volume settings are saved per browser.
  */
 
-export type Sfx = 'coin' | 'coinLoss' | 'star' | 'roll' | 'whoosh' | 'card' | 'fanfare' | 'fail' | 'tick' | 'drum' | 'pop' | 'blip' | 'motifRound' | 'motifStar' | 'motifLoss';
+export type Sfx = 'coin' | 'coinLoss' | 'star' | 'roll' | 'whoosh' | 'card' | 'fanfare' | 'fail' | 'tick' | 'drum' | 'pop' | 'blip' | 'motifRound' | 'motifStar' | 'motifLoss' | 'diceHit' | 'diceLand';
 export type Mood = 'off' | 'lobby' | 'board' | 'minigame' | 'tense' | 'podium';
 
 interface Prefs {
@@ -210,11 +210,18 @@ class SoundEngine {
     src.stop(at + dur + 0.02);
   }
 
-  play(name: Sfx): void {
+  /** `gain` scales this one play (e.g. a die clacks louder the faster it hits). */
+  play(name: Sfx, gain = 1): void {
     const ctx = this.ensure();
     if (!ctx || ctx.state !== 'running' || this.prefs.muted) return;
     const t = ctx.currentTime + 0.01;
-    const bus = this.sfxBus;
+    let bus: AudioNode = this.sfxBus;
+    if (gain !== 1) {
+      const g = ctx.createGain();
+      g.gain.value = Math.max(0, Math.min(1.5, gain));
+      g.connect(this.sfxBus);
+      bus = g;
+    }
     switch (name) {
       case 'motifRound':
       case 'motifStar':
@@ -224,6 +231,17 @@ class SoundEngine {
         if (name === 'motifStar') this.hiss(bus, t + 0.28, 0.32, 0.055, 6500, 2, 10000);
         break;
       }
+      case 'diceHit':
+        // A woody clack: a short filtered knock plus a tiny pitched tick.
+        this.hiss(bus, t, 0.045, 0.55, 1700 + Math.random() * 600, 3);
+        this.tone(bus, 'square', 320 + Math.random() * 90, t, 0.045, 0.12, 190);
+        break;
+      case 'diceLand':
+        this.hiss(bus, t, 0.05, 0.6, 1500, 3);
+        this.hiss(bus, t + 0.07, 0.04, 0.4, 2100, 3);
+        this.tone(bus, 'triangle', 880, t + 0.1, 0.22, 0.2);
+        this.tone(bus, 'triangle', 1320, t + 0.17, 0.3, 0.17);
+        break;
       case 'coin':
         this.tone(bus, 'square', 988, t, 0.08, 0.25);
         this.tone(bus, 'square', 1319, t + 0.07, 0.22, 0.25);

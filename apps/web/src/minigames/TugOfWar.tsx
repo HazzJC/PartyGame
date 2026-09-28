@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { seatMap } from '../game/HostFlow.tsx';
 import { registerMinigameUi, type MgHostProps, type MgPlayerProps } from '../game/registry.ts';
-import { TapLimiter, useVirtualKeys } from '../input/index.ts';
+import { isMashPointer, MashGate, mashStyleOfKey, useMashSender, useVirtualKeys, type MashStyle } from '../input/index.ts';
 import { useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import './minigames.css';
@@ -64,8 +64,6 @@ function Host({ conn, view, mg }: MgHostProps) {
   );
 }
 
-const BATCH_MS = 250;
-
 /**
  * The pad is judged on the phone: each tap is checked against the hazard windows by synced
  * time, so a slow stream can't make you tap into a hazard you haven't seen yet.
@@ -73,30 +71,32 @@ const BATCH_MS = 250;
 function Player({ conn, mg }: MgPlayerProps) {
   const d = mg.game as Data;
   const now = useServerNow(conn, 20);
-  const limiter = useRef(new TapLimiter());
-  const pending = useRef({ good: 0, bad: 0 });
+  const gate = useRef(new MashGate());
   const [pulse, setPulse] = useState(0);
+  // Pulls are counted here as they happen, so the counter never waits on the server.
+  const [pulls, setPulls] = useState(0);
+  const pending = useMashSender<{ good: number; bad: number }>(
+    (b) => conn.intent({ type: 'mash', ...b }),
+    () => ({ good: 0, bad: 0 }),
+    (b) => !b.good && !b.bad,
+  );
   const slippery = inHazard(d.hazards, now);
   const started = now >= d.startAt;
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      const { good, bad } = pending.current;
-      if (good || bad) conn.intent({ type: 'mash', good, bad });
-      pending.current = { good: 0, bad: 0 };
-    }, BATCH_MS);
-    return () => clearInterval(t);
-  }, [conn]);
-
-  const tap = (ts: number) => {
+  const tap = (style: MashStyle, ts: number) => {
     const t = conn.serverNow();
-    if (t < d.startAt || !limiter.current.accept(ts)) return;
+    // One input style at a time (Space, or left click / one finger), up to 30 taps a second.
+    if (t < d.startAt || !gate.current.accept(style, ts)) return;
     setPulse((x) => x + 1);
     if (inHazard(d.hazards, t)) pending.current.bad++;
-    else pending.current.good++;
+    else {
+      pending.current.good++;
+      setPulls((n) => n + 1);
+    }
   };
   useVirtualKeys((e) => {
-    if (e.down && !e.repeat) tap(e.timeStamp);
+    const style = e.down ? mashStyleOfKey(e) : null;
+    if (style) tap(style, e.timeStamp);
   });
 
   const team = d.team ?? 0;
@@ -104,7 +104,7 @@ function Player({ conn, mg }: MgPlayerProps) {
     <div className="mg-player">
       <div className="mg-player-head">
         <h2 style={{ color: TEAM_COLOURS[team] }}>{TEAM_NAMES[team]} team</h2>
-        <span className="chip">{d.myTaps ?? 0} pulls</span>
+        <span className="chip">{Math.max(pulls, d.myTaps ?? 0)} pulls</span>
       </div>
       <Rope marker={d.marker} slippery={slippery} />
       <button
@@ -113,7 +113,7 @@ function Player({ conn, mg }: MgPlayerProps) {
         data-slippery={slippery}
         data-pulse={pulse % 2}
         disabled={!started}
-        onPointerDown={(e) => tap(e.timeStamp)}
+        onPointerDown={(e) => isMashPointer(e) && tap('pointer', e.timeStamp)}
         onContextMenu={(e) => e.preventDefault()}
       >
         <span className="mash-label">{!started ? 'Ready…' : slippery ? 'STOP!' : 'PULL!'}</span>

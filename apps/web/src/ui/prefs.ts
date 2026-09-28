@@ -1,8 +1,10 @@
 /**
  * Per-device display preferences, applied as attributes on <html> so CSS can react:
- * data-motion="reduce" turns animation off, data-contrast="high" strengthens muted text and edges.
+ * data-motion="reduce" turns animation off, "low" keeps what you need to follow the game (pawns
+ * walking, dice) but drops the decoration (scenery, idle bobbing, confetti) for slower PCs, and
+ * data-contrast="high" strengthens muted text and edges.
  */
-export type Motion = 'system' | 'reduce' | 'full';
+export type Motion = 'system' | 'reduce' | 'low' | 'full';
 
 export interface DisplayPrefs {
   motion: Motion;
@@ -24,7 +26,7 @@ function load(): DisplayPrefs {
 export function applyDisplayPrefs(): void {
   const root = document.documentElement;
   const reduce = prefs.motion === 'reduce' || (prefs.motion === 'system' && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  root.dataset.motion = reduce ? 'reduce' : 'full';
+  root.dataset.motion = reduce ? 'reduce' : prefs.motion === 'low' ? 'low' : 'full';
   root.dataset.contrast = prefs.highContrast ? 'high' : 'normal';
 }
 
@@ -48,5 +50,8 @@ export function subscribeDisplayPrefs(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
-/** For JS animations (e.g. confetti): whether to skip them. */
+/** For JS animations: whether to skip them entirely. */
 export const motionReduced = () => document.documentElement.dataset.motion === 'reduce';
+
+/** For decorative extras (confetti, bursts): skipped on low animation as well. */
+export const decorationOff = () => document.documentElement.dataset.motion !== 'full';

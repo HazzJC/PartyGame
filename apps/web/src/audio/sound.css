@@ -1,7 +1,7 @@
 .sound-ctl {
   position: absolute;
-  right: 18px;
-  bottom: 18px;
+  right: 14px;
+  bottom: 14px;
   z-index: 30;
   display: flex;
   flex-direction: column;
@@ -9,50 +9,48 @@
   gap: 10px;
 }
 
-/* Quiet on the stream until the host reaches for it. */
-.sound-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  opacity: 0.55;
-  transition: opacity 150ms ease-out;
+/* One small round button: faded until the host reaches for it, so it never gets in the way. */
+.sound-btn {
+  position: relative;
+  appearance: none;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 150ms ease-out, transform 140ms ease-out;
 }
 
-.sound-ctl:hover .sound-bar,
-.sound-ctl:focus-within .sound-bar,
-.sound-ctl[data-open='true'] .sound-bar {
+.sound-ctl:hover .sound-btn,
+.sound-btn:focus-visible,
+.sound-ctl[data-open='true'] .sound-btn {
   opacity: 1;
 }
 
-.sound-mute,
-.sound-more {
-  appearance: none;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border: 0;
+.sound-btn:hover {
+  transform: rotate(30deg);
+}
+
+/* Audio not enabled yet: a little dot says a click is needed. */
+.sound-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--ink);
   border-radius: 50%;
-  background: transparent;
-  color: var(--ink);
-  font-size: 28px;
-  cursor: pointer;
-}
-
-.sound-mute[aria-pressed='true'] {
-  background: var(--felt-dark);
-}
-
-.sound-volume {
-  width: 180px;
-  accent-color: var(--ink);
-  cursor: pointer;
+  background: var(--red);
 }
 
 .sound-pop {
-  width: 320px;
+  width: 380px;
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -62,7 +60,7 @@
 
 .sound-pop p {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .sound-pop label {
@@ -75,8 +73,14 @@
   accent-color: var(--ink);
 }
 
-.sound-hint {
-  white-space: nowrap;
-  font-size: 20px;
-  cursor: pointer;
+.sound-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sound-anim {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }

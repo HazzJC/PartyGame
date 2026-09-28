@@ -9,6 +9,7 @@ export * from './tapLimiter.ts';
 export * from './Aim.tsx';
 export * from './Grid.tsx';
 export * from './Sequence.tsx';
+export * from './ArrowIcon.tsx';
 export * from './TextAnswer.tsx';
 export * from './Draw.tsx';
 export * from './Rotate.tsx';

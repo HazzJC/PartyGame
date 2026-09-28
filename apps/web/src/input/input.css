@@ -324,9 +324,36 @@ kbd {
   cursor: pointer;
 }
 
+/* Two identical bumps with different names: flipping data-pulse restarts the animation on every tap. */
+.mash[data-pulse='0'] {
+  animation: mash-bump-a 150ms ease-out;
+}
+
 .mash[data-pulse='1'] {
-  transform: translateY(4px) scale(0.99);
-  box-shadow: 0 4px 0 var(--ink);
+  animation: mash-bump-b 150ms ease-out;
+}
+
+@keyframes mash-bump-a {
+  from { transform: translateY(5px) scale(0.985); box-shadow: 0 3px 0 var(--ink); }
+  to { transform: none; box-shadow: 0 8px 0 var(--ink); }
+}
+
+@keyframes mash-bump-b {
+  from { transform: translateY(5px) scale(0.985); box-shadow: 0 3px 0 var(--ink); }
+  to { transform: none; box-shadow: 0 8px 0 var(--ink); }
+}
+
+.mash-count {
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 1;
+  color: var(--ink);
+  animation: mash-count-pop 180ms ease-out;
+}
+
+@keyframes mash-count-pop {
+  from { transform: scale(1.35); }
+  to { transform: scale(1); }
 }
 
 .mash-label {
@@ -469,6 +496,24 @@ kbd {
   gap: 8px;
   align-items: center;
   justify-content: center;
+}
+
+.seq-chip {
+  min-width: 72px;
+  min-height: 64px;
+  font-size: 20px;
+}
+
+.seq-chip[data-arrow='true'] {
+  padding: 8px;
+  color: var(--star);
+}
+
+.seq-slot {
+  display: grid;
+  place-items: center;
+  color: var(--star);
+  font-size: 18px;
 }
 
 .seq-help {
@@ -675,12 +720,29 @@ kbd {
 
 .rank-arrows button {
   appearance: none;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   border: 3px solid var(--ink);
-  border-radius: 10px;
-  background: var(--felt-dark);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--star);
+  box-shadow: 0 3px 0 var(--ink);
   cursor: pointer;
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.rank-arrows button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.rank-arrows button:disabled {
+  color: var(--felt-dark);
+  box-shadow: none;
+  opacity: 0.5;
 }
 
 /* ------------------------------------------------------------------ timed cue */
