@@ -230,13 +230,35 @@ a {
   animation: pop-in 380ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    transition-duration: 1ms !important;
-  }
+/* Reduced motion: set from the device setting or the player's own preference (ui/prefs.ts). */
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+
+/* High contrast: muted text becomes full ink, dimmed things stay readable, outlines get bolder. */
+:root[data-contrast='high'] {
+  --ink-soft: #2b2233;
+  --felt: #fbf6ec;
+  --felt-dark: #efe3cb;
+  --outline: 5px;
+}
+
+:root[data-contrast='high'] :disabled {
+  opacity: 0.75 !important;
+}
+
+:root[data-contrast='high'] .chip,
+:root[data-contrast='high'] .panel {
+  border-width: 4px;
+}
+
+:focus-visible {
+  outline: 4px solid var(--blue);
+  outline-offset: 3px;
 }
 
 .debug-overlay {
@@ -268,4 +290,41 @@ a {
 .countdown[data-urgent='true'] {
   background: var(--red);
   color: var(--paper);
+}
+
+/* Segmented choice (game length, movement, motion…). */
+.seg {
+  display: inline-flex;
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.seg button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 10px 24px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.seg button + button {
+  border-left: 4px solid var(--ink);
+}
+
+.seg button[aria-pressed='true'] {
+  background: var(--star);
+}
+
+.seg.small button {
+  font-size: 18px;
+  padding: 8px 14px;
+  flex: 1;
+}
+
+.seg.small {
+  display: flex;
 }

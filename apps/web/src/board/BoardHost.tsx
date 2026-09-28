@@ -4,6 +4,9 @@ import type { HostScreenProps } from '../host/registry.tsx';
 import { Countdown, useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import { BoardSvg, type Pawn } from './BoardSvg.tsx';
+import { useEffect } from 'react';
+import { sound } from '../audio/sound.ts';
+import { Burst } from '../ui/Confetti.tsx';
 import './board.css';
 
 interface HostWalk {
@@ -56,9 +59,12 @@ function pawnXY(def: BoardDef, w: HostWalk, now: number, stepMs: number): { x: n
 function SpotlightCard({ spot, view }: { spot: Spotlight; view: HostView }) {
   const seats = seatMap(view);
   const data = spot.data as { winner?: string; bids?: Record<string, number> } | undefined;
+  const starry = spot.kind === 'star' || spot.kind === 'contest';
+  useEffect(() => sound.play(starry ? 'star' : 'pop'), [spot, starry]);
   return (
     <div className="spot-back">
       <div className="spot-card sticker pop-in" data-kind={spot.kind}>
+        {starry && <Burst kind="star" count={12} />}
         <div className="spot-title">
           {(spot.kind === 'star' || spot.kind === 'contest') && <StarIcon size={70} />}
           {spot.title}

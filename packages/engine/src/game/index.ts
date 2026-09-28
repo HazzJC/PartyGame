@@ -38,6 +38,8 @@ import './games/meteor.ts';
 // After the board: the endgame wraps the board's flow steps, and duels wrap the endgame's.
 import './endgame.ts';
 import './duels.ts';
+// Last: the intro runs before everything else in round 1.
+import './tutorial.ts';
 
 export * from './state.ts';
 export * from './minigame.ts';

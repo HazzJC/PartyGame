@@ -9,3 +9,4 @@ export * from './rules.ts';
 export * from './items.ts';
 export * from './text.ts';
 export * from './sims.ts';
+export * from './tutorial.ts';

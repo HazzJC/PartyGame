@@ -10,7 +10,7 @@ import './lab.css';
  *
  * /dev/board?n=4&dev=items,duel,shop — a real board game with dev tools on; optionally hands you
  * items, queues a duel and opens the shop so those flows can be tried on purpose.
- * Add &team=1 for team board mode (8+ players) and &cards=1 for movement cards.
+ * Add &team=1 for team board mode (8+ players), &cards=1 for movement cards and &tutorial=1 for the intro.
  */
 export default function MinigameHarness({ gameId }: { gameId: string | null }) {
   const params = new URLSearchParams(location.search);
@@ -35,7 +35,7 @@ export default function MinigameHarness({ gameId }: { gameId: string | null }) {
           }
         });
       });
-      conn.host({ action: 'settings', settings: { forceGame: gameId, length: 'quick', devTools: true, teamBoard: params.get('team') === '1', movement: params.get('cards') === '1' ? 'cards' : 'dice' } });
+      conn.host({ action: 'settings', settings: { forceGame: gameId, length: 'quick', devTools: true, teamBoard: params.get('team') === '1', tutorial: params.get('tutorial') === '1', movement: params.get('cards') === '1' ? 'cards' : 'dice' } });
       for (let i = 1; i < n; i++) conn.host({ action: 'addBot' });
       if (!live) return;
       setRoom({ code, hostToken, seatToken: joined.seatToken });

@@ -12,6 +12,7 @@ import { WatchScreen } from './WatchScreen.tsx';
 
 export { WatchScreen };
 import '../screens.ts';
+import { Preferences } from '../ui/Preferences.tsx';
 import { DebugOverlay } from '../timing/DebugOverlay.tsx';
 
 /**
@@ -65,6 +66,7 @@ function PlayerMenu({ conn, view, onClose }: { conn: Connection<PlayerView>; vie
   const [link, setLink] = useState<string | null>(null);
   const [feedback, setFeedback] = useState('');
   const [sent, setSent] = useState(false);
+  const [prefs, setPrefs] = useState(false);
 
   useEffect(
     () =>
@@ -96,6 +98,11 @@ function PlayerMenu({ conn, view, onClose }: { conn: Connection<PlayerView>; vie
             Close
           </button>
         </div>
+
+        <button className="btn white" onClick={() => setPrefs(true)}>
+          Preferences: motion, contrast, keys
+        </button>
+        {prefs && <Preferences onClose={() => setPrefs(false)} />}
 
         <section className="stack" style={{ gap: 10 }}>
           <h3>Play on another device</h3>

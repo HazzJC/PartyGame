@@ -206,16 +206,6 @@
   font-size: 20px;
 }
 
-.seg.small button {
-  font-size: 18px;
-  padding: 8px 14px;
-  flex: 1;
-}
-
-.seg.small {
-  display: flex;
-}
-
 .pl-list {
   list-style: none;
   margin: 0;

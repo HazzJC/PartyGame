@@ -9,6 +9,7 @@ import { registerHostScreen } from './host/registry.tsx';
 import './minigames/index.ts';
 import { registerPlayerScreen } from './player/registry.tsx';
 import { CalibrateHost, CalibratePlayer } from './toys/Calibrate.tsx';
+import { TutorialHost, TutorialPlayer } from './game/Tutorial.tsx';
 import { ReactionHost, ReactionPlayer } from './toys/Reaction.tsx';
 
 registerHostScreen('calibrate', CalibrateHost);
@@ -36,5 +37,7 @@ registerHostScreen('bonus', BonusHost);
 registerPlayerScreen('bonus', BonusPlayer);
 registerHostScreen('duelSetup', DuelSetupHost);
 registerPlayerScreen('duelSetup', DuelSetupPlayer);
+registerHostScreen('tutorial', TutorialHost);
+registerPlayerScreen('tutorial', TutorialPlayer);
 registerHostScreen('duelResult', DuelResultHost);
 registerPlayerScreen('duelResult', DuelResultPlayer);

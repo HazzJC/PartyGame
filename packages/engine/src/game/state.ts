@@ -86,6 +86,8 @@ export interface GameState {
   teamBoard?: TeamBoard | null;
   /** Seat → entity. Identity in normal games. */
   entityOf?: Record<SeatId, string>;
+  /** The how-to-play intro has been shown this game. */
+  tutorialDone?: boolean;
   /** Coins each entity gains from the mini game being revealed (kept off the rail until payout). */
   revealPayout?: Record<string, number> | null;
 }

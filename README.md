@@ -1,4 +1,4 @@
-# Party Board
+# Sticker Party
 
 A Mario Party-style board game for 2 to 16 friends, played in the browser. One **host screen** is shared on Discord
 (or shown on a TV); everyone plays on their own phone or laptop. Nothing to install.
@@ -6,6 +6,19 @@ A Mario Party-style board game for 2 to 16 friends, played in the browser. One *
 - **Host:** open the site → **Host a game**. Screen-share that window. Press **Play from this computer or your phone**
   to get your personal player link (opens in its own window, or scan a QR on your phone).
 - **Friends:** open the site and type the 4-letter code, or scan the QR on the shared screen.
+
+**What's in it:** a procedurally generated board with simultaneous turns, stars, items, hidden traps, duels
+with spectator bets, a shop, a last-place twist and bonus stars; 33 mini games across free-for-all, team,
+1 vs many and co-op; stream-delay calibration so phones never spoil results; and, for big rooms, team board
+mode, movement cards and deck editing. Sound is synthesised live (music on the host screen only), and all
+art is hand-drawn SVG, so there are no asset downloads.
+
+**Accessibility:** controls adapt to touch, mouse and keyboard (gamepads work for d-pad and button games). The phone menu has
+**Preferences** (reduced motion, high contrast, extra key bindings including an AZERTY preset). Identity is
+carried by the animal, not only the colour.
+
+**Dev pages:** `/dev/input-lab` (try every control on your device), `/dev/minigame/<id>?n=8` (one game against
+bots), `/dev/board?n=16&team=1&cards=1&tutorial=1` (a board game with options), `/credits`.
 
 ## Stack
 

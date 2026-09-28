@@ -7,6 +7,7 @@ import { Avatar } from '../ui/Avatar.tsx';
 import { Qr } from '../ui/Qr.tsx';
 import { PlayHere, useHostSeat } from './PlayHere.tsx';
 import { GameOptions } from '../ui/GameSettings.tsx';
+import { Logo } from '../ui/Logo.tsx';
 
 const LENGTHS = [
   { id: 'quick', label: 'Quick', detail: '8 rounds · ~25 min' },
@@ -26,7 +27,9 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
   return (
     <div className="hl">
       <div className="hl-left">
-        <h1 className="hl-title">Party Board</h1>
+        <h1 className="hl-title">
+          <Logo height={150} />
+        </h1>
         <div className="sticker hl-join">
           <div className="stack" style={{ gap: 8 }}>
             <div className="hl-join-url">Join at {url.replace(/^https?:\/\//, '').replace(/\/[A-Z]{4}$/, '')}</div>

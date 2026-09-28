@@ -8,6 +8,9 @@ import { Stage } from './Stage.tsx';
 import { hostScreens } from './registry.tsx';
 import './host.css';
 import '../screens.ts';
+import { SoundControl } from '../audio/SoundControl.tsx';
+import { useHostAudio } from '../audio/useHostAudio.ts';
+import { GAME_NAME } from '../ui/Logo.tsx';
 import { DebugOverlay } from '../timing/DebugOverlay.tsx';
 
 /** Resolve the host token: from a fresh "re-open host screen" link (#t=…) or this tab's session. */
@@ -37,8 +40,9 @@ function HostLive({ code, conn }: { code: string; conn: Connection<HostView> }) 
   const { status, view } = useConnection(conn);
 
   useEffect(() => {
-    document.title = `${code} · Party Board host`;
+    document.title = `${code} · ${GAME_NAME} host`;
   }, [code]);
+  useHostAudio(view?.phase);
 
   if (status === 'gone') {
     return (
@@ -68,6 +72,7 @@ function HostLive({ code, conn }: { code: string; conn: Connection<HostView> }) 
       )}
       {status === 'reconnecting' && <div className="host-status sticker">Reconnecting…</div>}
       {view?.paused && <div className="host-status sticker" style={{ background: 'var(--star)' }}>Paused</div>}
+      <SoundControl />
       <DebugOverlay conn={conn} />
     </Stage>
   );

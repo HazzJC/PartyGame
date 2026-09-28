@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { boundKey } from './bindings.ts';
 import { markGamepadUsed } from './device.ts';
 
 /**
@@ -47,7 +48,8 @@ const KEYMAP: Record<string, VKey> = {
 };
 
 function keyToV(key: string): VKey {
-  const mapped = KEYMAP[key];
+  // The player's own extra bindings win (e.g. Z for up on AZERTY).
+  const mapped = boundKey(key) ?? KEYMAP[key];
   if (mapped) return mapped;
   if (/^[0-9]$/.test(key)) return 'digit';
   if (/^[a-zA-Z]$/.test(key)) return 'char';

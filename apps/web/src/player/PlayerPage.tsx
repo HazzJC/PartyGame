@@ -7,6 +7,7 @@ import { prefs, seatStore } from '../net/storage.ts';
 import { hashParam, navigate } from '../router.ts';
 import { Avatar, animalName } from '../ui/Avatar.tsx';
 import { PlayerShell } from './PlayerShell.tsx';
+import { GAME_NAME } from '../ui/Logo.tsx';
 import './player.css';
 
 function resolveSeatToken(code: string): string | null {
@@ -21,7 +22,7 @@ function resolveSeatToken(code: string): string | null {
 export default function PlayerPage({ code }: { code: string }) {
   const [token, setToken] = useState(() => resolveSeatToken(code));
   useEffect(() => {
-    document.title = `${code} · Party Board`;
+    document.title = `${code} · ${GAME_NAME}`;
   }, [code]);
   if (!token) return <JoinForm code={code} onJoined={setToken} />;
   return <PlayerConnected key={token} code={code} token={token} onForget={() => { seatStore.clear(code); history.replaceState(null, '', location.pathname); setToken(null); }} />;

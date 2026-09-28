@@ -1,0 +1,106 @@
+.tut-card {
+  margin: auto;
+  width: 1180px;
+  max-width: 100%;
+  padding: 44px 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.tut-card h1 {
+  font-size: 72px;
+  margin: 10px 0 0;
+}
+
+.tut-card p {
+  margin: 0;
+  font-size: 34px;
+}
+
+.tut-pic {
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.tut-space {
+  display: grid;
+  place-items: center;
+  border: 6px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: var(--sticker-ring), 0 6px 0 5px var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.tut-arrow {
+  font-family: var(--font-display);
+  font-size: 80px;
+}
+
+.tut-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 56px;
+}
+
+.tut-chip {
+  font-size: 40px;
+  padding: 10px 26px;
+}
+
+.tut-chip.blue {
+  background: var(--blue);
+  color: var(--paper);
+}
+
+.tut-chip.red {
+  background: var(--red);
+  color: var(--paper);
+}
+
+.tut-phone {
+  width: 100px;
+  height: 170px;
+  display: grid;
+  place-items: center;
+  border: 6px solid var(--ink);
+  border-radius: 22px;
+  background: var(--paper);
+  font-size: 56px;
+}
+
+.tut-foot {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+}
+
+.tut-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.tut-dots span {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.tut-dots span[data-on='true'] {
+  background: var(--star);
+}

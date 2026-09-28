@@ -31,6 +31,8 @@ export interface Settings {
   devTools?: boolean;
   /** Team board mode for big rooms: teams share a pawn, purse, items and stars. */
   teamBoard?: boolean;
+  /** Show the how-to-play intro before round 1. */
+  tutorial?: boolean;
 }
 
 export interface Timer {

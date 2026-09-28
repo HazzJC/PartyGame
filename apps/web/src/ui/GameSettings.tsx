@@ -54,6 +54,13 @@ export function GameOptions({ conn, view, compact = false }: { conn: SettingsHos
           <span className="muted"> · four teams share a pawn and purse{bigEnough ? '' : ` (needs ${TEAM_BOARD_MIN}+ players)`}</span>
         </span>
       </label>
+      <label className="gopts-row gopts-check">
+        <input type="checkbox" checked={!!s.tutorial} onChange={(e) => set({ tutorial: e.target.checked })} />
+        <span>
+          <b>How-to-play intro</b>
+          <span className="muted"> · 40 seconds of rules before round 1</span>
+        </span>
+      </label>
       {catalogue.length > 0 && (
         <button className={`btn white ${compact ? 'small' : ''}`} onClick={() => setEditing(true)}>
           Mini games: {catalogue.length - off}/{catalogue.length} on

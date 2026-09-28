@@ -5,6 +5,7 @@ import type { HostScreenProps } from '../host/registry.tsx';
 import { Countdown } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import { minigameUi, type MgHostPhase } from './registry.ts';
+import { Confetti } from '../ui/Confetti.tsx';
 import './game.css';
 
 export interface EntityInfo {
@@ -117,7 +118,7 @@ export function HostGameFrame({ view, title, right, children, rail = true }: { v
                 <StarIcon size={22} />
                 {p.stars}
               </span>
-              <span className="hg-stat">
+              <span className="hg-stat bump" key={`c${p.coins}`}>
                 <Coin size={22} />
                 {p.coins}
               </span>
@@ -264,6 +265,7 @@ export function PodiumHost({ conn, view }: HostScreenProps) {
   return (
     <HostGameFrame view={view} title="Final results" rail={false}>
       <div className="podium">
+        <Confetti />
         <div className="podium-row">
           <PodiumBlock s={seats.get(order[1]!)} place={2} height={220} />
           <PodiumBlock s={seats.get(order[0]!)} place={1} height={320} />

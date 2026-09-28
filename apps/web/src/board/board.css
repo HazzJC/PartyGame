@@ -284,3 +284,7 @@
   outline: 5px solid var(--ink);
   outline-offset: 3px;
 }
+
+.spot-card {
+  position: relative;
+}

@@ -2,6 +2,7 @@ import { CODE_LENGTH, normaliseCode } from '@partygame/shared';
 import { useState, type FormEvent } from 'react';
 import { navigate } from '../router.ts';
 import { Avatar } from '../ui/Avatar.tsx';
+import { Logo } from '../ui/Logo.tsx';
 import './landing.css';
 
 export function Landing({ notFound = false }: { notFound?: boolean }) {
@@ -23,7 +24,9 @@ export function Landing({ notFound = false }: { notFound?: boolean }) {
             <Avatar key={a} avatar={a} size={64} className="pop-in" />
           ))}
         </div>
-        <h1 className="landing-title">Party Board</h1>
+        <h1 className="landing-title">
+          <Logo height={170} />
+        </h1>
         <p className="landing-tag">A board game for 2 to 16 friends. One shared screen, everyone plays on their own phone or laptop.</p>
       </header>
 
@@ -65,6 +68,9 @@ export function Landing({ notFound = false }: { notFound?: boolean }) {
       </section>
       <footer className="landing-foot muted">
         <a href="/dev/input-lab">Try your device</a> · Nothing to install · Free
+      </footer>
+      <footer className="landing-foot">
+        <a href="/credits">Credits</a>
       </footer>
     </main>
   );

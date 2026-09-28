@@ -69,3 +69,47 @@
 .landing-foot {
   margin-top: auto;
 }
+
+.landing-foot {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 0 24px;
+  font-weight: 800;
+}
+
+.landing-foot a {
+  color: var(--ink);
+}
+
+.credits {
+  align-items: center;
+  gap: 20px;
+}
+
+.credits-card {
+  max-width: 760px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.credits-card h1,
+.credits-card h2,
+.credits-card p {
+  margin: 0;
+}
+
+.credits-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.credits-list a {
+  color: var(--ink);
+  font-weight: 800;
+}

@@ -153,3 +153,14 @@ Aim for a 12 to 16 player night, with bots topping up if people drop.
 - [ ] **Deck editing** (lobby, "Mini games: N/33 on"): untick games you don't want. Free-for-all can't be emptied.
 - [ ] **Autopilot:** if you drop, your seat now makes random path choices and never spends your items or coins. Only real bots use items and shop.
 - [ ] Try `/dev/board?n=16&team=1&cards=1` to see team board and cards with bots.
+
+## v0.14 · Polish (the full game)
+
+A final Standard game, with sound on the stream.
+
+- [ ] **Sound:** the host screen plays music (a different mood for the board, mini games, duels and the podium) and effects (rolls, coins, stars, fanfares). Is it at a good level through Discord? Use the speaker button, bottom right of the host screen. If it says "Click for sound", click once on the host window.
+- [ ] **How-to-play intro** (lobby option): five slides before round 1. Everyone pressing Got it skips the rest. Was it enough for a first-timer?
+- [ ] **Juice:** star purchases burst, coin counts bump on the rail, and the podium has confetti. Is it too much or too little on the stream?
+- [ ] **Preferences** (phone menu ⋯): reduced motion, high contrast and extra keys. Try binding a key and using it in a game.
+- [ ] **Name and branding:** the game is now "Sticker Party". Keep it, or suggest a better one?
+- [ ] `/credits` is linked from the home page.
