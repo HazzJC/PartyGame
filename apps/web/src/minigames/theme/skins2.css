@@ -1,0 +1,242 @@
+/* Per-game skins, pack 2 (see skins1.css). */
+
+/* ------------------------------------------------------------------ Quick Draw: the saloon sign */
+.mg-themed[data-game='quick-draw'] .toy-big-cue {
+  flex: none;
+  width: min(860px, 100%);
+  height: min(400px, 60%);
+  margin: auto;
+  border-radius: 20px;
+  background-color: #b5793d;
+  background-image: repeating-linear-gradient(180deg, transparent 0 70px, rgba(43, 34, 51, 0.35) 70px 75px);
+  color: #fff3d6;
+  -webkit-text-stroke: 12px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: inset 0 0 0 10px #8a5a3c, inset 0 0 0 14px var(--ink), 0 10px 0 var(--ink);
+}
+
+.mg-themed[data-game='quick-draw'] .toy-big-cue[data-go='true'] {
+  background-color: #e5484d;
+  background-image: none;
+  color: #ffd23f;
+}
+
+.mg-themed[data-game='quick-draw'] .toy-row {
+  background: #f3e0b5;
+}
+
+.mg-themed[data-game='quick-draw'] .toy-row.first {
+  background: #ffd23f;
+}
+
+.mg-player-themed[data-game='quick-draw'] .cue-surface:is([data-cue='idle']) {
+  background-color: #b5793d;
+  background-image: repeating-linear-gradient(180deg, transparent 0 46px, rgba(43, 34, 51, 0.3) 46px 50px);
+  color: #fff3d6;
+}
+
+.mg-player-themed[data-game='quick-draw'] .cue-surface[data-cue='idle'] .cue-label {
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+}
+
+/* ------------------------------------------------------------------ Silent Trample: patches of savanna */
+.mg-themed[data-game='silent-trample'] .trample-zone {
+  background: #e8d27a;
+  border-radius: 42% 46% 30% 36% / 34% 36% 40% 32%;
+  box-shadow: inset 0 -14px 0 #d4b95a, 0 7px 0 var(--ink);
+}
+
+.mg-themed[data-game='silent-trample'] .trample-zone:nth-child(3n + 2) {
+  border-radius: 36% 30% 44% 40% / 40% 32% 36% 34%;
+}
+
+.mg-themed[data-game='silent-trample'] .trample-zone:nth-child(3n) {
+  border-radius: 30% 44% 36% 46% / 32% 40% 34% 38%;
+}
+
+.mg-themed[data-game='silent-trample'] .trample-name {
+  color: #6b4a2b;
+}
+
+.mg-themed[data-game='silent-trample'] .trample-pts {
+  color: #7cc77f;
+}
+
+/* A collapsed patch is a hole in the ground. */
+.mg-themed[data-game='silent-trample'] .trample-zone[data-fell='true'] {
+  background: #6b4a2b;
+  box-shadow: inset 0 16px 0 #4a3220, 0 7px 0 var(--ink);
+}
+
+.mg-themed[data-game='silent-trample'] .trample-zone[data-fell='true'] .trample-name {
+  color: #e8d27a;
+}
+
+.mg-player-themed[data-game='silent-trample'] .pick-tile {
+  --tile: #e8d27a;
+  border-radius: 40% 44% 30% 36% / 34% 36% 40% 32%;
+  box-shadow: inset 0 -8px 0 #d4b95a, 0 5px 0 var(--ink);
+}
+
+.mg-player-themed[data-game='silent-trample'] .pick-tile[aria-checked='true'] {
+  background: #ffd23f;
+  box-shadow: inset 0 -8px 0 #e0b020, 0 3px 0 var(--ink), 0 0 0 5px var(--ink);
+}
+
+/* ------------------------------------------------------------------ Pick a Door: Creaky Manor's doors */
+.mg-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .door {
+  background-color: #6b4a8a;
+  background-image: repeating-linear-gradient(90deg, transparent 0 42px, rgba(43, 34, 51, 0.35) 42px 46px);
+  box-shadow: 0 8px 0 var(--ink), 0 0 0 10px #3e2f5e, 0 0 0 14px var(--ink);
+  margin: 14px 0 6px;
+}
+
+.mg-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .door[data-safe='true'] {
+  background-color: #ffe08a;
+  background-image: none;
+}
+
+.mg-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .door[data-trap='true'] {
+  background-color: var(--ink);
+  background-image: none;
+}
+
+/* Something is looking out of the trap door. */
+.mg-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .door[data-trap='true']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 80px;
+  height: 20px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 18% 50%, #ffd23f 0 9px, transparent 10px),
+    radial-gradient(circle at 82% 50%, #ffd23f 0 9px, transparent 10px);
+}
+
+.mg-player-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .pick-tile {
+  --tile: #6b4a8a;
+  min-height: 96px;
+  border-radius: 48px 48px 12px 12px;
+  color: var(--paper);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+}
+
+.mg-player-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .pick-tile[aria-checked='true'] {
+  background: #ffe08a;
+  color: var(--ink);
+  -webkit-text-stroke: 0;
+}
+
+.mg-player-themed:is([data-game='pick-a-door'], [data-game='pick-a-door-setter']) .pick-key {
+  -webkit-text-stroke: 0;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ Deep Sea Sonar: the sub's sonar screen */
+.mg-themed[data-game='deep-sea-sonar'] .sonar-grid {
+  position: relative;
+  overflow: hidden;
+  margin: 18px 0;
+  border-radius: 30px;
+  background: #12324f;
+  box-shadow: 0 0 0 14px #c9892b, 0 0 0 19px var(--ink), 10px 14px 0 19px var(--ink);
+}
+
+/* The sonar sweep. */
+.mg-themed[data-game='deep-sea-sonar'] .sonar-grid::after {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from 0deg, rgba(170, 255, 225, 0.5) 0deg, rgba(170, 255, 225, 0) 50deg, transparent 360deg);
+  animation: sonar-sweep 4s linear infinite;
+  pointer-events: none;
+}
+
+:root[data-motion='low'] .mg-themed[data-game='deep-sea-sonar'] .sonar-grid::after,
+:root[data-motion='reduce'] .mg-themed[data-game='deep-sea-sonar'] .sonar-grid::after {
+  display: none;
+}
+
+@keyframes sonar-sweep {
+  to { transform: rotate(360deg); }
+}
+
+.mg-themed[data-game='deep-sea-sonar'] .sonar-fish {
+  top: 4px;
+  left: 6px;
+  min-width: 38px;
+  padding: 0 6px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: #ffd23f;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ------------------------------------------------------------------ Raft Gamble: down the rapids */
+.mg-themed[data-game='raft-gamble'] .raft-sea {
+  background-color: #3d9bd1;
+  background-image: repeating-linear-gradient(172deg, transparent 0 46px, rgba(255, 255, 255, 0.14) 46px 52px);
+}
+
+.mg-themed[data-game='raft-gamble'] .raft-island {
+  background: #e8c77a;
+  box-shadow: inset 0 14px 0 #7cc77f, 0 6px 0 var(--ink);
+}
+
+.mg-themed[data-game='raft-gamble'] .raft-island[data-here='true'] {
+  background: #ffd23f;
+}
+
+/* Logs lashed together. */
+.mg-themed[data-game='raft-gamble'] .raft {
+  border-radius: 30px;
+  background-color: #a0703c;
+  background-image: repeating-linear-gradient(90deg, transparent 0 58px, rgba(43, 34, 51, 0.55) 58px 62px);
+  box-shadow: 0 8px 0 var(--ink), 0 14px 0 rgba(255, 255, 255, 0.35);
+}
+
+.mg-player-themed[data-game='raft-gamble'] .raft-choice.bank {
+  background: #ffb703;
+  box-shadow: inset 0 0 0 7px #a0703c, inset 0 0 0 10px var(--ink), 0 7px 0 var(--ink);
+}
+
+.mg-player-themed[data-game='raft-gamble'] .raft-choice.stay {
+  background-color: #3d9bd1;
+  background-image: repeating-linear-gradient(172deg, transparent 0 26px, rgba(255, 255, 255, 0.18) 26px 31px);
+}
+
+/* ------------------------------------------------------------------ Crumble Tower: castle stone */
+.mg-themed[data-game='crumble-tower'] .tower-block[data-present='true'] {
+  background: #b8b2a7;
+  border-radius: 4px;
+  box-shadow: inset 0 -5px 0 #9a9486;
+}
+
+.mg-themed[data-game='crumble-tower'] .tower-row[data-odd='true'] .tower-block[data-present='true'] {
+  background: #a9a396;
+}
+
+.mg-themed[data-game='crumble-tower'] .tower {
+  border-bottom: 16px solid #7a6a53;
+  border-radius: 0 0 8px 8px;
+}
+
+.mg-player-themed[data-game='crumble-tower'] .tower-pick {
+  background: #d9eaf5;
+}
+
+.mg-player-themed[data-game='crumble-tower'] .tower-pick-block:not(:disabled) {
+  background: #b8b2a7;
+  box-shadow: inset 0 -4px 0 #9a9486;
+}
+
+.mg-player-themed[data-game='crumble-tower'] .tower-pick-block[aria-pressed='true'] {
+  background: #ffd23f;
+  box-shadow: 0 0 0 3px var(--blue);
+}
