@@ -5,6 +5,7 @@ import { useVirtualKeys } from '../input/index.ts';
 import { Countdown, useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import './minigames.css';
+import { Icon } from '../ui/Icons.tsx';
 import './wave-e.css';
 
 function Lives({ n }: { n: number }) {
@@ -12,7 +13,7 @@ function Lives({ n }: { n: number }) {
     <span className="mind-lives" aria-label={`${n} lives`}>
       {[0, 1, 2].map((i) => (
         <span key={i} data-on={i < n}>
-          ♥
+          <Icon name="heart" size={30} />
         </span>
       ))}
     </span>

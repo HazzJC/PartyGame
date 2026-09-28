@@ -218,16 +218,23 @@
 }
 
 .mind-lives span {
-  font-size: 40px;
-  color: #d8cbb3;
+  display: inline-block;
 }
 
-.mind-lives span[data-on='true'] {
-  color: var(--red);
+.mind-lives svg {
+  width: 44px;
+  height: 44px;
 }
 
-.mg-player .mind-lives span {
-  font-size: 26px;
+/* A lost life: a faded paper heart. */
+.mind-lives span[data-on='false'] {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+.mg-player .mind-lives svg {
+  width: 28px;
+  height: 28px;
 }
 
 .mind-card {

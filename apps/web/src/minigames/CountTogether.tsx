@@ -4,6 +4,7 @@ import { registerMinigameUi, type MgHostProps, type MgPlayerProps } from '../gam
 import { KeyHint, useDevice, useVirtualKeys, wantsOnScreenControls } from '../input/index.ts';
 import { Countdown, useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
+import { Icon } from '../ui/Icons.tsx';
 import './minigames.css';
 
 interface Data {
@@ -39,7 +40,7 @@ function Host({ conn, view, mg }: MgHostProps) {
             <span key={i} className="sticker count-call" data-clash={!!l.clash}>
               {s && <Avatar avatar={s.avatar} size={40} />}
               {other && <Avatar avatar={other.avatar} size={40} />}
-              {l.clash ? '💥' : l.n}
+              {l.clash ? <Icon name="clash" size={34} label="Clash" /> : l.n}
             </span>
           );
         })}

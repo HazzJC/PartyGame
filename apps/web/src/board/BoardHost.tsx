@@ -57,7 +57,7 @@ function pawnXY(def: BoardDef, w: HostWalk, now: number, stepMs: number): { x: n
   const a = node(i);
   const b = node(i + 1);
   // A little hop between spaces.
-  return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f - Math.sin(f * Math.PI) * 18, facing: face(i), walking: true };
+  return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f - Math.sin(f * Math.PI) * 24, facing: face(i), walking: true };
 }
 
 function SpotlightCard({ spot, view }: { spot: Spotlight; view: HostView }) {

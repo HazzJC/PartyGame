@@ -1,5 +1,6 @@
 import { ITEMS, type ItemId } from '@partygame/shared';
-import { ItemChip, ITEM_GLYPH } from '../board/ItemPicker.tsx';
+import { ItemChip } from '../board/ItemPicker.tsx';
+import { ItemIcon } from '../ui/Icons.tsx';
 import type { Connection } from '../net/connection.ts';
 import { Countdown } from '../timing/clock.tsx';
 import { Coin } from './HostFlow.tsx';
@@ -35,7 +36,9 @@ export function Shop({ conn, shop, endsAt }: { conn: Connection; shop: ShopView;
           const cant = full || shop.coins < it.price;
           return (
             <li key={id} className="shop-item sticker">
-              <span className="item-glyph big">{ITEM_GLYPH[id]}</span>
+              <span className="item-glyph big">
+                <ItemIcon item={id} size={40} />
+              </span>
               <div className="shop-text">
                 <b>{it.name}</b>
                 <span>{it.text}</span>

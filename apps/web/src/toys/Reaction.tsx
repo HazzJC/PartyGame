@@ -4,10 +4,11 @@ import { ControlsCard, CueSurface } from '../input/index.ts';
 import type { PlayerScreenProps } from '../player/registry.tsx';
 import { useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
+import { DeviceIcon, Icon } from '../ui/Icons.tsx';
 import './toys.css';
 
 const fmt = (r: ReactionResult | undefined) => (!r ? '…' : 'ms' in r ? `${r.ms} ms` : 'falseStart' in r ? 'too early' : 'missed');
-const deviceIcon = (s: PublicSeat) => (s.isBot ? '🤖' : s.device === 'touch' ? '📱' : s.device === 'mouse' ? '💻' : '');
+const deviceIcon = (s: PublicSeat) => <DeviceIcon device={s.device} bot={s.isBot} size={26} />;
 
 export function ReactionHost({ conn, view }: HostScreenProps) {
   const p = view.phase;
@@ -31,7 +32,7 @@ export function ReactionHost({ conn, view }: HostScreenProps) {
           {final ? 'Final times (lower is better)' : p.stage === 'ready' ? 'Get ready. Watch YOUR OWN screen, not this one.' : `Round ${p.round} of ${p.rounds}. Tap on FIRE!, not on the fakes.`}
         </p>
         <div className="toy-big-cue" data-go={p.stage === 'live' && (shown?.real ?? false)}>
-          {p.stage === 'live' ? shown?.label ?? '…' : final ? '🏆' : p.stage === 'reveal' ? 'Results' : 'Ready?'}
+          {p.stage === 'live' ? shown?.label ?? '…' : final ? <Icon name="trophy" size={160} /> : p.stage === 'reveal' ? 'Results' : 'Ready?'}
         </div>
       </div>
       <div className="toy-list">

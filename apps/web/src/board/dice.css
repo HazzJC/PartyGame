@@ -7,7 +7,7 @@
 /* A felt tray with a wooden rim: the die bounces off its inner edge. */
 .dice-tray {
   position: relative;
-  height: 180px;
+  height: 190px;
   border: 5px solid var(--ink);
   border-radius: 22px;
   background: #3f8f5f;
@@ -16,12 +16,13 @@
   touch-action: none;
 }
 
-.dice-tray::after {
-  content: '';
+.dice-shadow {
   position: absolute;
-  inset: 11px;
-  border-radius: 12px;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.06) 0 2px, transparent 3px) 0 0 / 18px 18px;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: #1c3b28;
+  opacity: 0.35;
   pointer-events: none;
 }
 
@@ -29,21 +30,48 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 84px;
-  height: 84px;
   z-index: 1;
   cursor: grab;
   touch-action: none;
-  filter: drop-shadow(0 6px 0 rgba(43, 34, 51, 0.35));
+  transform-origin: 50% 50%;
   will-change: transform;
 }
 
 .dice-tray[data-stage='held'] .dice-die {
   cursor: grabbing;
-  filter: drop-shadow(0 14px 0 rgba(43, 34, 51, 0.3));
 }
 
-.dice-tray[data-stage='ready'] .dice-die > div {
+/* The cube itself: six faces in 3D, the camera looking from a three-quarter angle. */
+.die3d {
+  position: relative;
+  perspective: 600px;
+}
+
+.die3d-cube {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.die3d-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.die3d-face svg {
+  display: block;
+}
+
+.die3d-core {
+  position: absolute;
+  inset: 3px;
+  border-radius: 12px;
+  background: #d9d2e2;
+  border: 3px solid var(--ink);
+}
+
+.dice-tray[data-stage='ready'] .die3d {
   animation: dice-wiggle 1.6s ease-in-out infinite;
 }
 
@@ -54,10 +82,55 @@
   transform: translateX(-50%);
   padding: 2px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   font-family: var(--font-display);
   font-size: 16px;
   pointer-events: none;
+}
+
+/* "You got N!": a sticker banner pinned to the top of the tray once the die stops. */
+.dice-result {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%) rotate(-3deg);
+  padding: 4px 18px;
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  background: var(--star);
+  box-shadow: 0 4px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: 24px;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.dice-result b {
+  font-size: 34px;
+}
+
+.dice-rolled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0 8px;
+}
+
+.dice-rolled .die3d {
+  width: 96px;
+  height: 96px;
+  margin: 10px 0;
+  animation: dice-float 2.2s ease-in-out infinite alternate;
+}
+
+.dice-rolled-text {
+  font-family: var(--font-display);
+  font-size: 32px;
+}
+
+.dice-rolled-text b {
+  font-size: 52px;
 }
 
 @keyframes dice-wiggle {
@@ -67,8 +140,13 @@
   94% { transform: rotate(-4deg); }
 }
 
+@keyframes dice-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+
 @media (max-height: 640px) {
   .dice-tray {
-    height: 130px;
+    height: 140px;
   }
 }

@@ -59,14 +59,15 @@ test('Count Together: saying a number blocks you from going twice; the VIP can s
 });
 
 test('Tug of War: taps pull the rope; hazards are judged on the phone', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   const { host, player } = await openHarness(page, 'tug-of-war');
   const pad = player.locator('.tug-pad');
   await expect(pad).toBeEnabled({ timeout: 15_000 });
   for (let i = 0; i < 30; i++) await pad.click();
   await expect(player.locator('.chip', { hasText: 'pulls' })).not.toHaveText('0 pulls');
   await page.screenshot({ path: 'test-results/game-tug.png' });
-  await expect(host.getByText(/team wins|dead heat/)).toBeVisible({ timeout: 40_000 });
+  // No time limit: the rope must reach an end, helped by growing pull power.
+  await expect(host.getByText(/team wins|dead heat/)).toBeVisible({ timeout: 75_000 });
   await expectPersonalResult(player);
 });
 

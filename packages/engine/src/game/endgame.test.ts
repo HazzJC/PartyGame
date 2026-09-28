@@ -1,6 +1,6 @@
 import { SESSION } from '@partygame/shared';
 import { describe, expect, it } from 'vitest';
-import { caught, createSimRoom, drawBonusStars, game, hunterZones } from './index.ts';
+import { caught, createSimRoom, drawBonusStars, game, hunterZones, POWER_DOUBLING_S, TUG_MAX_MS, tugPower } from './index.ts';
 
 describe('endgame', () => {
   it('last place picks a twist at the start of the final stretch, then bonus stars are awarded', () => {
@@ -43,11 +43,24 @@ describe('endgame', () => {
 });
 
 describe('new mini games', () => {
-  it('Tug of War runs in real time and ends with a team result', () => {
-    const { room, run } = createSimRoom({ seed: 8, bots: 6, forceGame: 'tug-of-war' });
-    room.hostAction({ action: 'start' }, { role: 'host' });
-    run(() => room.phase.kind === 'minigame' && room.phase.stage === 'reveal');
-    expect(room.phase.result.kind).toBe('team');
+  it('Tug of War runs until the rope reaches an end, even between evenly matched bot teams', () => {
+    for (const seed of [8, 9, 10]) {
+      const { room, run, now } = createSimRoom({ seed, bots: 6, forceGame: 'tug-of-war' });
+      room.hostAction({ action: 'start' }, { role: 'host' });
+      run(() => room.phase.kind === 'minigame');
+      const started = now();
+      run(() => room.phase.kind === 'minigame' && room.phase.stage === 'reveal');
+      expect(room.phase.result.kind).toBe('team');
+      // Decided by the rope, not a clock: it reached an end, well before the two-minute safety net.
+      expect(Math.abs(room.phase.data.marker)).toBe(1);
+      expect(now() - started).toBeLessThan(TUG_MAX_MS);
+    }
+  });
+
+  it('Tug of War pull power grows, so small edges count more later on', () => {
+    expect(tugPower(0)).toBe(1);
+    expect(tugPower(POWER_DOUBLING_S * 1000)).toBeCloseTo(2);
+    expect(tugPower(POWER_DOUBLING_S * 3000)).toBeCloseTo(8);
   });
 
   it('Hunter vs Hiders pays the small side 15 when it wins', () => {

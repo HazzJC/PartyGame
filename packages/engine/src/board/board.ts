@@ -68,7 +68,7 @@ export const ROLL_MS = 10_000;
 export const BRANCH_MS = 10_000;
 export const BID_MS = 10_000;
 /** Host animation speed per node; the phase waits for the longest walk. */
-export const STEP_MS = 230;
+export const STEP_MS = 340;
 export const SPOTLIGHT_MS = 3800;
 export const LANDING_MS = 2600;
 export const FLIP_MS = 2400;
@@ -418,7 +418,8 @@ export const boardPhase = definePhase<BoardPhase>({
       if (s.contests.every((x) => x.bidders.every((e) => voted(s, g, e, 'bid')))) room.setPhaseTimer('bidEnd', room.now() + 800);
       return;
     } else return;
-    if (Object.values(s.walks).every((x) => x.roll !== null)) room.setPhaseTimer('rollEnd', room.now() + 1600);
+    // Everyone has rolled: leave time for the last die to finish tumbling and show its number.
+    if (Object.values(s.walks).every((x) => x.roll !== null)) room.setPhaseTimer('rollEnd', room.now() + 2600);
   },
   timer(room, s, key) {
     if (key === 'rollEnd' && s.stage === 'roll') endRoll(room, s);

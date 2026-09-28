@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Connection } from '../net/connection.ts';
 import { Avatar } from '../ui/Avatar.tsx';
 import { BoardSvg } from './BoardSvg.tsx';
+import { ItemIcon } from '../ui/Icons.tsx';
 import { focusedView } from './boardVisual.ts';
 
 export interface ItemUseView {
@@ -12,21 +13,12 @@ export interface ItemUseView {
   space?: number;
 }
 
-/** Item icons drawn as simple glyph stickers (no emoji, so every phone renders them the same). */
-export const ITEM_GLYPH: Record<ItemId, string> = {
-  doubleRoll: '⚄⚄',
-  warp: '↯',
-  swap: '⇄',
-  steal: '✋',
-  starDiscount: '%',
-  trap: '⚠',
-  duelTicket: 'VS',
-};
-
 export function ItemChip({ item, onClick, active, disabled }: { item: ItemId; onClick?: () => void; active?: boolean; disabled?: boolean }) {
   return (
     <button type="button" className="item-chip" aria-pressed={active} onClick={onClick} disabled={disabled} title={ITEMS[item].text}>
-      <span className="item-glyph">{ITEM_GLYPH[item]}</span>
+      <span className="item-glyph">
+        <ItemIcon item={item} size={26} />
+      </span>
       <span>{ITEMS[item].name}</span>
     </button>
   );

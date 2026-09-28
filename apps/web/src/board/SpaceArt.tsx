@@ -1,5 +1,6 @@
 import type { BoardNode } from '@partygame/engine';
 import type { ReactNode } from 'react';
+import { StarArt } from '../ui/StarArt.tsx';
 
 const INK = '#2B2233';
 const PAPER = '#FFFFFF';
@@ -128,28 +129,44 @@ export function SpaceIcon({ kind, size = 30 }: { kind: SpaceKind | 'star'; size?
   );
 }
 
-/** The star you buy: a gold paper star on a glowing pedestal, centred on 0,0. */
+/**
+ * The star you buy: the shared star art on a slowly turning paper sunburst, with a few sparkles
+ * twinkling round it (they only move on the host screen). Centred on 0,0.
+ */
 export function StarPrize({ size = 64, spin = false }: { size?: number; spin?: boolean }) {
-  const s = size / 100;
-  const star = 'M50 2 L63 36 L99 37 L70 58 L81 94 L50 73 L19 94 L30 58 L1 37 L37 36 Z';
+  const R = size * 0.78;
+  const rays = Array.from({ length: 12 }, (_, i) => {
+    const a0 = (i / 12) * Math.PI * 2;
+    const a1 = a0 + Math.PI / 12;
+    const r = i % 2 ? R * 0.8 : R;
+    return `M0 0L${(Math.cos(a0) * r).toFixed(1)} ${(Math.sin(a0) * r).toFixed(1)}L${(Math.cos(a1) * r).toFixed(1)} ${(Math.sin(a1) * r).toFixed(1)}Z`;
+  });
+  const sparkle = (x: number, y: number, k: number, i: number) => (
+    <path
+      key={i}
+      className={spin ? 'star-sparkle' : undefined}
+      style={{ animationDelay: `${-i * 0.6}s` }}
+      d={`M${x} ${y - k}Q${x} ${y} ${x + k} ${y}Q${x} ${y} ${x} ${y + k}Q${x} ${y} ${x - k} ${y}Q${x} ${y} ${x} ${y - k}Z`}
+      fill="#FFFFFF"
+      stroke={INK}
+      strokeWidth={1.5}
+    />
+  );
   return (
     <g className="star-prize">
-      <ellipse cy={size * 0.42} rx={size * 0.46} ry={size * 0.16} fill={INK} opacity={0.2} />
+      <ellipse cy={size * 0.5} rx={size * 0.46} ry={size * 0.14} fill={INK} opacity={0.2} />
       <g className={spin ? 'star-glow' : undefined}>
-        {Array.from({ length: 8 }, (_, i) => (
-          <path key={i} d={`M0 ${-size * 0.62} L${size * 0.06} ${-size * 0.46} L${-size * 0.06} ${-size * 0.46}Z`} transform={`rotate(${i * 45})`} fill="#FFE98A" stroke={INK} strokeWidth={2} />
-        ))}
+        <path d={rays.join('')} fill="#FFE98A" opacity={0.75} />
+        <circle r={size * 0.5} fill="#FFF6CC" opacity={0.7} />
       </g>
       <g className={spin ? 'star-bob' : undefined}>
-        <g transform={`translate(${-size / 2} ${-size / 2}) scale(${s})`}>
-          <path d={star} fill={PAPER} stroke={PAPER} strokeWidth={16} strokeLinejoin="round" />
-          <path d={star} transform="translate(0 7)" fill="#C98F00" stroke={INK} strokeWidth={6} strokeLinejoin="round" />
-          <path d={star} fill="#FFD23F" stroke={INK} strokeWidth={6} strokeLinejoin="round" />
-          <circle cx={42} cy={48} r={4.5} fill={INK} />
-          <circle cx={58} cy={48} r={4.5} fill={INK} />
-          <path d="M32 30 Q40 22 50 24" fill="none" stroke={PAPER} strokeWidth={6} strokeLinecap="round" opacity={0.7} />
-        </g>
+        <StarArt size={size} />
       </g>
+      {[
+        [size * 0.55, -size * 0.42, size * 0.1],
+        [-size * 0.6, -size * 0.18, size * 0.08],
+        [size * 0.44, size * 0.34, size * 0.07],
+      ].map(([x, y, k], i) => sparkle(x!, y!, k!, i))}
     </g>
   );
 }

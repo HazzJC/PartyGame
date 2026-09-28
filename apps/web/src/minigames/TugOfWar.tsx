@@ -14,7 +14,8 @@ interface Hazard {
 interface Data {
   marker: number;
   startAt: number;
-  closesAt: number;
+  /** Pull multiplier: grows the longer the tug lasts. */
+  power: number;
   hazards: Hazard[];
   winner?: number | null;
   team?: number;
@@ -25,6 +26,15 @@ export const TEAM_NAMES = ['Red', 'Blue', 'Green', 'Gold'];
 export const TEAM_COLOURS = ['#FF4D5E', '#3D7BFF', '#2EC27E', '#FFB703'];
 
 const inHazard = (hazards: Hazard[], t: number) => hazards.some((h) => t >= h.at && t < h.until);
+
+/** Pull power grows the longer the tug lasts, so every tap counts more and more. */
+function PowerMeter({ power }: { power: number }) {
+  return (
+    <span className="chip tug-power" data-hot={power >= 4} aria-label={`Pull power times ${power.toFixed(1)}`}>
+      Pull power ×{power < 10 ? power.toFixed(1) : Math.round(power)}
+    </span>
+  );
+}
 
 function Rope({ marker, slippery }: { marker: number; slippery: boolean }) {
   return (
@@ -47,6 +57,7 @@ function Host({ conn, view, mg }: MgHostProps) {
     <div className="mg-host">
       <p className="mg-host-lead">{mg.stage === 'reveal' ? (d.winner === -1 ? 'A dead heat!' : `${TEAM_NAMES[d.winner ?? 0]} team wins!`) : !started ? 'Get ready to pull…' : slippery ? 'SLIPPERY! Stop tapping!' : 'PULL!'}</p>
       <Rope marker={d.marker} slippery={slippery && mg.stage === 'play'} />
+      {started && mg.stage === 'play' && <PowerMeter power={d.power} />}
       <div className="tug-teams">
         {teams.slice(0, 2).map((t, i) => (
           <div key={i} className="tug-team sticker" style={{ ['--team' as string]: TEAM_COLOURS[i] }}>
@@ -105,6 +116,7 @@ function Player({ conn, mg }: MgPlayerProps) {
       <div className="mg-player-head">
         <h2 style={{ color: TEAM_COLOURS[team] }}>{TEAM_NAMES[team]} team</h2>
         <span className="chip">{Math.max(pulls, d.myTaps ?? 0)} pulls</span>
+        {started && <PowerMeter power={d.power} />}
       </div>
       <Rope marker={d.marker} slippery={slippery} />
       <button

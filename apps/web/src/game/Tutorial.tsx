@@ -6,6 +6,7 @@ import { Countdown } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import { Coin, HostGameFrame, StarIcon } from './HostFlow.tsx';
 import './game.css';
+import { Icon } from '../ui/Icons.tsx';
 import './tutorial.css';
 
 const SPACE_COLOURS: Record<string, string> = { blue: '#3D7BFF', red: '#FF4D5E', event: '#9B5DE5', shop: '#FFB703', duel: '#1B998B' };
@@ -62,7 +63,7 @@ function Picture({ id }: { id: TutorialSlide['id'] }) {
       return (
         <div className="tut-pic">
           <span className="tut-phone">
-            <span>🤫</span>
+            <Icon name="secret" size={60} />
           </span>
           <Avatar avatar={5} size={100} />
           <Avatar avatar={9} size={100} />

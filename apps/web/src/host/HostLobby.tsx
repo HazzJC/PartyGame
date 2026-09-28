@@ -8,6 +8,7 @@ import { Qr } from '../ui/Qr.tsx';
 import { PlayHere, useHostSeat } from './PlayHere.tsx';
 import { GameOptions } from '../ui/GameSettings.tsx';
 import { Logo } from '../ui/Logo.tsx';
+import { DeviceIcon } from '../ui/Icons.tsx';
 import { sound } from '../audio/sound.ts';
 
 const LENGTHS = [
@@ -131,7 +132,11 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
                 {s.vip && <span className="hl-badge">VIP</span>}
                 {s.isBot && <span className="hl-badge bot">BOT</span>}
                 {!s.connected && <span className="hl-badge away">away</span>}
-                {s.connected && s.device && !s.isBot && <span className="hl-device" title={s.device}>{s.device === 'touch' ? '📱' : '💻'}</span>}
+                {s.connected && s.device && !s.isBot && (
+                  <span className="hl-device" title={s.device}>
+                    <DeviceIcon device={s.device} size={30} />
+                  </span>
+                )}
               </div>
             );
           })}

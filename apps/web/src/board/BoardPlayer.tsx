@@ -5,7 +5,7 @@ import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
 import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { BoardSvg, BoardLegend } from './BoardSvg.tsx';
-import { DiceTray, Die } from './DiceTray.tsx';
+import { DiceTray, Die, RolledDie } from './DiceTray.tsx';
 import { focusedView, ROUTES } from './boardVisual.ts';
 import { ItemPicker, type ItemUseView } from './ItemPicker.tsx';
 import { TEAM_AVATAR_BASE, type ItemId } from '@partygame/shared';
@@ -98,7 +98,7 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
         : 'Your turn to roll'
       : !landed
         ? 'Rolling…'
-        : `${p.team ? 'Your team' : 'You'} rolled ${p.roll}!`;
+        : `${p.team ? 'Your team' : 'You'} got ${p.roll}!`;
   return (
     <div className="bp">
       <TeamBanner p={p} />
@@ -222,6 +222,8 @@ export function BoardPlayer({ conn, view }: PlayerScreenProps) {
   if (p.stage === 'roll') return <RollStage conn={conn} p={p} view={view} />;
   if (p.stage === 'items') return <WatchScreen text="Items revealed! Watch the screen" />;
   if (p.stage === 'move' && p.junction && p.def) return <JunctionStage conn={conn} p={p} j={p.junction} />;
+  // Keep the result on screen while the pawns walk, so everyone sees what they got.
+  if (p.stage === 'move' && p.roll !== null && !p.cards?.length) return <RolledDie value={p.roll} team={!!p.team} />;
   if (p.stage === 'move') return <WatchScreen text={p.done ? 'Watch your pawn!' : `Moving ${p.roll ?? ''} spaces…`} />;
   if (p.stage === 'bid' && p.bid) return <BidStage conn={conn} p={p} />;
   if (p.stage === 'resolve' && p.colourKnownAt)

@@ -22,6 +22,7 @@ import {
   type AimValues,
 } from '../input/index.ts';
 import { navigate } from '../router.ts';
+import { Icon } from '../ui/Icons.tsx';
 import './lab.css';
 
 type Log = (entry: string) => void;
@@ -244,7 +245,12 @@ export default function InputLab() {
         <h1>Input Lab</h1>
         <span className="chip">
           {device.kind} · {device.size} · last: {device.last}
-          {device.gamepad ? ' · 🎮' : ''}
+          {device.gamepad ? (
+            <>
+              {' · '}
+              <Icon name="gamepad" size={20} label="Gamepad" />
+            </>
+          ) : null}
         </span>
       </header>
       <nav className="lab-tabs">

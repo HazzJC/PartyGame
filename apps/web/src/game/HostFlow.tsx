@@ -7,7 +7,9 @@ import { Avatar } from '../ui/Avatar.tsx';
 import { PaperPawnSvg } from '../board/PaperPawn.tsx';
 import { minigameUi, type MgHostPhase } from './registry.ts';
 import { Confetti } from '../ui/Confetti.tsx';
+import { StarIconArt } from '../ui/StarArt.tsx';
 import { FormatBadge, FormatParade } from '../ui/FormatBadge.tsx';
+import { Icon } from '../ui/Icons.tsx';
 import './game.css';
 
 export interface EntityInfo {
@@ -72,11 +74,7 @@ export function Coin({ size = 28 }: { size?: number }) {
 }
 
 export function StarIcon({ size = 28 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden style={{ flex: 'none' }}>
-      <path d="M50 6 L62 38 L96 38 L68 58 L79 92 L50 71 L21 92 L32 58 L4 38 L38 38 Z" fill="#FFD23F" stroke="#2B2233" strokeWidth="8" strokeLinejoin="round" />
-    </svg>
-  );
+  return <StarIconArt size={size} />;
 }
 
 /** Top banner + right-hand player rail shared by every in-game host screen. */
@@ -153,10 +151,12 @@ export function RoundIntroHost({ view }: HostScreenProps) {
   );
 }
 
-function ControlsColumn({ title, inputs, scheme }: { title: string; inputs: InputSpec[]; scheme: 'touch' | 'keys' }) {
+function ControlsColumn({ title, icon, inputs, scheme }: { title: string; icon: 'phone' | 'laptop'; inputs: InputSpec[]; scheme: 'touch' | 'keys' }) {
   return (
     <div className="rules-col">
-      <h3>{title}</h3>
+      <h3>
+        <Icon name={icon} size={30} /> {title}
+      </h3>
       <ul>
         {describeInputs(inputs, scheme).map((l, i) => (
           <li key={i}>
@@ -181,8 +181,8 @@ export function RulesHost({ conn, view }: HostScreenProps) {
         {p.fallback && <p className="muted">No games of that format yet, so it's a free-for-all instead.</p>}
         {(view.game as GameHostView | null)?.teamBoard && p.format === 'ffa' && <p className="muted">Team board: everyone plays for themselves, and each team scores its members' average placing.</p>}
         <div className="rules-cols">
-          <ControlsColumn title="📱 Touch" inputs={p.inputs} scheme="touch" />
-          <ControlsColumn title="💻 Keyboard" inputs={p.inputs} scheme="keys" />
+          <ControlsColumn title="Touch" icon="phone" inputs={p.inputs} scheme="touch" />
+          <ControlsColumn title="Keyboard" icon="laptop" inputs={p.inputs} scheme="keys" />
         </div>
         <div className="rules-ready">
           {(p.participants as string[]).map((id) => {

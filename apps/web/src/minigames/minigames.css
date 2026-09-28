@@ -365,3 +365,23 @@
   font-family: var(--font-display);
   font-size: 40px;
 }
+
+.tug-power {
+  align-self: center;
+  font-size: 26px;
+  transition: transform 200ms ease-out;
+}
+
+.tug-power[data-hot='true'] {
+  background: #ffd0d5;
+  animation: tug-throb 0.8s ease-in-out infinite alternate;
+}
+
+.mg-player .tug-power {
+  font-size: 15px;
+}
+
+@keyframes tug-throb {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}

@@ -100,7 +100,7 @@ svg[data-presentation='host'] .pawn-idle {
 }
 
 svg[data-presentation='host'] .pawn-walk {
-  animation: pawn-walk 0.23s ease-in-out infinite alternate;
+  animation: pawn-walk 0.34s ease-in-out infinite alternate;
 }
 
 svg[data-presentation='host'] .flag-wave {
@@ -111,6 +111,17 @@ svg[data-presentation='host'] .flag-wave {
 
 svg[data-presentation='host'] .star-glow {
   animation: sc-spin 14s linear infinite;
+}
+
+svg[data-presentation='host'] .star-sparkle {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: star-sparkle 1.8s ease-in-out infinite;
+}
+
+@keyframes star-sparkle {
+  0%, 100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(45deg); opacity: 1; }
 }
 
 svg[data-presentation='host'] .star-bob {
@@ -203,7 +214,7 @@ svg[data-presentation='host'] .star-bob {
 }
 
 /* Low animation (slower PCs): keep walking and dice, drop the ambient decoration. */
-:root[data-motion='low'] :is(.map-scenery *, .pawn-idle, .star-glow, .star-bob, .flag-wave) {
+:root[data-motion='low'] :is(.map-scenery *, .pawn-idle, .star-glow, .star-bob, .star-sparkle, .flag-wave) {
   animation: none !important;
 }
 
