@@ -15,10 +15,12 @@ test('a board round: roll on the phone, pawns move on the host, colours pick the
   await expect(page.getByLabel('Board space legend')).toBeVisible();
   await expect(p.page.getByRole('button', { name: 'Full map' })).toBeVisible();
   const near = await p.page.getByLabel('Game board').getAttribute('viewBox');
+  // The camera glides between views, so wait for it to arrive.
+  const viewBox = () => p.page.getByLabel('Game board').getAttribute('viewBox');
   await p.page.getByRole('button', { name: 'Full map' }).tap();
-  expect(await p.page.getByLabel('Game board').getAttribute('viewBox')).not.toBe(near);
+  await expect.poll(viewBox).not.toBe(near);
   await p.page.getByRole('button', { name: 'Near me' }).tap();
-  expect(await p.page.getByLabel('Game board').getAttribute('viewBox')).toBe(near);
+  await expect.poll(viewBox).toBe(near);
   await p.page.setViewportSize({ width: 844, height: 390 });
   await expect(p.page.getByRole('button', { name: 'Full map' })).toBeVisible();
   await p.page.getByRole('button', { name: 'Full map' }).click();

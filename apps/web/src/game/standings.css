@@ -1,0 +1,182 @@
+.stand {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+}
+
+/* ------------------------------------------------------------------ the leader's spotlight */
+.stand-spot {
+  width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stand-crown {
+  margin-bottom: -28px;
+  z-index: 1;
+  animation: stand-crown 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes stand-crown {
+  from { transform: translateY(0) rotate(-6deg); }
+  to { transform: translateY(-8px) rotate(6deg); }
+}
+
+.stand-leader {
+  animation: stand-hop 1.6s ease-in-out infinite;
+}
+
+@keyframes stand-hop {
+  0%, 70%, 100% { transform: translateY(0); }
+  82% { transform: translateY(-16px); }
+}
+
+.stand-plinth {
+  width: 100%;
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--star);
+  font-size: 40px;
+  text-align: center;
+}
+
+.stand-plinth-label {
+  font-family: var(--font-display);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.stand-plinth-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 34px;
+}
+
+.stand-climber {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  font-size: 24px;
+}
+
+/* ------------------------------------------------------------------ the list */
+.stand-list {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stand-row {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--row-w, 580px);
+  height: 84px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 18px;
+  font-size: 30px;
+  /* The slide to the new place. */
+  transition: transform 900ms cubic-bezier(0.5, 0, 0.2, 1.15);
+  animation: stand-in 380ms ease-out both;
+}
+
+.stand-row[data-lead='true'] {
+  background: #fff4c2;
+}
+
+@keyframes stand-in {
+  from { opacity: 0; scale: 0.9; }
+  to { opacity: 1; scale: 1; }
+}
+
+.stand-rank {
+  font-family: var(--font-display);
+  font-size: 40px;
+  width: 1.3em;
+}
+
+.stand-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stand-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 90px;
+  font-family: var(--font-display);
+}
+
+.stand-gain {
+  min-width: 70px;
+  text-align: center;
+  padding: 2px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--good);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 24px;
+  animation: stand-pop 420ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.stand-gain[data-neg='true'] {
+  background: var(--bad);
+}
+
+.stand-gain.none {
+  visibility: hidden;
+}
+
+@keyframes stand-pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.stand-arrow {
+  position: absolute;
+  right: -18px;
+  top: -14px;
+  padding: 0 10px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--paper);
+  animation: stand-pop 420ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.stand-arrow.up {
+  background: var(--good);
+}
+
+.stand-arrow.down {
+  background: var(--bad);
+}
+
+.stand-climber .stand-arrow {
+  position: static;
+}
+
+:root[data-motion='low'] :is(.stand-crown, .stand-leader) {
+  animation: none;
+}

@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { useDevice, useVirtualKeys, wantsOnScreenControls, Aim } from '../input/index.ts';
 import type { PlayerScreenProps } from '../player/registry.tsx';
 import { WatchScreen } from '../player/WatchScreen.tsx';
-import { Countdown, SpoilerGate } from '../timing/clock.tsx';
-import { BoardSvg, BoardLegend } from './BoardSvg.tsx';
+import { Countdown, SpoilerGate, useServerNow } from '../timing/clock.tsx';
+import { BoardSvg, BoardLegend, type Pawn } from './BoardSvg.tsx';
+import { pawnXY, type WalkPath } from './walk.ts';
 import { DiceTray, Die, RolledDie } from './DiceTray.tsx';
 import { focusedView, ROUTES } from './boardVisual.ts';
 import { ItemPicker, type ItemUseView } from './ItemPicker.tsx';
@@ -43,6 +44,9 @@ interface BoardPlayerPhase {
   myBranch: number | null;
   team: { name: string; index: number } | null;
   targets: { id: string; name: string; avatar: number }[];
+  /** Your own route this turn, once it's final. */
+  walk: WalkPath | null;
+  stepMs: number;
 }
 
 /** Team board mode: a banner saying you're choosing with your team (choices are votes). */
@@ -106,23 +110,29 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
         <h2>{title}</h2>
         <Countdown conn={conn} until={p.endsAt} />
       </div>
+      <div className="bp-split">
       {p.def && (
-        <div className="bp-map-tools">
-          <span>{fullMap ? 'Whole board' : 'Near your space'}</span>
-          <button type="button" className="btn white small" aria-pressed={fullMap} onClick={() => setFullMap((v) => !v)}>{fullMap ? 'Near me' : 'Full map'}</button>
+        <div className="bp-mapcol">
+          <div className="bp-map-tools">
+            <span>{fullMap ? 'Whole board' : 'Near your space'}</span>
+            <button type="button" className="btn white small" aria-pressed={fullMap} onClick={() => setFullMap((v) => !v)}>
+              {fullMap ? 'Near me' : 'Full map'}
+            </button>
+          </div>
+          <BoardSvg
+            className="bp-map"
+            def={p.def}
+            stars={p.stars}
+            focus={fullMap ? undefined : focusedView(p.def, p.position)}
+            presentation="phone"
+            glide
+            pawns={[myPawn(view, p, p.def.nodes[p.position]!)]}
+            highlights={[{ nodes: [p.position], colour: '#FFD23F' }, ...(p.trap !== null ? [{ nodes: [p.trap], colour: '#E5484D' }] : [])]}
+          />
+          <BoardLegend />
         </div>
       )}
-      {p.def && (
-        <BoardSvg
-          className="bp-map"
-          def={p.def}
-          stars={p.stars}
-          focus={fullMap ? undefined : focusedView(p.def, p.position)}
-          presentation="phone"
-          highlights={[{ nodes: [p.position], colour: '#FFD23F' }, ...(p.trap !== null ? [{ nodes: [p.trap], colour: '#E5484D' }] : [])]}
-        />
-      )}
-      {p.def && <BoardLegend />}
+      <div className="bp-controls">
       {p.def && <ItemPicker conn={conn} view={view} hand={p.hand} use={p.use} def={p.def} position={p.position} stars={p.stars} targets={p.targets} />}
       {p.coupon && <span className="chip">Star coupon ready: your next star is cheaper</span>}
       {cards ? (
@@ -136,6 +146,45 @@ function RollStage({ conn, p, view }: { conn: PlayerScreenProps['conn']; p: Boar
       ) : (
         <DiceTray value={p.roll} onThrow={() => conn.intent({ type: 'roll' })} onLanded={() => setLanded(true)} keyHint={!wantsOnScreenControls(device)} />
       )}
+      </div>
+      </div>
+    </div>
+  );
+}
+
+/** Your own standee on your map (your team's badge in team board mode). */
+function myPawn(view: PlayerScreenProps['view'], p: BoardPlayerPhase, at: { x: number; y: number }, extra: Partial<Pawn> = {}): Pawn {
+  return { id: 'me', avatar: p.team ? TEAM_AVATAR_BASE + p.team.index : view.me.avatar, x: at.x, y: at.y, ...extra };
+}
+
+/**
+ * While the pawns walk: your map follows your own standee along its route (the camera glides with
+ * it), with the die you rolled held underneath.
+ */
+function MoveStage({ conn, view, p }: { conn: PlayerScreenProps['conn']; view: PlayerScreenProps['view']; p: BoardPlayerPhase }) {
+  const now = useServerNow(conn, 40);
+  const def = p.def!;
+  const walk = p.walk;
+  const at = walk ? pawnXY(def, walk, now, p.stepMs) : { ...def.nodes[p.position]!, facing: 1 as const, walking: false };
+  // The camera is centred on the pawn (clamped to the board), so it glides along with every hop.
+  const w = 640;
+  const h = 430;
+  const focus = { x: Math.max(0, Math.min(def.width - w, at.x - w / 2)), y: Math.max(-10, Math.min(def.height - h, at.y - h / 2 - 20)), w, h };
+  return (
+    <div className="bp bp-move">
+      <TeamBanner p={p} />
+      <div className="bp-split">
+        <div className="bp-mapcol">
+          <BoardSvg className="bp-map" def={def} stars={p.stars} focus={focus} presentation="phone" pawns={[myPawn(view, p, at, { facing: at.facing, walking: at.walking })]} />
+        </div>
+        <div className="bp-controls">
+          {p.roll !== null && !p.cards?.length ? (
+            <RolledDie value={p.roll} team={!!p.team} />
+          ) : (
+            <div className="dice-rolled-text">{p.done ? 'Watch your pawn!' : `Moving ${p.roll ?? ''} spaces…`}</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -166,6 +215,7 @@ function JunctionStage({ conn, p, j }: { conn: PlayerScreenProps['conn']; p: Boa
         def={def}
         stars={p.stars}
         focus={focus}
+        glide
         presentation="focus"
         highlights={j.options.map((o, i) => ({ nodes: [j.node, ...o.preview], colour: ROUTES[i]?.colour ?? ROUTES[0].colour, dash: ROUTES[i]?.dash }))}
       />
@@ -222,8 +272,8 @@ export function BoardPlayer({ conn, view }: PlayerScreenProps) {
   if (p.stage === 'roll') return <RollStage conn={conn} p={p} view={view} />;
   if (p.stage === 'items') return <WatchScreen text="Items revealed! Watch the screen" />;
   if (p.stage === 'move' && p.junction && p.def) return <JunctionStage conn={conn} p={p} j={p.junction} />;
-  // Keep the result on screen while the pawns walk, so everyone sees what they got.
-  if (p.stage === 'move' && p.roll !== null && !p.cards?.length) return <RolledDie value={p.roll} team={!!p.team} />;
+  // Your map follows your pawn along its route, with the result held underneath.
+  if (p.stage === 'move' && p.def) return <MoveStage conn={conn} view={view} p={p} />;
   if (p.stage === 'move') return <WatchScreen text={p.done ? 'Watch your pawn!' : `Moving ${p.roll ?? ''} spaces…`} />;
   if (p.stage === 'bid' && p.bid) return <BidStage conn={conn} p={p} />;
   if (p.stage === 'resolve' && p.colourKnownAt)

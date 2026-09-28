@@ -25,7 +25,7 @@ test('Lowest Unique Number: pick, reveal, personal result after the reveal, payo
   await expect(host.locator('.lun-tile[data-state]').first()).toBeVisible();
   await page.screenshot({ path: 'test-results/game-lun.png' });
   await expectPersonalResult(player);
-  await expect(host.getByRole('heading', { name: /Standings/ }).or(host.locator('.standings'))).toBeVisible({ timeout: 20_000 });
+  await expect(host.getByRole('heading', { name: /Standings/ }).or(host.locator('.stand-list'))).toBeVisible({ timeout: 20_000 });
   await page.screenshot({ path: 'test-results/game-standings.png' });
 });
 

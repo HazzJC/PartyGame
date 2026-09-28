@@ -193,8 +193,8 @@
   font-size: 15px;
   font-weight: 900;
 }
-.bp > .board-legend { font-size: 12px; gap: 2px 8px; padding: 2px 6px; }
-.bp > .board-legend svg { width: 18px; height: 18px; }
+.bp .board-legend { font-size: 12px; gap: 2px 8px; padding: 2px 6px; }
+.bp .board-legend svg { width: 18px; height: 18px; }
 .bp-route-mark {
   display: block;
   width: 58px;
@@ -360,5 +360,34 @@
   .bp-card { min-height: 72px; }
   .bp-card-value { font-size: 38px; }
   .bp-choice { min-height: 66px; font-size: 21px; }
-  .bp > .board-legend { font-size: 11px; }
+  .bp .board-legend { font-size: 11px; }
+}
+
+/* ------------------------------------------------------------------ map + controls layout */
+.bp-split,
+.bp-mapcol,
+.bp-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Laptops and landscape tablets: the map on the left, dice and items on the right, so nothing
+   scrolls below the fold and the map isn't blown up to the full width. */
+@media (min-width: 880px) and (min-aspect-ratio: 5/4) {
+  .bp:has(.bp-split) {
+    max-width: 1180px;
+  }
+
+  .bp-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(340px, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .bp-split .bp-map[data-presentation='phone'] {
+    max-height: calc(100vh - 260px);
+  }
 }

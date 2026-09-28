@@ -7,6 +7,7 @@ import { Avatar } from '../ui/Avatar.tsx';
 import { PaperPawnSvg } from '../board/PaperPawn.tsx';
 import { minigameUi, type MgHostPhase } from './registry.ts';
 import { Confetti } from '../ui/Confetti.tsx';
+import { Standings, type StandingRow } from './Standings.tsx';
 import { StarIconArt } from '../ui/StarArt.tsx';
 import { FormatBadge, FormatParade } from '../ui/FormatBadge.tsx';
 import { Icon } from '../ui/Icons.tsx';
@@ -214,34 +215,15 @@ export function PayoutHost({ view }: HostScreenProps) {
   const p = view.phase;
   const g = view.game as GameHostView;
   const seats = seatMap(view);
-  const gains = p.lastPayout as Record<string, number> | null;
-  const byId = new Map(g.players.map((x) => [x.id, x]));
+  const gains = (p.lastPayout ?? {}) as Record<string, number>;
   const shoppers = (p.shoppers ?? []) as string[];
+  const rows: StandingRow[] = g.players.flatMap((pl) => {
+    const seat = seats.get(pl.id);
+    return seat ? [{ id: pl.id, seat, stars: pl.stars, coins: pl.coins, gained: gains[pl.id] ?? 0 }] : [];
+  });
   return (
-    <HostGameFrame view={view} title={shoppers.length ? `Standings · ${shoppers.map((id) => seats.get(id)?.name).join(', ')} shopping` : 'Standings'} rail={false}>
-      <ol className="standings">
-        {(p.standings as string[]).map((id, i) => {
-          const s = seats.get(id);
-          const pl = byId.get(id);
-          if (!s || !pl) return null;
-          return (
-            <li key={id} className="sticker standing" style={{ animationDelay: `${i * 70}ms` }}>
-              <span className="standing-rank">{i + 1}</span>
-              <Avatar avatar={s.avatar} size={60} />
-              <span className="standing-name">{s.name}</span>
-              <span className="hg-stat big">
-                <StarIcon size={34} />
-                {pl.stars}
-              </span>
-              <span className="hg-stat big">
-                <Coin size={34} />
-                {pl.coins}
-              </span>
-              {gains?.[id] ? <span className="standing-gain">+{gains[id]}</span> : <span className="standing-gain none" />}
-            </li>
-          );
-        })}
-      </ol>
+    <HostGameFrame view={view} title={shoppers.length ? `Standings · ${shoppers.map((id) => seats.get(id)?.name).join(', ')} shopping` : `Standings after round ${g.round}`} rail={false}>
+      <Standings rows={rows} order={p.standings as string[]} />
     </HostGameFrame>
   );
 }

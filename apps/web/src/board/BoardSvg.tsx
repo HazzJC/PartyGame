@@ -1,9 +1,46 @@
 import type { BoardDef } from '@partygame/engine';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { MapSceneryArt } from './MapSceneryArt.tsx';
 import { PaperPawn } from './PaperPawn.tsx';
 import { SpaceIcon, SpaceToken, StarPrize, type SpaceKind } from './SpaceArt.tsx';
 import { clusteredPawns } from './boardVisual.ts';
+
+type Box = { x: number; y: number; w: number; h: number };
+
+/** Eases the camera (the SVG viewBox) to a new view over about half a second. */
+function useGlide(target: Box, on: boolean): Box {
+  const [box, setBox] = useState(target);
+  const current = useRef(target);
+  const key = `${target.x},${target.y},${target.w},${target.h}`;
+  useEffect(() => {
+    const from = { ...current.current };
+    const reduce = document.documentElement.dataset.motion === 'reduce';
+    if (!on || reduce) {
+      current.current = target;
+      setBox(target);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / 480);
+      const e = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+      const next = {
+        x: from.x + (target.x - from.x) * e,
+        y: from.y + (target.y - from.y) * e,
+        w: from.w + (target.w - from.w) * e,
+        h: from.h + (target.h - from.h) * e,
+      };
+      current.current = next;
+      setBox(next);
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+    // The key captures every part of the target box.
+  }, [key, on]);
+  return on ? box : target;
+}
 
 /** This many pawns on one space collapse into a "×N" badge (only big rooms, e.g. 16 on Start). */
 const CROWD_MIN = 9;
@@ -102,6 +139,7 @@ export function BoardSvg({
   focus,
   onNodeClick,
   presentation = 'host',
+  glide = false,
 }: {
   def: BoardDef;
   stars: number[];
@@ -114,13 +152,16 @@ export function BoardSvg({
   /** Makes spaces tappable (e.g. to place a hidden trap). */
   onNodeClick?: (id: number) => void;
   presentation?: 'host' | 'phone' | 'focus' | 'trap';
+  /** Animate the camera to a new view instead of cutting (e.g. switching near me / full map). */
+  glide?: boolean;
 }) {
   // Big crowds spread past the edge spaces (16 pawns on the start), so leave a margin for them.
   // Standees on the top road poke above the island: a back-row head plus its badge rises about
   // 0.55 × pawnSize above the board's top edge, so that much headroom is always kept for them.
   const margin = pawns.length > 7 ? 70 : 0;
   const headroom = pawns.length ? Math.max(margin, pawnSize * 0.55) : margin;
-  const vb = focus ?? { x: -margin, y: -headroom, w: def.width + margin * 2, h: def.height + margin + headroom };
+  const target = focus ?? { x: -margin, y: -headroom, w: def.width + margin * 2, h: def.height + margin + headroom };
+  const vb = useGlide(target, glide);
   const edges: ReactNode[] = [];
   for (const node of def.nodes)
     for (const nx of node.next) {

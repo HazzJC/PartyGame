@@ -527,7 +527,11 @@ export const boardPhase = definePhase<BoardPhase>({
     const contest = s.contests.find((c) => c.bidders.includes(id));
     return {
       stage: s.stage,
-      def: w?.junction || s.stage === 'roll' ? b.def : null,
+      // The board layout is public (it's on the host screen); phones use it for their own map.
+      def: b.def,
+      // Your own walk, once your route is final (as the host shows it), so your map can follow you.
+      walk: w ? { start: w.start, path: w.done ? w.path : [], finalAt: w.finalAt } : null,
+      stepMs: STEP_MS,
       stars: b.stars,
       position: b.positions[id],
       roll: w?.roll ?? null,
