@@ -28,6 +28,23 @@
   min-height: 0;
 }
 
+/* Notes and logs sit on paper cards so they read over any scene. */
+.mg-themed .mg-host p.muted,
+.mg-themed .heist-log:not(:empty) {
+  align-self: center;
+  max-width: 100%;
+  padding: 8px 20px;
+  border: 4px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink-soft);
+}
+
+.mg-themed .heist-log:not(:empty) {
+  align-self: stretch;
+  padding-left: 44px;
+}
+
 /* Lead text floats on a paper label so it reads over any scene. */
 .mg-themed .mg-host-lead {
   align-self: center;

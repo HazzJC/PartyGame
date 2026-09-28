@@ -210,10 +210,6 @@
 }
 
 /* ------------------------------------------------------------------ Count Together: counting sheep */
-[data-game='count-to'] .mg-host-lead ~ .muted {
-  color: #c9c6f0;
-}
-
 [data-game='count-to'] .count-target {
   color: #8f8bd6;
 }

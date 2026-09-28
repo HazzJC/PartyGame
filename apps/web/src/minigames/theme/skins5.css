@@ -1,0 +1,126 @@
+/* Per-game skins, pack 5 (see skins1.css). */
+
+/* ------------------------------------------------------------------ Recipe Assembly: diner order tickets */
+.mg-themed[data-game='recipe-assembly'] .recipe-ticket {
+  position: relative;
+  padding: 44px 16px 16px;
+  border: 5px solid var(--ink);
+  border-radius: 8px;
+  background: #fff6e5;
+  box-shadow: 8px 10px 0 var(--ink);
+  transform: rotate(-1.5deg);
+}
+
+/* The ticket's red header strip. */
+.mg-themed[data-game='recipe-assembly'] .recipe-ticket::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26px;
+  border-bottom: 4px solid var(--ink);
+  background: #e74c3c;
+}
+
+.mg-player-themed[data-game='recipe-assembly'] .recipe-card:not(:disabled) {
+  background-color: #fff6e5;
+  background-image: linear-gradient(#e74c3c 0 10px, transparent 10px);
+}
+
+/* ------------------------------------------------------------------ Runaway Switchboard: the yard plan */
+.mg-themed[data-game='runaway-switchboard'] .switch-svg {
+  padding: 16px;
+  border: 5px solid var(--ink);
+  border-radius: 20px;
+  background: #e9dcc3;
+  box-shadow: 8px 12px 0 var(--ink);
+}
+
+.mg-player-themed[data-game='runaway-switchboard'] .switch-svg {
+  background: #e9dcc3;
+}
+
+/* ------------------------------------------------------------------ Pressure Valve: brass and copper */
+:is(.mg-themed, .mg-player-themed)[data-game='pressure-valve'] .valve-gauge {
+  border-color: var(--ink);
+  background: #ffe1d6;
+  box-shadow: 0 0 0 8px #b87333, 0 0 0 12px var(--ink), 6px 10px 0 12px var(--ink);
+  margin: 14px;
+}
+
+.mg-player-themed[data-game='pressure-valve'] .valve-btn:not(:disabled) {
+  box-shadow: inset 0 0 0 6px #b87333, inset 0 0 0 9px var(--ink), 0 6px 0 var(--ink);
+}
+
+.mg-themed[data-game='pressure-valve'] .valve-history {
+  background: #fff6e5;
+}
+
+/* ------------------------------------------------------------------ The Mind: rice paper and a red seal */
+:is(.mg-themed, .mg-player-themed)[data-game='the-mind'] .mind-card {
+  position: relative;
+  background: #fbf6ea;
+}
+
+:is(.mg-themed, .mg-player-themed)[data-game='the-mind'] .mind-card::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: #c0392b;
+}
+
+:is(.mg-themed, .mg-player-themed)[data-game='the-mind'] .mind-card.big::after {
+  width: 34px;
+  height: 34px;
+  right: 16px;
+  bottom: 16px;
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------ Collaborative Quilt: stitched fabric */
+.mg-themed[data-game='collaborative-quilt'] .quilt-svg {
+  padding: 10px;
+  border: 6px dashed #e17055;
+  border-radius: 18px;
+  background: #fff6e5;
+  box-shadow: 0 0 0 6px #fff6e5, 0 0 0 11px var(--ink), 8px 12px 0 11px var(--ink);
+}
+
+/* ------------------------------------------------------------------ Defuse the Circuit: steel cases and the manual */
+.mg-themed[data-game='defuse-circuit'] .defuse-bomb {
+  background: #5e6670;
+  color: var(--paper);
+  box-shadow: inset 0 0 0 8px #8c96a3, inset 0 0 0 11px var(--ink), 0 8px 0 var(--ink);
+}
+
+.mg-themed[data-game='defuse-circuit'] .defuse-bomb[data-exploded='true'] {
+  background: #e5484d;
+}
+
+.mg-themed[data-game='defuse-circuit'] .defuse-bomb .chip {
+  color: var(--ink);
+}
+
+.mg-themed[data-game='defuse-circuit'] .defuse-strikes {
+  color: #ffd23f;
+}
+
+.mg-player-themed[data-game='defuse-circuit'] .defuse-module:not([data-done='true']) {
+  background: #c9ced8;
+}
+
+.mg-player-themed[data-game='defuse-circuit'] .defuse-page {
+  background: #d8cfa8;
+}
+
+/* ------------------------------------------------------------------ Meteor Shield: the station window */
+.mg-themed[data-game='meteor-shield'] .meteor-svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 12px #8c96a3, 0 0 0 17px var(--ink), 10px 14px 0 17px var(--ink);
+  margin: 20px;
+}
