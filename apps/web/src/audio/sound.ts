@@ -1,7 +1,7 @@
 /**
- * Procedural audio: every sound effect and music loop is synthesised with WebAudio, so there are no
- * audio files to download or license. Music plays on the host screen only (it reaches everyone
- * through the stream); phones get a few quiet UI blips.
+ * Host screen audio. Music is a set of CC0 tracks (see /credits) that crossfade by game mood;
+ * sound effects are synthesised with WebAudio. Everything plays on the host screen only, so it
+ * reaches players through the stream. Volume settings are saved per browser.
  */
 
 export type Sfx = 'coin' | 'coinLoss' | 'star' | 'roll' | 'whoosh' | 'card' | 'fanfare' | 'fail' | 'tick' | 'drum' | 'pop' | 'blip';
@@ -9,12 +9,14 @@ export type Mood = 'off' | 'lobby' | 'board' | 'minigame' | 'tense' | 'podium';
 
 interface Prefs {
   muted: boolean;
+  /** Master volume, 0 to 1. */
+  volume: number;
   music: number;
   sfx: number;
 }
 
 const PREFS_KEY = 'pg.audio';
-const DEFAULT_PREFS: Prefs = { muted: false, music: 0.5, sfx: 0.8 };
+const DEFAULT_PREFS: Prefs = { muted: false, volume: 0.8, music: 0.6, sfx: 0.8 };
 
 function loadPrefs(): Prefs {
   try {
@@ -24,31 +26,41 @@ function loadPrefs(): Prefs {
   }
 }
 
-// Scale degrees → semitones (major and natural minor).
-const MAJOR = [0, 2, 4, 5, 7, 9, 11];
-const MINOR = [0, 2, 3, 5, 7, 8, 10];
-
-interface MoodDef {
-  bpm: number;
-  root: number; // MIDI note of the key's tonic
-  scale: number[];
-  /** Chord roots as scale degrees, one per bar. */
-  chords: number[];
-  /** Melody: scale degree per eighth note (null = rest), looped over the progression. */
-  melody: (number | null)[];
-  hats: boolean;
-  swing: number;
-}
-
-const MOODS: Record<Exclude<Mood, 'off'>, MoodDef> = {
-  lobby: { bpm: 96, root: 60, scale: MAJOR, chords: [0, 5, 3, 4], melody: [4, null, 2, null, 4, 5, null, null, 2, null, 0, null, 1, 2, null, null], hats: false, swing: 0.12 },
-  board: { bpm: 112, root: 62, scale: MAJOR, chords: [0, 4, 5, 3], melody: [0, 2, 4, null, 4, 5, 4, 2, 1, null, 1, 2, 4, null, null, null], hats: true, swing: 0.1 },
-  minigame: { bpm: 132, root: 57, scale: MINOR, chords: [0, 5, 3, 4], melody: [0, null, 0, 2, null, 4, 3, null, 2, null, 2, 4, null, 6, 4, null], hats: true, swing: 0 },
-  tense: { bpm: 144, root: 55, scale: MINOR, chords: [0, 0, 5, 4], melody: [null, null, 0, null, null, null, 1, null, null, null, 0, null, null, 6, null, null], hats: true, swing: 0 },
-  podium: { bpm: 104, root: 60, scale: MAJOR, chords: [0, 3, 4, 0], melody: [0, 2, 4, 7, null, 4, 7, null, 5, 4, 2, 4, null, null, null, null], hats: false, swing: 0.08 },
+/** Tracks per mood (loudness-normalised MP3s in public/music). Moods with several loops take turns. */
+const TRACKS: Record<Exclude<Mood, 'off'>, { loops: string[]; intro?: string }> = {
+  lobby: { loops: ['/music/lobby.mp3'] },
+  board: { loops: ['/music/board.mp3'] },
+  minigame: { loops: ['/music/minigame.mp3', '/music/minigame2.mp3'] },
+  tense: { loops: ['/music/tense.mp3'], intro: '/music/tense-intro.mp3' },
+  // Until a podium track is chosen, the celebration borrows the party mini game track.
+  podium: { loops: ['/music/minigame2.mp3'] },
 };
 
+const CROSSFADE_S = 0.9;
+
 const midiHz = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
+
+interface Trimmed {
+  buffer: AudioBuffer;
+  /** Where the audio really starts and ends (MP3 encoding adds silence, which would gap a loop). */
+  start: number;
+  end: number;
+}
+
+function trimSilence(buffer: AudioBuffer): Trimmed {
+  const threshold = 0.001;
+  const chans = Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i));
+  const loud = (i: number) => chans.some((c) => Math.abs(c[i]!) > threshold);
+  let first = 0;
+  while (first < buffer.length && !loud(first)) first++;
+  let last = buffer.length - 1;
+  while (last > first && !loud(last)) last--;
+  // Only trim encoder padding (a few tens of ms), never a deliberate pause.
+  const maxTrim = Math.round(buffer.sampleRate * 0.12);
+  first = Math.min(first, maxTrim);
+  last = Math.max(last, buffer.length - 1 - maxTrim);
+  return { buffer, start: first / buffer.sampleRate, end: (last + 1) / buffer.sampleRate };
+}
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
@@ -60,9 +72,23 @@ class SoundEngine {
   private listeners = new Set<() => void>();
 
   private mood: Mood = 'off';
-  private timer: ReturnType<typeof setInterval> | null = null;
-  private nextStep = 0;
-  private step = 0;
+  private playing: { mood: Mood; gain: GainNode; sources: AudioBufferSourceNode[] } | null = null;
+  private moodToken = 0;
+  private turn: Record<string, number> = {};
+  private tracks = new Map<string, Promise<Trimmed | null>>();
+
+  private readonly tabId = Math.random().toString(36).slice(2);
+  private yielded = false;
+  private readonly channel: BroadcastChannel | null = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pg-music') : null;
+
+  constructor() {
+    // Only one host screen per browser plays music: the newest one asks the others to stop.
+    this.channel?.addEventListener('message', (e: MessageEvent<{ claim?: string }>) => {
+      if (!e.data?.claim || e.data.claim === this.tabId) return;
+      this.yielded = true;
+      this.stopMusic();
+    });
+  }
 
   get settings(): Readonly<Prefs> {
     return this.prefs;
@@ -101,12 +127,16 @@ class SoundEngine {
     if (!AC) return null;
     const ctx = new AC();
     this.ctx = ctx;
-    ctx.addEventListener('statechange', () => this.listeners.forEach((l) => l()));
+    ctx.addEventListener('statechange', () => {
+      // A mood chosen before audio was allowed starts as soon as it is.
+      if (ctx.state === 'running' && this.mood !== 'off' && !this.playing) this.startMood(this.mood);
+      this.listeners.forEach((l) => l());
+    });
     this.master = ctx.createGain();
     // A gentle limiter so stacked effects never clip on the stream.
     const comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -12;
-    comp.ratio.value = 6;
+    comp.threshold.value = -10;
+    comp.ratio.value = 4;
     this.master.connect(comp).connect(ctx.destination);
     this.musicBus = ctx.createGain();
     this.sfxBus = ctx.createGain();
@@ -123,12 +153,14 @@ class SoundEngine {
   private applyGains(): void {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
-    this.master.gain.setTargetAtTime(this.prefs.muted ? 0 : 1, t, 0.05);
-    this.musicBus.gain.setTargetAtTime(this.prefs.music * 0.35, t, 0.05);
+    // Squared, so the slider feels even to the ear.
+    const master = this.prefs.muted ? 0 : this.prefs.volume * this.prefs.volume;
+    this.master.gain.setTargetAtTime(master, t, 0.05);
+    this.musicBus.gain.setTargetAtTime(this.prefs.music * 0.8, t, 0.05);
     this.sfxBus.gain.setTargetAtTime(this.prefs.sfx * 0.6, t, 0.05);
   }
 
-  // ---------------------------------------------------------------- building blocks
+  // ---------------------------------------------------------------- effects
 
   private tone(bus: AudioNode, type: OscillatorType, freq: number, at: number, dur: number, vol: number, slideTo?: number): void {
     const ctx = this.ctx!;
@@ -161,8 +193,6 @@ class SoundEngine {
     src.start(at, Math.random() * 0.5);
     src.stop(at + dur + 0.02);
   }
-
-  // ---------------------------------------------------------------- effects
 
   play(name: Sfx): void {
     const ctx = this.ensure();
@@ -225,71 +255,85 @@ class SoundEngine {
 
   // ---------------------------------------------------------------- music
 
+  private load(url: string): Promise<Trimmed | null> {
+    let p = this.tracks.get(url);
+    if (!p) {
+      const ctx = this.ctx!;
+      p = fetch(url)
+        .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`${r.status}`))))
+        .then((data) => ctx.decodeAudioData(data))
+        .then(trimSilence)
+        .catch(() => {
+          // Retry next time rather than caching a failure (e.g. a flaky connection).
+          this.tracks.delete(url);
+          return null;
+        });
+      this.tracks.set(url, p);
+    }
+    return p;
+  }
+
   setMood(mood: Mood): void {
     if (mood === this.mood) return;
     this.mood = mood;
-    // Only one host screen per browser plays music: the newest one asks the others to stop.
-    if (mood !== 'off') this.claimMusic();
-    if (this.timer) clearInterval(this.timer);
-    this.timer = null;
-    if (mood === 'off') return;
-    const ctx = this.ensure();
-    if (!ctx) return;
-    this.step = 0;
-    this.nextStep = ctx.currentTime + 0.1;
-    // Lookahead scheduler: wake often, schedule the next 150 ms of notes precisely.
-    this.timer = setInterval(() => this.schedule(), 40);
-  }
-
-  private readonly tabId = Math.random().toString(36).slice(2);
-  private yielded = false;
-  private readonly channel: BroadcastChannel | null = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pg-music') : null;
-
-  constructor() {
-    this.channel?.addEventListener('message', (e: MessageEvent<{ claim?: string }>) => {
-      if (e.data?.claim && e.data.claim !== this.tabId) this.yielded = true;
-    });
-  }
-
-  private claimMusic(): void {
+    if (mood === 'off') return this.stopMusic();
     this.yielded = false;
     this.channel?.postMessage({ claim: this.tabId });
+    const ctx = this.ensure();
+    if (ctx?.state === 'running') this.startMood(mood);
   }
 
-  private schedule(): void {
-    const ctx = this.ctx;
-    if (!ctx || this.mood === 'off' || ctx.state !== 'running' || this.yielded) return;
-    const m = MOODS[this.mood];
-    const eighth = 60 / m.bpm / 2;
-    // Don't try to catch up after the tab was throttled: skip ahead instead.
-    if (this.nextStep < ctx.currentTime - 0.2) this.nextStep = ctx.currentTime + 0.05;
-    while (this.nextStep < ctx.currentTime + 0.15) {
-      this.note(m, this.step, this.nextStep, eighth);
-      this.step++;
-      this.nextStep += eighth * (this.step % 2 === 1 ? 1 + m.swing : 1 - m.swing);
+  private async startMood(mood: Exclude<Mood, 'off'> | Mood): Promise<void> {
+    if (mood === 'off' || this.yielded) return;
+    const token = ++this.moodToken;
+    const def = TRACKS[mood];
+    const n = this.turn[mood] ?? 0;
+    this.turn[mood] = n + 1;
+    const [loop, intro] = await Promise.all([this.load(def.loops[n % def.loops.length]!), def.intro ? this.load(def.intro) : Promise.resolve(null)]);
+    // The mood may have moved on while the track was loading.
+    if (token !== this.moodToken || !loop || this.yielded) return;
+    const ctx = this.ctx!;
+    this.fadeOut();
+    const gain = ctx.createGain();
+    gain.connect(this.musicBus);
+    const t = ctx.currentTime + 0.05;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(1, t + CROSSFADE_S);
+    const sources: AudioBufferSourceNode[] = [];
+    let at = t;
+    if (intro) {
+      const src = ctx.createBufferSource();
+      src.buffer = intro.buffer;
+      src.connect(gain);
+      src.start(at, intro.start, intro.end - intro.start);
+      sources.push(src);
+      at += intro.end - intro.start;
     }
+    const src = ctx.createBufferSource();
+    src.buffer = loop.buffer;
+    src.loop = true;
+    src.loopStart = loop.start;
+    src.loopEnd = loop.end;
+    src.connect(gain);
+    src.start(at, loop.start);
+    sources.push(src);
+    this.playing = { mood, gain, sources };
   }
 
-  private note(m: MoodDef, step: number, at: number, eighth: number): void {
-    const bus = this.musicBus;
-    const bar = Math.floor(step / 8) % m.chords.length;
-    const inBar = step % 8;
-    const deg = m.chords[bar]!;
-    const pitch = (d: number, octave = 0) => m.root + m.scale[((d % 7) + 7) % 7]! + 12 * (Math.floor(d / 7) + octave);
-    // Bass on beats 1 and 3, a fifth on the "and" of 4.
-    if (inBar === 0 || inBar === 4) this.tone(bus, 'triangle', midiHz(pitch(deg, -2)), at, eighth * 1.8, 0.5);
-    if (inBar === 7) this.tone(bus, 'triangle', midiHz(pitch(deg + 4, -2)), at, eighth * 0.9, 0.35);
-    // Off-beat chord stabs.
-    if (inBar % 2 === 1)
-      for (const d of [0, 2, 4]) this.tone(bus, 'square', midiHz(pitch(deg + d)), at, eighth * 0.6, 0.045);
-    // Melody.
-    const mel = m.melody[step % m.melody.length];
-    if (mel !== null && mel !== undefined) this.tone(bus, 'triangle', midiHz(pitch(mel, 1)), at, eighth * 1.4, 0.18);
-    // Hi-hats on every eighth, kick on 1 and 3 for the busier moods.
-    if (m.hats) {
-      this.hiss(bus, at, 0.035, inBar % 2 ? 0.12 : 0.2, 8000, 1.2);
-      if (inBar === 0 || inBar === 4) this.tone(bus, 'sine', 120, at, 0.2, 0.5, 45);
-    }
+  private fadeOut(): void {
+    const old = this.playing;
+    this.playing = null;
+    if (!old || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    old.gain.gain.cancelScheduledValues(t);
+    old.gain.gain.setValueAtTime(old.gain.gain.value, t);
+    old.gain.gain.linearRampToValueAtTime(0, t + CROSSFADE_S);
+    for (const s of old.sources) s.stop(t + CROSSFADE_S + 0.05);
+  }
+
+  private stopMusic(): void {
+    this.moodToken++;
+    this.fadeOut();
   }
 }
 
@@ -302,5 +346,5 @@ if (typeof window !== 'undefined') {
   window.addEventListener('keydown', unlock, { capture: true });
 }
 
-// Dev builds: poke at the synth from the console (e.g. __sound.play('star')).
+// Dev builds: poke at the engine from the console (e.g. __sound.play('star')).
 if (import.meta.env?.DEV && typeof window !== 'undefined') (window as unknown as { __sound: SoundEngine }).__sound = sound;

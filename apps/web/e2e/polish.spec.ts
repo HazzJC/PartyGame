@@ -51,3 +51,15 @@ test('host lobby fits a laptop window: Start is on screen and the join QR scans'
   await page.getByRole('button', { name: 'Options' }).click();
   await expect(page.getByRole('dialog', { name: 'Game options' }).getByRole('button', { name: 'Cards' })).toBeVisible();
 });
+
+test('the host volume slider is saved in this browser', async ({ page }) => {
+  await page.goto('/host');
+  const volume = page.getByRole('slider', { name: 'Volume' });
+  await expect(volume).toBeVisible({ timeout: 15_000 });
+  await volume.fill('0.3');
+  await page.getByRole('button', { name: 'Mute' }).click();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Unmute' })).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Unmute' }).click();
+  await expect(page.getByRole('slider', { name: 'Volume' })).toHaveValue('0.3');
+});
