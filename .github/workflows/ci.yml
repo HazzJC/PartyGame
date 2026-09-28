@@ -4,6 +4,11 @@ on:
     branches: [main, staging]
   pull_request:
 
+# A newer push to the same branch cancels the older run, so a stale run can never deploy over it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -17,8 +22,50 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm build
+
+  # The end-to-end suite is mostly whole mini games played in real time, so it is split across
+  # four machines (two tests at a time on each) instead of running one test after another.
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @partygame/web exec playwright install --with-deps chromium
-      - run: pnpm e2e
+      - run: pnpm --filter @partygame/web exec playwright test --project=chromium --shard=${{ matrix.shard }}/4
+        env:
+          CI: 'true'
+
+  # Latency and reaction-time checks run on their own machine, one at a time, so a busy CPU
+  # never skews what they measure.
+  e2e-timing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm --filter @partygame/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @partygame/web exec playwright test --project=timing --workers=1
         env:
           CI: 'true'
 
@@ -26,7 +73,7 @@ jobs:
   # Needs a CLOUDFLARE_API_TOKEN repository secret (the "Edit Cloudflare Workers" token template);
   # without it this job skips the deploy instead of failing.
   deploy:
-    needs: check
+    needs: [check, e2e, e2e-timing]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     concurrency: deploy-${{ github.ref_name }}
