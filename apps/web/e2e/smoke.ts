@@ -4,7 +4,8 @@ import { expect, type FrameLocator, type Page } from '@playwright/test';
  * Plays a mini game from the harness player screen by poking whatever input is on offer, until
  * the personal result appears. Takes a host screenshot the first time a reveal is on screen.
  */
-export async function smokeGame(page: Page, gameId: string, n = 5, shot = gameId): Promise<void> {
+/** Plays a game through with random pokes. `budgetMs` must cover the game's own time limit plus its reveal. */
+export async function smokeGame(page: Page, gameId: string, n = 5, shot = gameId, budgetMs = 150_000): Promise<void> {
   await page.goto(`/dev/minigame/${gameId}?n=${n}`);
   const host = page.frameLocator('iframe[title="Host screen"]');
   const player = page.frameLocator('iframe[title="Player screen"]');
@@ -12,7 +13,7 @@ export async function smokeGame(page: Page, gameId: string, n = 5, shot = gameId
   await player.getByRole('button', { name: 'Ready' }).click();
 
   let playShot = false;
-  const deadline = Date.now() + 150_000;
+  const deadline = Date.now() + budgetMs;
   while (Date.now() < deadline) {
     if (await player.locator('.pf-coins').isVisible().catch(() => false)) break;
     const acted = await poke(player);
