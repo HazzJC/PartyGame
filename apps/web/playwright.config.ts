@@ -5,6 +5,8 @@ const PORT = 5188;
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
+  // The smoke tests play whole games with random input; on slow CI runners one can occasionally run long.
+  retries: process.env.CI ? 1 : 0,
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],

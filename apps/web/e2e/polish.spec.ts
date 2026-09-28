@@ -38,3 +38,16 @@ test('how-to-play intro, then an extra key rolls the dice', async ({ page, brows
   await expect(p.page.getByLabel(/Rolled [1-6]/)).toBeVisible();
   await p.ctx.close();
 });
+
+test('host lobby fits a laptop window: Start is on screen and the join QR scans', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/host');
+  const start = page.getByRole('button', { name: 'Start game' });
+  await expect(start).toBeVisible({ timeout: 15_000 });
+  const box = (await start.boundingBox())!;
+  expect(box.y + box.height).toBeLessThanOrEqual(720);
+  await expect(page.getByRole('img', { name: /^Join [A-Z]{4}$/ })).toBeVisible();
+  // Options live in a dialog so the lobby never grows past the stage.
+  await page.getByRole('button', { name: 'Options' }).click();
+  await expect(page.getByRole('dialog', { name: 'Game options' }).getByRole('button', { name: 'Cards' })).toBeVisible();
+});

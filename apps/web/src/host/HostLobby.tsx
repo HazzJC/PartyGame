@@ -17,6 +17,7 @@ const LENGTHS = [
 
 export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: HostView }) {
   const [playOpen, setPlayOpen] = useState(false);
+  const [optsOpen, setOptsOpen] = useState(false);
   const hostSeat = useHostSeat(view.code, view);
   const url = joinLink(view.code);
   const humans = view.seats.filter((s) => !s.isBot).length;
@@ -28,7 +29,7 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
     <div className="hl">
       <div className="hl-left">
         <h1 className="hl-title">
-          <Logo height={150} />
+          <Logo height={124} />
         </h1>
         <div className="sticker hl-join">
           <div className="stack" style={{ gap: 8 }}>
@@ -38,7 +39,8 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
             </div>
           </div>
           <div className="hl-qr">
-            <Qr text={url} size={210} />
+            {/* Upper case fits QR's denser alphanumeric mode: fewer, bigger squares that scan better off a stream. */}
+            <Qr text={url.toUpperCase()} size={210} label={`Join ${view.code}`} />
           </div>
         </div>
 
@@ -60,7 +62,12 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
               </button>
             ))}
           </div>
-          <GameOptions conn={conn} view={view} />
+          <div className="hl-opts-row">
+            <span className="muted">{optionSummary(view.settings, (view.phase.catalogue as unknown[] | undefined)?.length ?? 0)}</span>
+            <button className="btn white small" onClick={() => setOptsOpen(true)}>
+              Options
+            </button>
+          </div>
         </div>
 
         <button className={`btn big ${hostSeat ? 'white' : 'purple'}`} onClick={() => setPlayOpen(true)} style={{ alignSelf: 'flex-start' }}>
@@ -130,8 +137,31 @@ export function HostLobby({ conn, view }: { conn: Connection<HostView>; view: Ho
       </div>
 
       {playOpen && <PlayHere view={view} onClose={() => setPlayOpen(false)} />}
+      {optsOpen && (
+        <div className="modal-back" onClick={() => setOptsOpen(false)}>
+          <div className="panel modal hl-opts" role="dialog" aria-label="Game options" onClick={(e) => e.stopPropagation()}>
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <h2>Game options</h2>
+              <button className="btn green" onClick={() => setOptsOpen(false)}>
+                Done
+              </button>
+            </div>
+            <GameOptions conn={conn} view={view} />
+          </div>
+        </div>
+      )}
     </div>
   );
+}
+
+/** One line under the game length: the other options at a glance. */
+function optionSummary(s: HostView['settings'], total: number): string {
+  const parts = [s.movement === 'cards' ? 'Movement cards' : 'Dice'];
+  if (s.teamBoard) parts.push('Team board');
+  if (s.tutorial) parts.push('Intro on');
+  const off = s.removedGames.length;
+  if (total) parts.push(`${total - Math.min(off, total)}/${total} games`);
+  return parts.join(' · ');
 }
 
 function Doodle({ strokes }: { strokes: Stroke[] }) {

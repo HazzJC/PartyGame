@@ -1,9 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "partygame",
+  "account_id": "c9f7bab8db4dfe3c5cd2331d475b8eeb",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-09-20",
   "workers_dev": true,
+  // Production lives on a custom domain (Cloudflare creates the DNS record and certificate).
+  "routes": [{ "pattern": "partygame.harryjameschapman.com", "custom_domain": true }],
   "assets": {
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*", "/ws/*"]
@@ -19,6 +22,9 @@
   "env": {
     "staging": {
       "name": "partygame-staging",
+      // Staging stays on its workers.dev address only.
+      "workers_dev": true,
+      "routes": [],
       "durable_objects": {
         "bindings": [
           { "name": "ROOMS", "class_name": "Room" },

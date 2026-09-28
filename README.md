@@ -43,15 +43,24 @@ Phones on the same Wi-Fi can open `http://<your LAN IP>:5173`. For friends elsew
 
 ## Deploy (free)
 
-Two Workers, both deployed by Cloudflare Workers Builds from this repo:
+Live at **https://partygame.harryjameschapman.com** (production, from `main`). Staging, from `staging`, is at
+https://partygame-staging.harryjameschapman.workers.dev.
 
-| Worker | Branch | Build command | Deploy command |
-| --- | --- | --- | --- |
-| `partygame` | `main` | `pnpm install && pnpm build` | `cd apps/web && npx wrangler deploy` |
-| `partygame-staging` | `staging` | `pnpm install && CLOUDFLARE_ENV=staging pnpm build` | `cd apps/web && npx wrangler deploy` |
+GitHub Actions deploys after every check and e2e test has passed (the `deploy` job in `.github/workflows/ci.yml`):
+a push to `main` deploys production and a push to `staging` deploys staging. It needs one repository secret,
+`CLOUDFLARE_API_TOKEN`: in Cloudflare, go to My Profile → API Tokens → Create Token → "Edit Cloudflare Workers",
+then run `gh secret set CLOUDFLARE_API_TOKEN`. Without the secret the job skips the deploy with a warning.
 
-Set the Workers Builds **root directory** to the repo root. Optional: `wrangler secret put ADMIN_KEY` to read
-playtest feedback at `/api/admin/feedback?key=…`.
+To deploy by hand (with `npx wrangler login` done once):
+
+```bash
+pnpm build && cd apps/web && npx wrangler deploy                            # production
+CLOUDFLARE_ENV=staging pnpm build && cd apps/web && npx wrangler deploy     # staging
+```
+
+The custom domain is declared in `apps/web/wrangler.jsonc` (`routes` with `custom_domain`). Cloudflare creates the
+DNS record and certificate on deploy. Optional: `wrangler secret put ADMIN_KEY` to read playtest feedback at
+`/api/admin/feedback?key=…`.
 
 Durable Object Workers don't get per-version preview URLs, which is why staging is a separate Worker.
 

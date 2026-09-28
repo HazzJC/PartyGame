@@ -228,6 +228,8 @@ class SoundEngine {
   setMood(mood: Mood): void {
     if (mood === this.mood) return;
     this.mood = mood;
+    // Only one host screen per browser plays music: the newest one asks the others to stop.
+    if (mood !== 'off') this.claimMusic();
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
     if (mood === 'off') return;
@@ -239,9 +241,24 @@ class SoundEngine {
     this.timer = setInterval(() => this.schedule(), 40);
   }
 
+  private readonly tabId = Math.random().toString(36).slice(2);
+  private yielded = false;
+  private readonly channel: BroadcastChannel | null = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pg-music') : null;
+
+  constructor() {
+    this.channel?.addEventListener('message', (e: MessageEvent<{ claim?: string }>) => {
+      if (e.data?.claim && e.data.claim !== this.tabId) this.yielded = true;
+    });
+  }
+
+  private claimMusic(): void {
+    this.yielded = false;
+    this.channel?.postMessage({ claim: this.tabId });
+  }
+
   private schedule(): void {
     const ctx = this.ctx;
-    if (!ctx || this.mood === 'off' || ctx.state !== 'running') return;
+    if (!ctx || this.mood === 'off' || ctx.state !== 'running' || this.yielded) return;
     const m = MOODS[this.mood];
     const eighth = 60 / m.bpm / 2;
     // Don't try to catch up after the tab was throttled: skip ahead instead.

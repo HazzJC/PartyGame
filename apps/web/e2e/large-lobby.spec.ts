@@ -18,7 +18,8 @@ test('team board with movement cards: teams on the rail, a card played by vote',
   await expect(landGrab).not.toBeChecked();
   await p.page.getByRole('button', { name: 'Done' }).tap();
   await expect(p.page.getByRole('button', { name: /Mini games: 32\/33 on/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Cards' })).toHaveAttribute('aria-pressed', 'true');
+  // The host screen summarises the options under the game length.
+  await expect(page.locator('.hl-opts-row')).toContainText('Movement cards · Team board');
   await p.page.getByRole('button', { name: 'Start game' }).tap();
 
   // Four teams on the host rail, and a hand of three cards on the phone.

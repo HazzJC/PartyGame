@@ -32,14 +32,37 @@
   inset: 0;
   display: grid;
   grid-template-columns: 640px 1fr;
+  /* Never taller than the stage: a long column must not push Start off the bottom. */
+  grid-template-rows: minmax(0, 1fr);
   gap: 48px;
-  padding: 56px 64px;
+  padding: 48px 64px;
 }
 
 .hl-left {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
+  min-height: 0;
+}
+
+.hl-settings .seg {
+  display: flex;
+}
+
+.hl-settings .seg button {
+  flex: 1;
+}
+
+.hl-opts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 24px;
+}
+
+.hl-opts {
+  width: 900px;
 }
 
 .hl-title {
@@ -157,6 +180,11 @@
   display: flex;
   gap: 24px;
   align-items: center;
+}
+
+.hl-actions .btn {
+  white-space: nowrap;
+  flex: none;
 }
 
 .hl-notice {
