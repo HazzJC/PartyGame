@@ -5,6 +5,7 @@ import { Countdown, SpoilerGate } from '../timing/clock.tsx';
 import { minigameUi, type MgPlayerPhase } from './registry.ts';
 import { Shop } from './Shop.tsx';
 import { FormatBadge } from '../ui/FormatBadge.tsx';
+import { Demo, SceneStrip, themeOf, themeStyle } from '../minigames/theme/themes.tsx';
 import './game.css';
 
 const TEAM_NAMES = ['Red team', 'Blue team', 'Green team', 'Gold team'];
@@ -33,6 +34,7 @@ export function RulesPlayer({ conn, view }: PlayerScreenProps) {
         <Countdown conn={conn} until={p.endsAt} />
       </div>
       <FormatBadge format={p.format} compact />
+      <Demo gameId={p.gameId} />
       {p.team !== null && p.team >= 0 && <span className="chip pf-team">{teamBoard && p.teams?.length === 4 ? TEAM_NAMES[p.team] : `Team ${p.team + 1}`}</span>}
       <p className="pf-blurb">{p.blurb}</p>
       {teamBoard && p.format === 'ffa' && <p className="muted" style={{ margin: 0 }}>Team board: your placing counts towards your team's average.</p>}
@@ -78,7 +80,18 @@ export function MinigamePlayer({ conn, view }: PlayerScreenProps) {
       </SpoilerGate>
     );
   if (!mg.playing) return <WatchScreen text="You're watching this one" />;
-  return ui ? <ui.Player conn={conn} view={view} mg={mg} /> : <WatchScreen text={`Missing UI for ${mg.gameId}`} />;
+  if (!ui) return <WatchScreen text={`Missing UI for ${mg.gameId}`} />;
+  // A slice of the game's scene across the top, so each game feels like its own place.
+  return (
+    <div className="mg-player-themed" data-game={mg.gameId} style={themeStyle(mg.gameId)}>
+      {themeOf(mg.gameId) && (
+        <div className="mg-player-band">
+          <SceneStrip gameId={mg.gameId} />
+        </div>
+      )}
+      <ui.Player conn={conn} view={view} mg={mg} />
+    </div>
+  );
 }
 
 export function PayoutPlayer({ conn, view }: PlayerScreenProps) {

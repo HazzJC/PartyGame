@@ -1,0 +1,377 @@
+/*
+ * Per-game skins, pack 1. Each game's host area (.mg-themed) and phone screen (.mg-player-themed)
+ * carry data-game, so a game can dress its own pieces for its place without touching the others.
+ */
+
+/* ------------------------------------------------------------------ Lowest Unique: quiz-show cards */
+[data-game='lowest-unique'] .lun-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+[data-game='lowest-unique'] .lun-tile {
+  width: 150px;
+}
+
+[data-game='lowest-unique'] .lun-tile {
+  background: #7b4fd0;
+  color: var(--paper);
+  -webkit-text-stroke: 10px var(--ink);
+  paint-order: stroke fill;
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 7px #ffd23f, inset 0 0 0 11px var(--ink), 0 8px 0 var(--ink);
+}
+
+/* Face down until the count reaches it. */
+[data-game='lowest-unique'] .lun-tile[data-state='hidden'] {
+  background: #3a2466;
+  color: #6b55a3;
+  -webkit-text-stroke: 0;
+  box-shadow: inset 0 0 0 7px #6b55a3, inset 0 0 0 11px var(--ink), 0 8px 0 var(--ink);
+}
+
+[data-game='lowest-unique'] .lun-tile:is([data-state='empty'], [data-state='unique'], [data-state='clash']) {
+  animation: lun-flip 360ms ease-out both;
+}
+
+[data-game='lowest-unique'] .lun-tile[data-state='empty'] {
+  opacity: 1;
+  background: #c9bfe3;
+  color: #efeaf8;
+  box-shadow: inset 0 0 0 7px #a99bd0, inset 0 0 0 11px var(--ink), 0 8px 0 var(--ink);
+}
+
+[data-game='lowest-unique'] .lun-tile[data-state='unique'] {
+  background: #2ec27e;
+}
+
+[data-game='lowest-unique'] .lun-tile[data-state='clash'] {
+  background: #e5484d;
+  text-decoration: line-through;
+  text-decoration-thickness: 8px;
+}
+
+[data-game='lowest-unique'] .lun-tile[data-state='winner'] {
+  background: #ffd23f;
+  box-shadow: inset 0 0 0 7px var(--paper), inset 0 0 0 11px var(--ink), 0 10px 0 var(--ink), 0 0 0 8px var(--paper), 0 0 0 13px var(--ink);
+  animation: lun-win 600ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes lun-flip {
+  from { transform: perspective(600px) rotateY(90deg); }
+  to { transform: perspective(600px) rotateY(0); }
+}
+
+@keyframes lun-win {
+  from { transform: scale(1) rotate(0); }
+  to { transform: scale(1.1) rotate(-3deg); }
+}
+
+.mg-player-themed[data-game='lowest-unique'] .pick-tile {
+  --tile: #7b4fd0;
+  color: var(--paper);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: inset 0 0 0 4px #ffd23f, inset 0 0 0 6px var(--ink), 0 5px 0 var(--ink);
+}
+
+.mg-player-themed[data-game='lowest-unique'] .pick-tile[aria-checked='true'] {
+  background: #ffd23f;
+  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 6px var(--ink), 0 3px 0 var(--ink), 0 0 0 5px var(--ink);
+}
+
+.mg-player-themed[data-game='lowest-unique'] .pick-key {
+  -webkit-text-stroke: 0;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ Stopwatch Chicken: a brass pocket watch */
+[data-game='stopwatch-chicken'] .sw-clock {
+  position: relative;
+  width: 470px;
+  height: 470px;
+  padding: 0;
+  margin: 70px auto auto;
+  border-radius: 50%;
+  border: 6px solid var(--ink);
+  background:
+    radial-gradient(circle closest-side, #fff8e6 0 84%, transparent 84.5%),
+    repeating-conic-gradient(from -1.5deg, var(--ink) 0 3deg, #fff8e6 3deg 30deg);
+  box-shadow: 0 0 0 22px #d9a441, 0 0 0 28px var(--ink), 12px 16px 0 28px var(--ink);
+  font-size: 84px;
+}
+
+/* The crown and bow on top. */
+[data-game='stopwatch-chicken'] .sw-clock::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -66px;
+  width: 64px;
+  height: 44px;
+  transform: translateX(-50%);
+  border: 6px solid var(--ink);
+  border-radius: 14px;
+  background: #d9a441;
+}
+
+/* The centre pin. */
+[data-game='stopwatch-chicken'] .sw-clock::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border: 5px solid var(--ink);
+  border-radius: 50%;
+  background: #c81e3a;
+  z-index: 2;
+}
+
+[data-game='stopwatch-chicken'] .sw-hand {
+  position: absolute;
+  left: calc(50% - 7px);
+  bottom: 50%;
+  width: 14px;
+  height: 190px;
+  border: 4px solid var(--ink);
+  border-radius: 7px;
+  background: #c81e3a;
+  transform-origin: 50% 100%;
+  z-index: 1;
+}
+
+[data-game='stopwatch-chicken'] .sw-digits {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translateX(-50%);
+  padding: 0 22px;
+  border: 5px solid var(--ink);
+  border-radius: 18px;
+  background: var(--paper);
+  line-height: 1.15;
+  z-index: 3;
+  white-space: nowrap;
+}
+
+[data-game='stopwatch-chicken'] .sw-clock[data-dark='true'] {
+  background: var(--ink);
+}
+
+[data-game='stopwatch-chicken'] .sw-clock[data-dark='true'] .sw-digits {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #3b3346;
+  color: #d9a441;
+  border-color: #d9a441;
+}
+
+[data-game='stopwatch-chicken'] .sw-clock[data-dark='true']::after {
+  display: none;
+}
+
+/* The reveal is a clockmaker's brass rule. */
+[data-game='stopwatch-chicken'] .sw-track {
+  background-color: #e9c489;
+  background-image: repeating-linear-gradient(90deg, rgba(43, 34, 51, 0.3) 0 3px, transparent 3px 5%);
+  background-size: 100% 26px;
+  background-repeat: no-repeat;
+}
+
+.mg-player-themed[data-game='stopwatch-chicken'] .sw-player-clock {
+  flex: none;
+  align-self: center;
+  width: min(72vw, 40vh, 320px);
+  aspect-ratio: 1;
+  min-height: 0;
+  margin: 22px 0;
+  border-radius: 50%;
+  background: #fff8e6;
+  box-shadow: 0 0 0 12px #d9a441, 0 0 0 16px var(--ink), 6px 8px 0 16px var(--ink);
+  font-size: clamp(44px, 15cqw, 84px);
+}
+
+.mg-player-themed[data-game='stopwatch-chicken'] .sw-player-clock[data-state='wait'] {
+  background: #efe0bf;
+}
+
+.mg-player-themed[data-game='stopwatch-chicken'] .sw-player-clock[data-state='dark'] {
+  background: var(--ink);
+  color: #d9a441;
+}
+
+.mg-player-themed[data-game='stopwatch-chicken'] .sw-stop {
+  flex: 1;
+  box-shadow: inset 0 0 0 8px #d9a441, inset 0 0 0 12px var(--ink), 0 8px 0 var(--ink);
+}
+
+/* ------------------------------------------------------------------ Count Together: counting sheep */
+[data-game='count-to'] .mg-host-lead ~ .muted {
+  color: #c9c6f0;
+}
+
+[data-game='count-to'] .count-target {
+  color: #8f8bd6;
+}
+
+.count-hop {
+  align-self: center;
+  width: 640px;
+  max-width: 100%;
+  height: auto;
+  flex: none;
+  margin: -30px 0 -10px;
+  overflow: visible;
+}
+
+.hop-jump {
+  animation: hop-jump 900ms cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+.hop-bonk {
+  animation: hop-bonk 1100ms ease-out both;
+}
+
+@keyframes hop-jump {
+  0% { transform: translate(70px, 130px); }
+  25% { transform: translate(165px, 72px); }
+  50% { transform: translate(260px, 44px); }
+  75% { transform: translate(355px, 72px); }
+  100% { transform: translate(450px, 130px); }
+}
+
+@keyframes hop-bonk {
+  0% { transform: translate(70px, 130px) rotate(0); }
+  40% { transform: translate(176px, 124px) rotate(0); }
+  55% { transform: translate(150px, 110px) rotate(-24deg); }
+  100% { transform: translate(120px, 130px) rotate(0); }
+}
+
+[data-game='count-to'] .count-call {
+  border-radius: 999px;
+  background: #f4f2ff;
+  box-shadow: 0 5px 0 var(--ink), 0 0 0 5px #f4f2ff, 0 0 0 8px var(--ink);
+}
+
+/* Night on the phone too (the timer keeps its ink on its paper disc). */
+.mg-player-themed:is([data-game='count-to'], [data-game='hunter-vs-hiders']) .countdown {
+  color: var(--ink);
+}
+
+.mg-player-themed[data-game='count-to'] .mg-player,
+.mg-player-themed[data-game='hunter-vs-hiders'] .mg-player {
+  max-width: none;
+  color: var(--paper);
+}
+
+.mg-player-themed[data-game='count-to'],
+.mg-player-themed[data-game='hunter-vs-hiders'] {
+  background: #25285e;
+}
+
+.mg-player-themed[data-game='hunter-vs-hiders'] {
+  background: #1b2638;
+}
+
+.mg-player-themed:is([data-game='count-to'], [data-game='hunter-vs-hiders']) .muted {
+  color: #c9c6f0;
+}
+
+.mg-player-themed[data-game='count-to'] .count-say {
+  border-radius: 48px;
+  box-shadow: 0 8px 0 var(--ink), 0 0 0 7px var(--paper), 0 0 0 11px var(--ink);
+}
+
+.mg-player-themed[data-game='count-to'] .count-say:disabled {
+  background: #3b3f82;
+  color: #c9c6f0;
+}
+
+/* ------------------------------------------------------------------ Hunter vs Hiders: bushes in the woods */
+[data-game='hunter-vs-hiders'] .hunt-zone {
+  min-height: 160px;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  padding: 10px 8px 12px;
+  border-radius: 46% 54% 22px 22px / 62% 58% 22px 22px;
+  background: #2e7a4f;
+  box-shadow: inset 0 -16px 0 #235e3c, 0 7px 0 var(--ink);
+  transition: background-color 250ms;
+}
+
+[data-game='hunter-vs-hiders'] .hunt-n {
+  padding: 0 16px;
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+  background: #b07a45;
+  color: var(--paper);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+  font-size: 34px;
+  transform: rotate(-4deg);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+[data-game='hunter-vs-hiders'] .hunt-zone:nth-child(even) .hunt-n {
+  transform: rotate(3deg);
+}
+
+/* A lantern finds the bush. */
+[data-game='hunter-vs-hiders'] .hunt-zone[data-lit='true'] {
+  background: #f2d35b;
+  box-shadow: inset 0 -16px 0 #d9b53e, 0 7px 0 var(--ink), 0 0 0 10px rgba(255, 229, 138, 0.55);
+}
+
+[data-game='hunter-vs-hiders'] .hunt-zone[data-hit='true'] {
+  background: #e5484d;
+  box-shadow: inset 0 -16px 0 #b8323a, 0 7px 0 var(--ink), 0 0 0 10px rgba(255, 229, 138, 0.55);
+}
+
+[data-game='hunter-vs-hiders'] .hunt-roles .chip {
+  font-size: 28px;
+}
+
+.mg-player-themed[data-game='hunter-vs-hiders'] .pick-tile {
+  --tile: #2e7a4f;
+  color: var(--paper);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+  border-radius: 46% 54% 16px 16px / 58% 54% 16px 16px;
+  box-shadow: inset 0 -8px 0 #235e3c, 0 5px 0 var(--ink);
+}
+
+.mg-player-themed[data-game='hunter-vs-hiders'] .pick-tile[aria-checked='true'] {
+  background: #f2d35b;
+  box-shadow: inset 0 -8px 0 #d9b53e, 0 3px 0 var(--ink), 0 0 0 5px var(--paper);
+}
+
+.mg-player-themed[data-game='hunter-vs-hiders'] .pick-key {
+  -webkit-text-stroke: 0;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ Tug of War: the mud pit */
+.tug-arena {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: visible;
+}
+
+.mg-themed[data-game='tug-of-war'] .tug-power {
+  font-size: 30px;
+}
+
+.mg-player-themed[data-game='tug-of-war'] .tug-pad:not(:disabled) {
+  border-radius: 40px;
+  background: #8a5a3c;
+  box-shadow: inset 0 0 0 8px #d6a86a, inset 0 0 0 12px var(--ink), 0 8px 0 var(--ink);
+}
+
+.mg-player-themed[data-game='tug-of-war'] .tug-pad[data-slippery='true'] {
+  background: #e5484d;
+}

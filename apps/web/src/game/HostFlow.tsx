@@ -11,6 +11,7 @@ import { Standings, type StandingRow } from './Standings.tsx';
 import { StarIconArt } from '../ui/StarArt.tsx';
 import { FormatBadge, FormatParade } from '../ui/FormatBadge.tsx';
 import { Icon } from '../ui/Icons.tsx';
+import { Demo, hasDemo, Scene, themeOf, themeStyle } from '../minigames/theme/themes.tsx';
 import './game.css';
 
 export interface EntityInfo {
@@ -175,15 +176,20 @@ export function RulesHost({ conn, view }: HostScreenProps) {
   const ready = new Set(p.ready as string[]);
   return (
     <HostGameFrame view={view} title={<FormatBadge format={p.format} />} right={<Countdown conn={conn} until={p.endsAt} />}>
-      <div className="rules-card sticker pop-in">
+      <Scene gameId={p.gameId} />
+      <div className={`rules-card sticker pop-in ${hasDemo(p.gameId) ? 'has-demo' : ''}`} style={themeStyle(p.gameId)}>
         <FormatBadge format={p.format} compact />
         <h1>{p.name}</h1>
+        {themeOf(p.gameId) && <p className="rules-place">{themeOf(p.gameId)!.place}</p>}
         <p className="rules-blurb">{p.blurb}</p>
         {p.fallback && <p className="muted">No games of that format yet, so it's a free-for-all instead.</p>}
         {(view.game as GameHostView | null)?.teamBoard && p.format === 'ffa' && <p className="muted">Team board: everyone plays for themselves, and each team scores its members' average placing.</p>}
-        <div className="rules-cols">
-          <ControlsColumn title="Touch" icon="phone" inputs={p.inputs} scheme="touch" />
-          <ControlsColumn title="Keyboard" icon="laptop" inputs={p.inputs} scheme="keys" />
+        <div className={hasDemo(p.gameId) ? 'rules-main' : undefined}>
+          <Demo gameId={p.gameId} />
+          <div className="rules-cols">
+            <ControlsColumn title="Touch" icon="phone" inputs={p.inputs} scheme="touch" />
+            <ControlsColumn title="Keyboard" icon="laptop" inputs={p.inputs} scheme="keys" />
+          </div>
         </div>
         <div className="rules-ready">
           {(p.participants as string[]).map((id) => {
@@ -206,7 +212,10 @@ export function MinigameHost({ conn, view }: HostScreenProps) {
   const ui = minigameUi(mg.gameId);
   return (
     <HostGameFrame view={view} title={<span className="hg-game-title"><FormatBadge format={mg.format} compact />{mg.name}</span>} right={mg.stage === 'play' ? <Countdown conn={conn} until={mg.endsAt} /> : <span className="chip">Results</span>}>
-      {ui ? <ui.Host conn={conn} view={view} mg={mg} /> : <div className="center">Missing UI for {mg.gameId}</div>}
+      <Scene gameId={mg.gameId} />
+      <div className="mg-themed" data-game={mg.gameId} style={themeStyle(mg.gameId)}>
+        {ui ? <ui.Host conn={conn} view={view} mg={mg} /> : <div className="center">Missing UI for {mg.gameId}</div>}
+      </div>
     </HostGameFrame>
   );
 }

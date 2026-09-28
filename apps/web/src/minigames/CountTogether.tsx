@@ -5,7 +5,28 @@ import { KeyHint, useDevice, useVirtualKeys, wantsOnScreenControls } from '../in
 import { Countdown, useServerNow } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
 import { Icon } from '../ui/Icons.tsx';
+import { INK } from './theme/paper.tsx';
+import { Sheep } from './theme/pack1.tsx';
 import './minigames.css';
+
+/** A sheep hops the fence for every number counted; on a clash it bonks into it. */
+function SheepHop({ count, clash }: { count: number; clash: boolean }) {
+  const cls = clash ? 'hop-bonk' : count === 0 ? 'hop-wait' : 'hop-jump';
+  return (
+    <svg className="count-hop" viewBox="0 0 520 176" aria-hidden="true">
+      <path d="M0 164 H520" stroke={INK} strokeWidth={5} />
+      <g fill="#C8995F" stroke={INK} strokeWidth={4} strokeLinejoin="round">
+        <rect x={214} y={112} width={92} height={12} rx={4} />
+        <rect x={214} y={136} width={92} height={12} rx={4} />
+        <rect x={222} y={96} width={16} height={68} rx={4} />
+        <rect x={282} y={96} width={16} height={68} rx={4} />
+      </g>
+      <g key={`${cls}${count}`} className={cls} transform={clash ? 'translate(120 130)' : count === 0 ? 'translate(70 130)' : 'translate(450 130)'}>
+        <Sheep x={0} y={0} s={0.8} />
+      </g>
+    </svg>
+  );
+}
 
 interface Data {
   target: number;
@@ -32,6 +53,7 @@ function Host({ conn, view, mg }: MgHostProps) {
         {clashing ? 'CLASH!' : d.count}
         <span className="count-target">/ {d.target}</span>
       </div>
+      {mg.stage === 'play' && <SheepHop count={d.count} clash={clashing} />}
       <div className="count-log">
         {(d.log ?? []).map((l, i) => {
           const s = seats.get(l.by);

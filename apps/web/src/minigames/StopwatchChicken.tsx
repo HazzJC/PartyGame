@@ -32,7 +32,8 @@ function Host({ conn, view, mg }: MgHostProps) {
           Stop your clock at <b>{secs(d.target)} s</b>. It goes dark after 3 seconds. Go over and you bust!
         </p>
         <div className="sw-clock sticker" data-dark={elapsed >= d.visibleMs}>
-          {clock}
+          {elapsed < d.visibleMs && <span className="sw-hand" style={{ transform: `rotate(${Math.max(0, elapsed) * 0.036}deg)` }} />}
+          <span className="sw-digits">{clock}</span>
         </div>
         <div className="submitted-row">
           {mg.participants.map((id) => {

@@ -1,0 +1,220 @@
+/* ------------------------------------------------------------------ scenes */
+.mg-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* A scene fills the stage and nothing a game draws spills past it. */
+.hg-stage:has(> .mg-scene) {
+  overflow: hidden;
+}
+
+/* The game sits above its scene. */
+.hg-stage > .mg-host,
+.hg-stage > .rules-card,
+.hg-stage > .mg-themed {
+  position: relative;
+  z-index: 1;
+}
+
+.mg-themed {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Lead text floats on a paper label so it reads over any scene. */
+.mg-themed .mg-host-lead {
+  align-self: center;
+  padding: 6px 28px;
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 5px 0 var(--ink);
+}
+
+.mg-scene-strip {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 64px;
+  width: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mg-player-themed {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mg-player-themed > .mg-player-band {
+  position: relative;
+  flex: none;
+  height: 48px;
+  overflow: hidden;
+  border-bottom: 4px solid var(--ink);
+}
+
+.mg-player-themed > .mg-player-band .mg-scene-strip {
+  height: 100%;
+}
+
+.mg-player-themed > .mg-player {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  width: 100%;
+}
+
+/* Rules card with a demo: slightly tighter type so the demo fits beside the controls. */
+.rules-card.has-demo {
+  padding: 30px 44px;
+  gap: 18px;
+}
+
+.rules-card.has-demo h1 {
+  font-size: 76px;
+}
+
+.rules-card.has-demo .rules-blurb {
+  font-size: 32px;
+}
+
+/* Scene animation: gentle and ambient, host only; still on low / no animation. */
+.mg-scene .anim-sway,
+.mg-scene .anim-bob,
+.mg-scene .anim-drift,
+.mg-scene .anim-spin,
+.mg-scene .anim-flutter,
+.mg-scene .anim-twinkle,
+.mg-scene .anim-blink {
+  transform-box: fill-box;
+}
+
+.mg-scene .anim-sway {
+  transform-origin: 50% 100%;
+  animation: anim-sway 5s ease-in-out infinite alternate;
+}
+
+.mg-scene .anim-bob {
+  animation: anim-bob 3.2s ease-in-out infinite alternate;
+}
+
+.mg-scene .anim-drift {
+  animation: anim-drift 14s ease-in-out infinite alternate;
+}
+
+.mg-scene .anim-spin {
+  transform-origin: 50% 50%;
+  animation: anim-spin 12s linear infinite;
+}
+
+.mg-scene .anim-flutter {
+  transform-origin: 50% 0;
+  animation: anim-flutter 1.8s ease-in-out infinite alternate;
+}
+
+.mg-scene .anim-twinkle {
+  transform-origin: 50% 50%;
+  animation: anim-twinkle 2.4s ease-in-out infinite;
+}
+
+.mg-scene .anim-blink {
+  animation: anim-blink 1.6s steps(2) infinite;
+}
+
+@keyframes anim-sway {
+  from { transform: rotate(-2.5deg); }
+  to { transform: rotate(2.5deg); }
+}
+
+@keyframes anim-bob {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
+}
+
+@keyframes anim-drift {
+  from { transform: translateX(-40px); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes anim-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes anim-flutter {
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(8deg); }
+}
+
+@keyframes anim-twinkle {
+  0%, 100% { transform: scale(0.6); opacity: 0.4; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes anim-blink {
+  to { opacity: 0.25; }
+}
+
+:root[data-motion='low'] .mg-scene *,
+.mg-scene-strip * {
+  animation: none !important;
+}
+
+/* ------------------------------------------------------------------ rules card with a demo */
+.rules-card.has-demo {
+  max-width: 1380px;
+}
+
+.rules-main {
+  display: grid;
+  grid-template-columns: 600px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.rules-main .rules-cols {
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.rules-place {
+  margin: -12px 0 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--mg-accent, var(--ink-soft));
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.mg-demo {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mg-demo svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mg-demo figcaption {
+  font-family: var(--font-display);
+  font-size: 22px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* On a phone the demo sits above the controls, smaller. */
+.pf .mg-demo figcaption {
+  font-size: 15px;
+}

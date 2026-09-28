@@ -30,3 +30,4 @@ import './TheMind.tsx';
 import './Quilt.tsx';
 import './Defuse.tsx';
 import './MeteorShield.tsx';
+import './theme/pack1.tsx';
