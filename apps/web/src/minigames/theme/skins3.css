@@ -1,0 +1,153 @@
+/* Per-game skins, pack 3 (see skins1.css). */
+
+/* Chips on a coloured sign keep their ink. */
+.mg-themed:is([data-game='herd-mentality'], [data-game='predict-the-crowd']) .word-prompt .chip:not([data-mode='unique']) {
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ Herd Mentality: the barn sign and the pens */
+.mg-themed[data-game='herd-mentality'] .word-prompt {
+  background: #d0463d;
+  color: var(--paper);
+  box-shadow: inset 0 0 0 8px var(--paper), inset 0 0 0 12px var(--ink), 0 8px 0 var(--ink);
+}
+
+.mg-themed[data-game='herd-mentality'] .word-prompt h2 {
+  -webkit-text-stroke: 9px var(--ink);
+  paint-order: stroke fill;
+}
+
+.mg-themed[data-game='herd-mentality'] .herd-group {
+  background: #fff8ea;
+  box-shadow: inset 0 -14px 0 #c9a06c, 0 7px 0 var(--ink);
+  padding-bottom: 24px;
+}
+
+.mg-themed[data-game='herd-mentality'] .herd-group[data-scored='true'] {
+  background: #c9f2dc;
+}
+
+/* ------------------------------------------------------------------ Odd One Out: case files */
+.mg-themed[data-game='odd-one-out'] .odd-card {
+  margin-top: 16px;
+  background: #e8c98a;
+  border-radius: 6px 18px 8px 8px;
+}
+
+/* The folder's tab. */
+.mg-themed[data-game='odd-one-out'] .odd-card::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: -21px;
+  width: 96px;
+  height: 18px;
+  border: 5px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: #e8c98a;
+}
+
+.mg-themed[data-game='odd-one-out'] .odd-clue {
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-weight: 700;
+}
+
+.mg-themed[data-game='odd-one-out'] .odd-card[data-imposter='true'] {
+  background: #f2b8a8;
+}
+
+.mg-themed[data-game='odd-one-out'] .odd-card[data-imposter='true']::before {
+  background: #f2b8a8;
+}
+
+/* A rubber stamp. */
+.mg-themed[data-game='odd-one-out'] .odd-tag {
+  top: 38%;
+  right: 12px;
+  padding: 2px 12px;
+  border: 5px solid #c81e3a;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #c81e3a;
+  font-size: 26px;
+  letter-spacing: 2px;
+  transform: rotate(-14deg);
+}
+
+.mg-player-themed[data-game='odd-one-out'] .odd-word {
+  background: #e8c98a;
+  border-radius: 6px 18px 8px 8px;
+}
+
+/* ------------------------------------------------------------------ Who Wrote That?: postcards and airmail */
+.mg-themed[data-game='who-wrote-that'] .word-prompt {
+  border: 12px solid;
+  border-image: repeating-linear-gradient(135deg, #d0463d 0 18px, #fff 18px 36px, #3d7bff 36px 54px, #fff 54px 72px) 12;
+  border-radius: 0;
+  box-shadow: 0 0 0 5px var(--ink), 0 10px 0 5px var(--ink);
+  background: #fff6e5;
+}
+
+.mg-themed[data-game='who-wrote-that'] .who-card {
+  background: #fff6e5;
+  border-radius: 8px;
+  padding-right: 64px;
+}
+
+/* A stamp in the corner. */
+.mg-themed[data-game='who-wrote-that'] .who-card::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 46px;
+  border: 3px dashed var(--paper);
+  outline: 3px solid var(--ink);
+  background: #d0463d;
+}
+
+.mg-themed[data-game='who-wrote-that'] .who-card:nth-child(3n + 2)::after {
+  background: #3d7bff;
+}
+
+.mg-themed[data-game='who-wrote-that'] .who-card:nth-child(3n)::after {
+  background: #2ec27e;
+}
+
+.mg-themed[data-game='who-wrote-that'] .who-card:nth-child(odd) {
+  transform: rotate(-1deg);
+}
+
+.mg-themed[data-game='who-wrote-that'] .who-card:nth-child(even) {
+  transform: rotate(1.2deg);
+}
+
+.mg-themed[data-game='who-wrote-that'] .who-card[data-revealed='true'] {
+  background: #fff1b8;
+}
+
+.mg-player-themed[data-game='who-wrote-that'] .who-guess {
+  background: #fff6e5;
+}
+
+/* ------------------------------------------------------------------ Predict the Crowd: the scoreboard */
+.mg-themed[data-game='predict-the-crowd'] .word-prompt {
+  background: #1e3a2b;
+  color: #ffd23f;
+  box-shadow: inset 0 0 0 8px #3b3346, inset 0 0 0 11px var(--ink), 0 8px 0 var(--ink);
+}
+
+.mg-themed[data-game='predict-the-crowd'] .word-prompt h2 {
+  color: #ffd23f;
+}
+
+.mg-themed[data-game='predict-the-crowd'] .predict-fill {
+  background-image: repeating-linear-gradient(0deg, transparent 0 36px, rgba(43, 34, 51, 0.22) 36px 41px);
+}
+
+.mg-themed[data-game='predict-the-crowd'] .predict-label {
+  background: #fff;
+  border-radius: 14px 14px 22px 22px;
+}

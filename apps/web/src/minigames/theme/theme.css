@@ -73,18 +73,31 @@
   width: 100%;
 }
 
-/* Rules card with a demo: slightly tighter type so the demo fits beside the controls. */
+/* Rules card with a demo: tighter type so the demo fits beside the controls on the stage. */
 .rules-card.has-demo {
-  padding: 30px 44px;
-  gap: 18px;
+  padding: 26px 44px;
+  gap: 16px;
 }
 
 .rules-card.has-demo h1 {
-  font-size: 76px;
+  font-size: 72px;
 }
 
 .rules-card.has-demo .rules-blurb {
-  font-size: 32px;
+  font-size: 30px;
+}
+
+.rules-card.has-demo .rules-col {
+  padding: 14px 22px;
+}
+
+.rules-card.has-demo .rules-col h3 {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.rules-card.has-demo .rules-col ul {
+  font-size: 25px;
 }
 
 /* Scene animation: gentle and ambient, host only; still on low / no animation. */
@@ -209,7 +222,7 @@
 
 .mg-demo figcaption {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   text-align: center;
   color: var(--ink-soft);
 }

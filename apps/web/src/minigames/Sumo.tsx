@@ -30,9 +30,15 @@ function Platform({ radius, children, onPoint }: { radius: number; children: Rea
         onPoint(p.x, p.y);
       }}
     >
-      <circle r={radius + 26} fill="#5a4d63" />
-      <circle r={radius} fill="#f7d9a8" stroke="#2B2233" strokeWidth={10} />
-      <circle r={radius * 0.5} fill="none" stroke="#e0b87a" strokeWidth={6} strokeDasharray="18 14" />
+      {/* The raised clay platform, with a hard paper shadow. */}
+      <rect x={-radius - 46} y={-radius - 46} width={(radius + 46) * 2} height={(radius + 46) * 2} rx={28} fill="#2B2233" transform="translate(10 14)" />
+      <rect x={-radius - 46} y={-radius - 46} width={(radius + 46) * 2} height={(radius + 46) * 2} rx={28} fill="#C99A62" stroke="#2B2233" strokeWidth={8} />
+      {/* The straw bales that mark the edge. */}
+      <circle r={radius + 16} fill="none" stroke="#2B2233" strokeWidth={30} />
+      <circle r={radius + 16} fill="none" stroke="#D9B35A" strokeWidth={22} strokeDasharray="46 8" />
+      <circle r={radius} fill="#f7d9a8" stroke="#2B2233" strokeWidth={6} />
+      {/* The starting lines. */}
+      <path d={`M${-radius * 0.14} ${-radius * 0.1} V${radius * 0.1} M${radius * 0.14} ${-radius * 0.1} V${radius * 0.1}`} stroke="#FFFFFF" strokeWidth={10} strokeLinecap="round" />
       {children}
     </svg>
   );

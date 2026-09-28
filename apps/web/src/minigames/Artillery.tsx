@@ -29,7 +29,16 @@ function Field({ width, children, zoom }: { width: number; children: React.React
   return (
     <svg className="art-svg" viewBox={`${x0} ${-SKY} ${w} ${SKY + 90}`} preserveAspectRatio="xMidYMax meet">
       <rect x={x0 - 2000} y={-SKY - 200} width={w + 4000} height={SKY + 200} fill="#bfe3f2" />
+      {Array.from({ length: Math.ceil(w / 700) + 2 }, (_, i) => (
+        <g key={i} transform={`translate(${x0 + i * 700 - 350} ${-SKY + 150 + (i % 2) * 90}) scale(1.6)`}>
+          <path d="M-60 20 Q-72 -8 -40 -12 Q-32 -40 -2 -32 Q20 -52 44 -26 Q76 -28 68 6 Q74 26 44 26 H-40 Q-66 30 -60 20 Z" fill="#FFFFFF" stroke="#2B2233" strokeWidth={4} />
+        </g>
+      ))}
+      {Array.from({ length: Math.ceil(w / 600) + 2 }, (_, i) => (
+        <ellipse key={i} cx={x0 + i * 600 - 300} cy={10} rx={430} ry={150 + (i % 2) * 50} fill={i % 2 ? '#9ccb6e' : '#8fc062'} stroke="#2B2233" strokeWidth={6} />
+      ))}
       <rect x={x0 - 2000} y={0} width={w + 4000} height={120} fill="#7ea34f" stroke="#2B2233" strokeWidth={6} />
+      <rect x={x0 - 2000} y={34} width={w + 4000} height={90} fill="#8a6440" />
       {children}
     </svg>
   );
@@ -38,8 +47,12 @@ function Field({ width, children, zoom }: { width: number; children: React.React
 function TankShape({ x, avatar, dim }: { x: number; avatar: number; dim?: boolean }) {
   return (
     <g opacity={dim ? 0.3 : 1}>
-      <rect x={x - 42} y={-34} width={84} height={34} rx={10} fill="#5f7a3a" stroke="#2B2233" strokeWidth={5} />
-      <g transform={`translate(${x - 30} -100)`}>
+      <rect x={x - 52} y={-28} width={104} height={28} rx={14} fill="#3B3346" stroke="#2B2233" strokeWidth={5} />
+      {[-34, -12, 12, 34].map((o) => (
+        <circle key={o} cx={x + o} cy={-14} r={8} fill="#8C8A96" stroke="#2B2233" strokeWidth={3} />
+      ))}
+      <path d={`M${x - 42} -28 L${x - 30} -54 H${x + 30} L${x + 42} -28 Z`} fill="#5f7a3a" stroke="#2B2233" strokeWidth={5} strokeLinejoin="round" />
+      <g transform={`translate(${x - 30} -112)`}>
         <Avatar avatar={avatar} size={60} />
       </g>
     </g>
@@ -50,6 +63,10 @@ function FortressShape({ f }: { f: Fortress }) {
   return (
     <g>
       <rect x={f.x - 90} y={-170} width={180} height={170} fill="#b8b0a2" stroke="#2B2233" strokeWidth={6} />
+      <path d={`M${f.x - 90} -114 H${f.x + 90} M${f.x - 90} -58 H${f.x + 90} M${f.x - 40} -170 V-114 M${f.x + 30} -114 V-58`} stroke="#2B2233" strokeWidth={3} opacity={0.35} />
+      <path d={`M${f.x - 30} 0 V-40 Q${f.x - 30} -70 ${f.x} -70 Q${f.x + 30} -70 ${f.x + 30} -40 V0 Z`} fill="#6b4a2b" stroke="#2B2233" strokeWidth={5} />
+      <path d={`M${f.x + 70} -200 V-300`} stroke="#2B2233" strokeWidth={7} strokeLinecap="round" />
+      <path d={`M${f.x + 70} -300 L${f.x + 130} -284 L${f.x + 70} -268 Z`} fill="#FF4D5E" stroke="#2B2233" strokeWidth={5} strokeLinejoin="round" />
       {[-90, -45, 0, 45].map((o) => (
         <rect key={o} x={f.x + o} y={-200} width={36} height={30} fill="#b8b0a2" stroke="#2B2233" strokeWidth={5} />
       ))}
