@@ -7,7 +7,7 @@ export const ROUTES = [
 ] as const;
 
 export const SPACE_SYMBOL: Partial<Record<BoardNode['type'], string>> = {
-  blue: '+', red: '−', event: '?', shop: '◆', duel: '⚔',
+  blue: '+', red: '−', event: '?', shop: '◆', duel: '⚔︎',
 };
 export const SYMBOL_INK = '#2B2233';
 export const SYMBOL_PAPER = '#FFFFFF';

@@ -5,7 +5,7 @@ const FORMATS = {
   team: { label: 'Team game', mark: '▣', tone: 'orange' },
   '1vN': { label: '1 vs many', mark: '◉', tone: 'purple' },
   coop: { label: 'Co-op', mark: '∞', tone: 'green' },
-  duel: { label: 'Duel', mark: '⚔', tone: 'red' },
+  duel: { label: 'Duel', mark: '⚔︎', tone: 'red' },
 } as const;
 
 export type GameFormat = keyof typeof FORMATS;

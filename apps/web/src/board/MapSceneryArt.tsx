@@ -1,21 +1,27 @@
+import { useId } from 'react';
+
 /** Original pop-up paper diorama, kept entirely below the playable board graph. */
 export function MapSceneryArt() {
+  // A phone can show two maps at once (route map and trap picker): give each its own pattern/filter ids.
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const id = (name: string) => `${name}-${uid}`;
+  const ref = (name: string) => `url(#${id(name)})`;
   return <g className="map-scenery" aria-hidden="true" strokeLinejoin="round" strokeLinecap="round">
     <defs>
-      <filter id="map-cut-shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="9" stdDeviation="1.5" floodColor="#412b38" floodOpacity=".35" /></filter>
-      <pattern id="map-paper-dots" width="27" height="27" patternUnits="userSpaceOnUse"><circle cx="5" cy="8" r="2" fill="#79536e" opacity=".13" /><circle cx="19" cy="21" r="1.5" fill="#79536e" opacity=".11" /></pattern>
-      <pattern id="map-quilt" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M0 0H100V100H0Z M0 50H100 M50 0V100" fill="none" stroke="#b65d8a" strokeWidth="4" opacity=".34" /><path d="M0 0L50 50L100 0 M0 100L50 50L100 100" fill="none" stroke="#fff5d8" strokeWidth="4" opacity=".65" /></pattern>
-      <pattern id="map-waves" width="74" height="40" patternUnits="userSpaceOnUse"><path d="M0 18Q18 4 37 18T74 18" fill="none" stroke="#298db4" strokeWidth="5" opacity=".48" /></pattern>
+      <filter id={id('map-cut-shadow')} x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="9" stdDeviation="1.5" floodColor="#412b38" floodOpacity=".35" /></filter>
+      <pattern id={id('map-paper-dots')} width="27" height="27" patternUnits="userSpaceOnUse"><circle cx="5" cy="8" r="2" fill="#79536e" opacity=".13" /><circle cx="19" cy="21" r="1.5" fill="#79536e" opacity=".11" /></pattern>
+      <pattern id={id('map-quilt')} width="100" height="100" patternUnits="userSpaceOnUse"><path d="M0 0H100V100H0Z M0 50H100 M50 0V100" fill="none" stroke="#b65d8a" strokeWidth="4" opacity=".34" /><path d="M0 0L50 50L100 0 M0 100L50 50L100 100" fill="none" stroke="#fff5d8" strokeWidth="4" opacity=".65" /></pattern>
+      <pattern id={id('map-waves')} width="74" height="40" patternUnits="userSpaceOnUse"><path d="M0 18Q18 4 37 18T74 18" fill="none" stroke="#298db4" strokeWidth="5" opacity=".48" /></pattern>
     </defs>
     <rect width="1440" height="940" fill="#F8EBCB" />
-    <rect width="1440" height="940" fill="url(#map-paper-dots)" />
+    <rect width="1440" height="940" fill={ref('map-paper-dots')} />
     <path d="M55 54Q720 20 1386 54 M52 885Q720 919 1386 885" fill="none" stroke="#c5a875" strokeWidth="4" strokeDasharray="14 15" opacity=".55" />
 
     {/* Paper Pier: water and sand layers, dock, striped light tower, sailing boat. */}
-    <g filter="url(#map-cut-shadow)">
+    <g filter={ref('map-cut-shadow')}>
       <path d="M148 250Q240 214 330 240Q435 200 555 262L574 426Q488 469 409 441Q304 476 237 443L145 452Q120 354 148 250Z" fill="#fff8e9" stroke="#fff" strokeWidth="20" />
       <path d="M148 250Q240 214 330 240Q435 200 555 262L574 426Q488 469 409 441Q304 476 237 443L145 452Q120 354 148 250Z" fill="#75CFE4" stroke="#3b4d69" strokeWidth="6" />
-      <path d="M148 250Q240 214 330 240Q435 200 555 262L574 426Q488 469 409 441Q304 476 237 443L145 452Q120 354 148 250Z" fill="url(#map-waves)" stroke="none" />
+      <path d="M148 250Q240 214 330 240Q435 200 555 262L574 426Q488 469 409 441Q304 476 237 443L145 452Q120 354 148 250Z" fill={ref('map-waves')} stroke="none" />
       <path d="M144 250Q236 223 333 246Q433 212 552 265L552 300Q454 273 359 305Q252 286 155 321Z" fill="#F7D99F" stroke="#fff1cc" strokeWidth="5" />
       <path d="M202 349L392 349L392 371L202 371Z M225 371L225 415 M278 371L278 418 M340 371L340 411" fill="#D78A56" stroke="#583d47" strokeWidth="5" />
       <path d="M225 349V310L250 283L277 310V349Z" fill="#fff4db" stroke="#583d47" strokeWidth="5" />
@@ -29,7 +35,7 @@ export function MapSceneryArt() {
     </g>
 
     {/* Doodle Grove: scalloped canopy, twisting trunks, a treehouse and mushrooms. */}
-    <g filter="url(#map-cut-shadow)">
+    <g filter={ref('map-cut-shadow')}>
       <path d="M774 246Q789 206 852 214Q922 178 982 213Q1085 176 1179 245Q1225 294 1194 358Q1237 407 1180 451Q1078 475 1009 449Q907 482 831 450Q760 417 774 353Q747 299 774 246Z" fill="#fff9e7" stroke="#fff" strokeWidth="20" />
       <path d="M774 246Q789 206 852 214Q922 178 982 213Q1085 176 1179 245Q1225 294 1194 358Q1237 407 1180 451Q1078 475 1009 449Q907 482 831 450Q760 417 774 353Q747 299 774 246Z" fill="#9FD88D" stroke="#3e5d4b" strokeWidth="6" />
       <path d="M784 382Q955 425 1187 374L1180 448Q1053 466 1008 442Q879 473 813 440Z" fill="#6AB879" stroke="none" />
@@ -45,10 +51,10 @@ export function MapSceneryArt() {
     </g>
 
     {/* Patchwork Plaza: quilted square, striped market, fountain and bunting. */}
-    <g filter="url(#map-cut-shadow)">
+    <g filter={ref('map-cut-shadow')}>
       <path d="M151 563L237 538L316 555L402 532L551 570L548 770L456 782L359 759L257 783L149 758Z" fill="#fff9e9" stroke="#fff" strokeWidth="20" />
       <path d="M151 563L237 538L316 555L402 532L551 570L548 770L456 782L359 759L257 783L149 758Z" fill="#DDA3C6" stroke="#664d74" strokeWidth="6" />
-      <path d="M170 565H534V755H170Z" fill="url(#map-quilt)" opacity=".86" stroke="none" />
+      <path d="M170 565H534V755H170Z" fill={ref('map-quilt')} opacity=".86" stroke="none" />
       <path d="M230 705V624L255 596H450L475 624V705Z" fill="#FCEFCF" stroke="#644a61" strokeWidth="6" />
       <path d="M224 627L252 591H450L481 627Z" fill="#EE6F87" stroke="#644a61" strokeWidth="6" />
       <path d="M251 592V628 M291 592V628 M331 592V628 M371 592V628 M411 592V628 M451 592V628" stroke="#fff5dc" strokeWidth="13" />
@@ -61,7 +67,7 @@ export function MapSceneryArt() {
     </g>
 
     {/* Lantern Hill: terraced hills, winding stair, gazebo and hanging lights. */}
-    <g filter="url(#map-cut-shadow)">
+    <g filter={ref('map-cut-shadow')}>
       <path d="M746 699Q808 607 886 642Q987 556 1064 620Q1157 602 1223 700L1213 789Q1103 808 1043 781Q928 821 858 781L748 790Z" fill="#fff9e7" stroke="#fff" strokeWidth="20" />
       <path d="M746 699Q808 607 886 642Q987 556 1064 620Q1157 602 1223 700L1213 789Q1103 808 1043 781Q928 821 858 781L748 790Z" fill="#F4B769" stroke="#835c5d" strokeWidth="6" />
       <path d="M752 739Q835 692 919 731Q1016 676 1113 724Q1187 697 1218 738V790Q1113 818 1042 785Q935 817 860 786L748 794Z" fill="#E89269" stroke="#835c5d" strokeWidth="5" />
@@ -80,7 +86,7 @@ export function MapSceneryArt() {
       { x: 865, y: 225, w: 228, title: 'DOODLE GROVE', colour: '#9FD88D' },
       { x: 232, y: 724, w: 250, title: 'PATCHWORK PLAZA', colour: '#DDA3C6' },
       { x: 850, y: 728, w: 228, title: 'LANTERN HILL', colour: '#F4B769' },
-    ].map((d) => <g key={d.title} filter="url(#map-cut-shadow)">
+    ].map((d) => <g key={d.title} filter={ref('map-cut-shadow')}>
       <path d={`M${d.x-12} ${d.y+7}l-18 12l18 12M${d.x+d.w+12} ${d.y+7}l18 12l-18 12`} fill={d.colour} stroke="#493747" strokeWidth="3" />
       <rect x={d.x} y={d.y} width={d.w} height="42" rx="10" fill="#FFF9E9" stroke="#493747" strokeWidth="4" />
       <text x={d.x+d.w/2} y={d.y+28} textAnchor="middle">{d.title}</text>

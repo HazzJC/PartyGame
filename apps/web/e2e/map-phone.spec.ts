@@ -11,7 +11,7 @@ test('phone trap picker keeps the shared map usable in high contrast and reduced
   await player.locator('.item-chip', { hasText: 'Trap' }).click();
   await expect(player.getByRole('heading', { name: 'Hide a trap: tap a space' })).toBeVisible();
   await expect(player.locator('.trap-map')).toHaveAttribute('data-presentation', 'trap');
-  await player.getByRole('button', { name: 'Space 1' }).click();
+  await player.getByRole('button', { name: 'Space 1', exact: true }).click();
   await expect(player.getByText('Using (secret):')).toBeVisible();
   await expect(player.locator('.item-chip', { hasText: 'Trap' })).toBeVisible();
 });

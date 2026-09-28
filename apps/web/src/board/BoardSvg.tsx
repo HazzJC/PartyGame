@@ -33,7 +33,7 @@ export interface Highlight {
 
 export function BoardLegend() {
   return <div className="board-legend" aria-label="Board space legend">
-    <span><b>+</b> coins</span><span><b>−</b> lose coins</span><span><b>?</b> event</span><span><b>◆</b> shop</span><span><b>⚔</b> duel</span><span><b>★</b> star</span>
+    <span><b>+</b> coins</span><span><b>−</b> lose coins</span><span><b>?</b> event</span><span><b>◆</b> shop</span><span><b>⚔︎</b> duel</span><span><b>★</b> star</span>
   </div>;
 }
 
