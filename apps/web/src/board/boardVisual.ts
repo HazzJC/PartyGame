@@ -1,4 +1,4 @@
-import type { BoardDef, BoardNode } from '@partygame/engine';
+import type { BoardDef } from '@partygame/engine';
 
 export type ViewBox = { x: number; y: number; w: number; h: number };
 export const ROUTES = [
@@ -6,11 +6,6 @@ export const ROUTES = [
   { label: 'Shortcut', dash: '18 12', colour: '#623090' },
 ] as const;
 
-export const SPACE_SYMBOL: Partial<Record<BoardNode['type'], string>> = {
-  blue: '+', red: '−', event: '?', shop: '◆', duel: '⚔︎',
-};
-export const SYMBOL_INK = '#2B2233';
-export const SYMBOL_PAPER = '#FFFFFF';
 
 export function focusedView(def: BoardDef, nodeId: number, w = 680, h = 460): ViewBox {
   const node = def.nodes[nodeId] ?? def.nodes[def.start]!;

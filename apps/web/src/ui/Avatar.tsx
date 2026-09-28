@@ -265,6 +265,13 @@ function TeamBadge({ c, n }: { c: string; n: number }) {
   );
 }
 
+/** Just the face (or team shield), drawn in a 100×100 box, for composing into other art such as board standees. */
+export function AvatarFace({ avatar }: { avatar: number }) {
+  const animal = ANIMALS[Math.abs(avatar) % ANIMALS.length]!;
+  const colour = avatarColour(avatar);
+  return <>{isTeamAvatar(avatar) ? <TeamBadge c={colour} n={avatar - TEAM_AVATAR_BASE} /> : faces[animal](colour)}</>;
+}
+
 export function Avatar({ avatar, size = 64, dim = false, sticker = true, className, title }: AvatarProps) {
   const animal = ANIMALS[Math.abs(avatar) % ANIMALS.length]!;
   const colour = avatarColour(avatar);

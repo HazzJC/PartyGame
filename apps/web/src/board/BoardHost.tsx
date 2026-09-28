@@ -40,20 +40,24 @@ interface BoardHostPhase {
 
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 
-/** Where a pawn is drawn right now: at its start, hopping along its final path, or at the end. */
-function pawnXY(def: BoardDef, w: HostWalk, now: number, stepMs: number): { x: number; y: number } {
+/**
+ * Where a pawn is drawn right now: at its start, hopping along its final path, or at the end.
+ * Also which way it faces: the way it is walking, or the way its last step went once it arrives.
+ */
+function pawnXY(def: BoardDef, w: HostWalk, now: number, stepMs: number): { x: number; y: number; facing: 1 | -1; walking: boolean } {
   const seq = [w.start, ...w.path];
   const node = (i: number) => def.nodes[seq[Math.max(0, Math.min(seq.length - 1, i))]!]!;
-  if (!w.finalAt || w.path.length === 0) return node(0);
+  const face = (i: number): 1 | -1 => (node(i + 1).x < node(i).x - 1 ? -1 : 1);
+  if (!w.finalAt || w.path.length === 0) return { ...node(0), facing: 1, walking: false };
   const t = (now - w.finalAt) / stepMs;
-  if (t <= 0) return node(0);
-  if (t >= w.path.length) return node(seq.length - 1);
+  if (t <= 0) return { ...node(0), facing: face(0), walking: false };
+  if (t >= w.path.length) return { ...node(seq.length - 1), facing: face(seq.length - 2), walking: false };
   const i = Math.floor(t);
   const f = ease(t - i);
   const a = node(i);
   const b = node(i + 1);
   // A little hop between spaces.
-  return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f - Math.sin(f * Math.PI) * 18 };
+  return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f - Math.sin(f * Math.PI) * 18, facing: face(i), walking: true };
 }
 
 function SpotlightCard({ spot, view }: { spot: Spotlight; view: HostView }) {
@@ -109,7 +113,7 @@ export function BoardHost({ conn, view }: HostScreenProps) {
     .filter((s): s is NonNullable<typeof s> => !!s);
   const pawns: Pawn[] = pieces.map((s) => {
     const w = p.walks[s.id];
-    const at = w ? pawnXY(def, w, now, p.stepMs) : def.nodes[p.positions[s.id] ?? def.start]!;
+    const at = w ? pawnXY(def, w, now, p.stepMs) : { ...def.nodes[p.positions[s.id] ?? def.start]!, facing: 1 as const, walking: false };
     let badge: Pawn['badge'];
     let badgeTone: Pawn['badgeTone'] = 'plain';
     if (p.stage === 'roll' && w?.roll) badge = w.roll;
@@ -120,7 +124,7 @@ export function BoardHost({ conn, view }: HostScreenProps) {
       badgeTone = p.landing[s.id]! > 0 ? 'good' : 'bad';
     }
     const moving = p.stage === 'move' && !!w?.finalAt && now >= w.finalAt && now < w.finalAt + w.path.length * p.stepMs;
-    return { id: s.id, avatar: s.avatar, x: at.x, y: at.y, dim: !s.connected, badge, badgeTone, stationary: !moving };
+    return { id: s.id, avatar: s.avatar, x: at.x, y: at.y, dim: !s.connected, badge, badgeTone, stationary: !moving, facing: at.facing, walking: at.walking };
   });
 
   const rolled = Object.values(p.walks).filter((w) => w.roll !== null).length;

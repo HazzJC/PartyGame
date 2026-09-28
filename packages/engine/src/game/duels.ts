@@ -274,6 +274,8 @@ onHostAction((room, action) => {
   if (action.op === 'giveItems') for (const id of humans) g.players[id]!.items = ['duelTicket', 'swap', 'trap'];
   if (action.op === 'queueDuel' && humans[0]) g.pendingDuels.push({ a: humans[0], b: null, reason: 'space' });
   if (action.op === 'shop') g.shoppers = [...new Set([...g.shoppers, ...humans])];
+  // Jump to the end screen, for checking the podium without playing a whole game.
+  if (action.op === 'podium') room.goto({ kind: 'podium' });
   return true;
 });
 

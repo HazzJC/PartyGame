@@ -47,6 +47,7 @@ export default function MinigameHarness({ gameId }: { gameId: string | null }) {
           if (ops.includes('items')) conn?.host({ action: 'dev', op: 'giveItems' });
           if (ops.includes('duel')) conn?.host({ action: 'dev', op: 'queueDuel' });
           if (ops.includes('shop')) conn?.host({ action: 'dev', op: 'shop' });
+          if (ops.includes('podium')) conn?.host({ action: 'dev', op: 'podium' });
         }, 500);
       }, 1500);
     })().catch((e: Error) => live && setError(e.message));

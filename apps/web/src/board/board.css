@@ -12,14 +12,6 @@
   display: block;
 }
 
-.map-scenery text {
-  fill: #59495d;
-  stroke: none;
-  font: 700 24px Fredoka, sans-serif;
-  letter-spacing: 2px;
-}
-
-:root[data-contrast='high'] .map-scenery { opacity: 0.28; }
 
 .board-legend {
   display: flex;
@@ -34,7 +26,11 @@
   padding: 4px 10px;
   font: 700 24px Fredoka, sans-serif;
 }
-.board-legend b { font-size: 26px; }
+.board-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 .board-host > .board-legend {
   position: absolute;
   left: 14px;
@@ -183,6 +179,13 @@
   border-radius: 18px;
 }
 
+/* The route map keeps the board's shape instead of letterboxing inside a stretched box. */
+.bp-map[data-presentation='phone'] {
+  flex: none;
+  min-height: 0;
+  aspect-ratio: 3 / 2;
+}
+
 .bp-map-tools {
   display: flex;
   justify-content: space-between;
@@ -191,7 +194,7 @@
   font-weight: 900;
 }
 .bp > .board-legend { font-size: 12px; gap: 2px 8px; padding: 2px 6px; }
-.bp > .board-legend b { font-size: 15px; }
+.bp > .board-legend svg { width: 18px; height: 18px; }
 .bp-route-mark {
   display: block;
   width: 58px;

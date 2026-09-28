@@ -1,17 +1,12 @@
-import type { BoardDef, BoardNode } from '@partygame/engine';
+import type { BoardDef } from '@partygame/engine';
 import type { ReactNode } from 'react';
-import { Avatar } from '../ui/Avatar.tsx';
 import { MapSceneryArt } from './MapSceneryArt.tsx';
-import { clusteredPawns, SPACE_SYMBOL, SYMBOL_INK, SYMBOL_PAPER } from './boardVisual.ts';
+import { PaperPawn } from './PaperPawn.tsx';
+import { SpaceIcon, SpaceToken, StarPrize, type SpaceKind } from './SpaceArt.tsx';
+import { clusteredPawns } from './boardVisual.ts';
 
-export const SPACE_FILL: Record<BoardNode['type'], string> = {
-  blue: '#3D7BFF',
-  red: '#FF4D5E',
-  event: '#9B5DE5',
-  shop: '#FFB703',
-  duel: '#1B998B',
-  slot: '#FFFFFF',
-};
+/** This many pawns on one space collapse into a "×N" badge (only big rooms, e.g. 16 on Start). */
+const CROWD_MIN = 9;
 
 export interface Pawn {
   id: string;
@@ -23,6 +18,9 @@ export interface Pawn {
   badge?: ReactNode;
   badgeTone?: 'good' | 'bad' | 'plain';
   stationary?: boolean;
+  /** Which way the standee faces (it flips when walking left). */
+  facing?: 1 | -1;
+  walking?: boolean;
 }
 
 export interface Highlight {
@@ -31,24 +29,42 @@ export interface Highlight {
   dash?: string;
 }
 
+const LEGEND: { kind: SpaceKind | 'star'; label: string }[] = [
+  { kind: 'blue', label: 'coins' },
+  { kind: 'red', label: 'lose coins' },
+  { kind: 'event', label: 'event' },
+  { kind: 'shop', label: 'shop' },
+  { kind: 'duel', label: 'duel' },
+  { kind: 'star', label: 'star' },
+];
+
+/** The key to the board, drawn with the same tokens as the spaces themselves. */
 export function BoardLegend() {
-  return <div className="board-legend" aria-label="Board space legend">
-    <span><b>+</b> coins</span><span><b>−</b> lose coins</span><span><b>?</b> event</span><span><b>◆</b> shop</span><span><b>⚔︎</b> duel</span><span><b>★</b> star</span>
-  </div>;
+  return (
+    <div className="board-legend" aria-label="Board space legend">
+      {LEGEND.map((l) => (
+        <span key={l.kind}>
+          <SpaceIcon kind={l.kind} />
+          {l.label}
+        </span>
+      ))}
+    </div>
+  );
 }
 
-export function StarShape({ x, y, size }: { x: number; y: number; size: number }) {
-  const s = size / 100;
+export function StarShape({ x, y, size, spin = false }: { x: number; y: number; size: number; spin?: boolean }) {
   return (
-    <g transform={`translate(${x - size / 2} ${y - size / 2}) scale(${s})`}>
-      <path d="M50 2 L63 36 L99 37 L70 58 L81 94 L50 73 L19 94 L30 58 L1 37 L37 36 Z" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="14" strokeLinejoin="round" />
-      <path d="M50 2 L63 36 L99 37 L70 58 L81 94 L50 73 L19 94 L30 58 L1 37 L37 36 Z" fill="#FFD23F" stroke="#2B2233" strokeWidth="6" strokeLinejoin="round" />
+    <g transform={`translate(${x} ${y})`}>
+      <StarPrize size={size} spin={spin} />
     </g>
   );
 }
 
-/** Groups pawns standing on the same spot and fans them out so every animal stays visible. */
-export function fanOut(pawns: Pawn[], radius = 26): Pawn[] {
+/**
+ * Lines up standees sharing a space, like a party posing for a photo: one row for up to four,
+ * then a back row and a front row. Standees read side by side far better than in a ring.
+ */
+export function lineUp(pawns: Pawn[], spacing: number): Pawn[] {
   const groups = new Map<string, Pawn[]>();
   for (const p of pawns) {
     const key = `${Math.round(p.x)},${Math.round(p.y)}`;
@@ -60,13 +76,12 @@ export function fanOut(pawns: Pawn[], radius = 26): Pawn[] {
       out.push(g[0]!);
       continue;
     }
-    // Up to 6 in a ring; bigger crowds (16 players on the start space) get a second, wider ring.
-    const rings = g.length <= 7 ? [g] : [g.slice(0, 6), g.slice(6)];
-    rings.forEach((ring, k) => {
-      const r = k === 0 ? radius + Math.min(ring.length, 7) * 2 : radius * 2.3 + ring.length * 1.5;
-      ring.forEach((p, i) => {
-        const a = (i / ring.length) * Math.PI * 2 - Math.PI / 2 + (k ? Math.PI / ring.length : 0);
-        out.push({ ...p, x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r });
+    const rows = g.length <= 4 ? [g] : [g.slice(0, Math.ceil(g.length / 2)), g.slice(Math.ceil(g.length / 2))];
+    rows.forEach((row, r) => {
+      const dy = rows.length === 1 ? 0 : r === 0 ? -16 : 12;
+      const shift = rows.length > 1 && r === 1 ? spacing / 2 : 0;
+      row.forEach((p, i) => {
+        out.push({ ...p, x: p.x + (i - (row.length - 1) / 2) * spacing + shift - (rows.length > 1 ? spacing / 4 : 0), y: p.y + dy });
       });
     });
   }
@@ -100,9 +115,12 @@ export function BoardSvg({
   onNodeClick?: (id: number) => void;
   presentation?: 'host' | 'phone' | 'focus' | 'trap';
 }) {
-  // Big crowds fan out past the edge spaces (16 pawns on the start), so leave a margin for them.
+  // Big crowds spread past the edge spaces (16 pawns on the start), so leave a margin for them.
+  // Standees on the top road poke above the island: a back-row head plus its badge rises about
+  // 0.55 × pawnSize above the board's top edge, so that much headroom is always kept for them.
   const margin = pawns.length > 7 ? 70 : 0;
-  const vb = focus ?? { x: -margin, y: -margin, w: def.width + margin * 2, h: def.height + margin * 2 };
+  const headroom = pawns.length ? Math.max(margin, pawnSize * 0.55) : margin;
+  const vb = focus ?? { x: -margin, y: -headroom, w: def.width + margin * 2, h: def.height + margin + headroom };
   const edges: ReactNode[] = [];
   for (const node of def.nodes)
     for (const nx of node.next) {
@@ -112,16 +130,22 @@ export function BoardSvg({
   const hl = new Map<number, string>();
   for (const h of highlights) for (const id of h.nodes) hl.set(id, h.colour);
   const groups = clusteredPawns(pawns);
-  const singles = fanOut(groups.filter((g) => g.members.length <= 4).flatMap((g) => g.members));
-  const crowds = groups.filter((g) => g.members.length > 4);
+  // Standees further down the board are drawn later, so they overlap the ones behind them.
+  const singles = lineUp(groups.filter((g) => g.members.length < CROWD_MIN).flatMap((g) => g.members), pawnSize * 0.72).sort((a, b) => a.y - b.y);
+  const crowds = groups.filter((g) => g.members.length >= CROWD_MIN);
+  const live = presentation === 'host';
 
   return (
     <svg className={className} data-presentation={presentation} viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Game board">
       <MapSceneryArt />
-      <g stroke="#2B2233" strokeWidth={26} strokeLinecap="round">
+      {/* The road: an ink edge, a paper strip, and a stitched centre line. */}
+      <g stroke="#2B2233" strokeWidth={30} strokeLinecap="round">
         {edges}
       </g>
-      <g stroke="#E8D9BC" strokeWidth={14} strokeLinecap="round">
+      <g stroke="#FFF3D6" strokeWidth={20} strokeLinecap="round">
+        {edges}
+      </g>
+      <g stroke="#D9B98A" strokeWidth={3.5} strokeLinecap="round" strokeDasharray="2 12">
         {edges}
       </g>
       {highlights.map((h, i) => (
@@ -140,48 +164,74 @@ export function BoardSvg({
       {def.nodes.map((node) => {
         if (node.type === 'slot') {
           if (stars.includes(node.id)) return null;
-          return <circle key={node.id} cx={node.x} cy={node.y} r={7} fill="#FFFFFF" stroke="#2B2233" strokeWidth={3} opacity={0.7} />;
+          return <circle key={node.id} cx={node.x} cy={node.y} r={8} fill="#FFF3D6" stroke="#2B2233" strokeWidth={3} />;
         }
         const ring = hl.get(node.id);
+        const start = node.id === def.start;
         return (
-          <g key={node.id} onClick={onNodeClick ? () => onNodeClick(node.id) : undefined} style={onNodeClick ? { cursor: 'pointer' } : undefined} role={onNodeClick ? 'button' : undefined} aria-label={onNodeClick ? `Space ${node.id}` : undefined}>
-            <circle cx={node.x} cy={node.y} r={31} fill={ring ?? '#FFFFFF'} stroke="#2B2233" strokeWidth={4} />
-            <circle cx={node.x} cy={node.y} r={25} fill={SPACE_FILL[node.type]} stroke="#2B2233" strokeWidth={2} />
-            <circle cx={node.x} cy={node.y} r={19} fill={SYMBOL_PAPER} stroke="#2B2233" strokeWidth={2} />
-            {SPACE_SYMBOL[node.type] && (
-              <text x={node.x} y={node.y + 8} textAnchor="middle" fontSize={node.type === 'duel' ? 22 : 26} fontFamily="Fredoka, sans-serif" fontWeight={700} fill={SYMBOL_INK}>
-                {SPACE_SYMBOL[node.type]}
-              </text>
-            )}
-            {node.id === def.start && (
-              <text x={node.x + 80} y={node.y - 36} textAnchor="start" fontSize={20} fontFamily="Fredoka, sans-serif" fontWeight={700} fill="#2B2233">
-                START
-              </text>
-            )}
+          <g
+            key={node.id}
+            transform={`translate(${node.x} ${node.y})`}
+            onClick={onNodeClick ? () => onNodeClick(node.id) : undefined}
+            style={onNodeClick ? { cursor: 'pointer' } : undefined}
+            role={onNodeClick ? 'button' : undefined}
+            aria-label={onNodeClick ? `Space ${node.id}` : undefined}
+          >
+            <SpaceToken kind={start ? 'start' : node.type} ring={ring} />
+            {start && <StartFlag live={live} />}
           </g>
         );
       })}
       {stars.map((id) => {
         const n = def.nodes[id];
-        return n ? <StarShape key={id} x={n.x} y={n.y} size={64} /> : null;
+        return n ? <StarShape key={id} x={n.x} y={n.y} size={66} spin={live} /> : null;
       })}
-      {singles.map((p) => (
-        <g key={p.id} transform={`translate(${p.x - pawnSize / 2} ${p.y - pawnSize / 2})`}>
-          <Avatar avatar={p.avatar} size={pawnSize} dim={p.dim} />
-          {p.badge !== undefined && p.badge !== null && (
-            <g transform={`translate(${pawnSize / 2} -14)`}>
-              <circle r={19} fill={p.badgeTone === 'good' ? '#2EC27E' : p.badgeTone === 'bad' ? '#E5484D' : '#FFFFFF'} stroke="#2B2233" strokeWidth={4} />
-              <text y={8} textAnchor="middle" fontSize={22} fontFamily="Fredoka, sans-serif" fontWeight={700} fill={p.badgeTone === 'plain' || !p.badgeTone ? '#2B2233' : '#FFFFFF'}>
-                {p.badge}
-              </text>
-            </g>
-          )}
+      {singles.map((p, i) => (
+        // Feet stand a little below the centre of the space, so the standee looks planted on its token.
+        <g key={p.id} transform={`translate(${p.x} ${p.y + 12})`}>
+          <PaperPawn avatar={p.avatar} size={pawnSize} dim={p.dim} facing={p.facing ?? 1} walking={live && !!p.walking} phase={(i * 0.37) % 2} />
         </g>
       ))}
-      {crowds.map((g) => <g key={`crowd-${g.x}-${g.y}`} className="pawn-crowd" aria-label={`${g.members.length} players on one space`}>
-        <circle cx={g.x} cy={g.y} r={35} fill="#FFFFFF" stroke="#2B2233" strokeWidth={6} />
-        <text x={g.x} y={g.y + 10} textAnchor="middle" fontSize="32" fontFamily="Fredoka, sans-serif" fontWeight="700" fill="#2B2233">×{g.members.length}</text>
-      </g>)}
+      {/* Badges go above every standee, beside the head, so none hides a neighbour's face. */}
+      {singles.map((p) =>
+        p.badge === undefined || p.badge === null ? null : (
+          <g key={`badge-${p.id}`} transform={`translate(${p.x + pawnSize * 0.42} ${p.y + 12 - pawnSize * 1.42})`}>
+            <circle r={18} fill={p.badgeTone === 'good' ? '#2EC27E' : p.badgeTone === 'bad' ? '#E5484D' : '#FFFFFF'} stroke="#2B2233" strokeWidth={4} />
+            <text y={8} textAnchor="middle" fontSize={22} fontFamily="Fredoka, sans-serif" fontWeight={700} fill={p.badgeTone === 'plain' || !p.badgeTone ? '#2B2233' : '#FFFFFF'}>
+              {p.badge}
+            </text>
+          </g>
+        ),
+      )}
+      {/* A big crowd on one space: three standees stand in for everyone, with a count beside them. */}
+      {crowds.map((g) => (
+        <g key={`crowd-${g.x}-${g.y}`} className="pawn-crowd" aria-label={`${g.members.length} players on one space`}>
+          {g.members.slice(0, 3).map((m, i) => (
+            <g key={m.id} transform={`translate(${g.x + (i - 1) * pawnSize * 0.6} ${g.y + 12 + (i === 1 ? 6 : 0)})`}>
+              <PaperPawn avatar={m.avatar} size={pawnSize} dim={m.dim} phase={i * 0.5} />
+            </g>
+          ))}
+          <g transform={`translate(${g.x + pawnSize * 1.6} ${g.y - pawnSize * 0.75})`}>
+            <rect x={-30} y={-20} width={60} height={40} rx={20} fill="#FFFFFF" stroke="#2B2233" strokeWidth={5} />
+            <text y={10} textAnchor="middle" fontSize="28" fontFamily="Fredoka, sans-serif" fontWeight="700" fill="#2B2233">
+              ×{g.members.length}
+            </text>
+          </g>
+        </g>
+      ))}
     </svg>
+  );
+}
+
+/** A little pennant on the start space, waving on the host screen. */
+function StartFlag({ live }: { live: boolean }) {
+  return (
+    <g transform="translate(30 -8)">
+      <path d="M0 0 V-58" stroke="#2B2233" strokeWidth={5} strokeLinecap="round" />
+      <g className={live ? 'flag-wave' : undefined}>
+        <path d="M2 -58 Q18 -64 34 -56 Q26 -48 34 -40 Q18 -44 2 -38 Z" fill="#FF4D5E" stroke="#2B2233" strokeWidth={3.5} strokeLinejoin="round" />
+      </g>
+      <circle cy={-60} r={4} fill="#FFD23F" stroke="#2B2233" strokeWidth={2.5} />
+    </g>
   );
 }

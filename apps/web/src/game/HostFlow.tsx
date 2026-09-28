@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import type { HostScreenProps } from '../host/registry.tsx';
 import { Countdown } from '../timing/clock.tsx';
 import { Avatar } from '../ui/Avatar.tsx';
+import { PaperPawnSvg } from '../board/PaperPawn.tsx';
 import { minigameUi, type MgHostPhase } from './registry.ts';
 import { Confetti } from '../ui/Confetti.tsx';
 import { FormatBadge, FormatParade } from '../ui/FormatBadge.tsx';
@@ -249,7 +250,7 @@ function PodiumBlock({ s, place, height }: { s: PublicSeat | undefined; place: n
   if (!s) return <div className="podium-col" />;
   return (
     <div className="podium-col">
-      <Avatar avatar={s.avatar} size={place === 1 ? 170 : 130} className="pop-in" />
+      <PaperPawnSvg avatar={s.avatar} size={place === 1 ? 190 : 150} className="pop-in podium-pawn" />
       <span className="podium-name">{s.name}</span>
       <div className={`podium-block p${place}`} style={{ height }}>
         {place}
