@@ -154,6 +154,10 @@ Aim for a 12 to 16 player night, with bots topping up if people drop.
 - [ ] **Autopilot:** if you drop, your seat now makes random path choices and never spends your items or coins. Only real bots use items and shop.
 - [ ] Try `/dev/board?n=16&team=1&cards=1` to see team board and cards with bots.
 
+Simulator (`pnpm -F @partygame/sim sim 30 standard team`): in a Standard team board game the leading team
+finishes on 3.6 to 4.3 stars (inside the doc's 3 to 5 target), and games run about 20 minutes of bot time
+rather than 28, because there are fewer pawns. Movement cards (`… standard cards`) play almost exactly like dice.
+
 ## v0.14 · Polish (the full game)
 
 A final Standard game, with sound on the stream.
