@@ -1,6 +1,6 @@
 import { SESSION } from '@partygame/shared';
 import { describe, expect, it } from 'vitest';
-import { caught, createSimRoom, drawBonusStars, game, hunterZones, POWER_DOUBLING_S, TUG_MAX_MS, tugPower } from './index.ts';
+import { caught, createSimRoom, drawBonusStars, game, hunterZones, POWER_DOUBLING_S, TUG_MAX_MS, tugPower, tugRates, tugWeights } from './index.ts';
 
 describe('endgame', () => {
   it('last place picks a twist at the start of the final stretch, then bonus stars are awarded', () => {
@@ -61,6 +61,16 @@ describe('new mini games', () => {
     expect(tugPower(0)).toBe(1);
     expect(tugPower(POWER_DOUBLING_S * 1000)).toBeCloseTo(2);
     expect(tugPower(POWER_DOUBLING_S * 3000)).toBeCloseTo(8);
+  });
+
+  it('Tug of War weights each individual the same, so a small team can hold a big one', () => {
+    expect(tugWeights([3, 5])).toEqual([5 / 3, 1]);
+    // One player tapping 8 times against three players tapping 8 times each: dead level.
+    const [solo, trio] = tugRates([[8, 0], [24, 0]], [1, 3], 1);
+    expect(solo).toBeCloseTo(trio!);
+    // Three on the big team idling while one pulls leaves them well behind the solo player.
+    const [solo2, trio2] = tugRates([[8, 0], [8, 0]], [1, 3], 1);
+    expect(solo2).toBeGreaterThan(trio2! * 2.9);
   });
 
   it('Hunter vs Hiders pays the small side 15 when it wins', () => {

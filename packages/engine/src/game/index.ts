@@ -53,7 +53,7 @@ export * from '../board/state.ts';
 export { formatFromColours, initBoard, teamBoardFormat } from '../board/board.ts';
 export * from './endgame.ts';
 export { hunterZones, caught } from './games/hunter.ts';
-export { tugPower, TUG_MAX_MS, POWER_DOUBLING_S } from './games/tug.ts';
+export { tugPower, tugRates, tugWeights, TUG_MAX_MS, POWER_DOUBLING_S } from './games/tug.ts';
 export * from '../simulate.ts';
 export * from './items.ts';
 export * from './duels.ts';

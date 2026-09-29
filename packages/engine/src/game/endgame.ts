@@ -1,4 +1,5 @@
 import { ITEM_IDS, MAX_ITEMS, SESSION, STAR_PRICE, type ItemId } from '@partygame/shared';
+import { paced } from './pace.ts';
 import { definePhase, type PhaseBase } from '../phase.ts';
 import type { RoomEngine } from '../room.ts';
 import { board, moveStar } from '../board/state.ts';
@@ -63,7 +64,7 @@ export const twistPhase = definePhase<TwistPhase>({
     if (!(id in TWISTS)) return;
     s.choice = id;
     applyTwist(room, game(room), id);
-    s.endsAt = room.now() + TWIST_SHOW_MS;
+    s.endsAt = room.now() + paced(room, TWIST_SHOW_MS);
     room.setPhaseTimer('pick', s.endsAt);
   },
   timer(room, s, key) {
@@ -173,8 +174,8 @@ export const bonusPhase = definePhase<BonusPhase>({
     s.awards = drawBonusStars(room, g, SESSION[g.length].bonusStars);
     for (const a of s.awards) for (const id of a.winners) g.players[id]!.stars++;
     g.bonus = s.awards.map((a) => ({ id: a.id, winners: a.winners }));
-    s.revealAt = s.awards.map((_, i) => room.now() + BONUS_INTRO_MS + i * BONUS_EACH_MS);
-    s.endsAt = room.now() + BONUS_INTRO_MS + s.awards.length * BONUS_EACH_MS + 1500;
+    s.revealAt = s.awards.map((_, i) => room.now() + paced(room, BONUS_INTRO_MS) + i * paced(room, BONUS_EACH_MS));
+    s.endsAt = room.now() + paced(room, BONUS_INTRO_MS) + s.awards.length * paced(room, BONUS_EACH_MS) + 1500;
     room.setPhaseTimer('done', s.endsAt);
   },
   timer(room, _s, key) {

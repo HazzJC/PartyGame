@@ -26,6 +26,8 @@ export interface MinigamePhase extends PhaseBase {
   revealEndsAt: number | null;
   /** Players the autopilot covered (they receive the median payout). */
   autopiloted: SeatId[];
+  /** A no-stakes practice round: nothing is paid and the real game follows. */
+  practice?: boolean;
 }
 
 export interface MgContext {
@@ -178,6 +180,7 @@ export const minigamePhase = definePhase<MinigamePhase>({
       result: s.result,
       payout: s.payout,
       revealEndsAt: s.revealEndsAt,
+      practice: !!s.practice,
       game: def.hostView(ctxFor(room, s), s.data),
     };
   },
@@ -192,6 +195,7 @@ export const minigamePhase = definePhase<MinigamePhase>({
       team: s.teams ? s.teams.findIndex((t) => t.includes(seatId)) : null,
       stage: s.stage,
       revealEndsAt: s.revealEndsAt,
+      practice: !!s.practice,
       // Personal result travels with the reveal; the player screen holds it back by the stream delay.
       mine: reveal ? { coins: s.payout?.[seatId] ?? 0, place: s.result?.kind === 'ffa' ? (s.result.places[seatId] ?? null) : null, result: s.result } : null,
       game: def.playerView(ctxFor(room, s), s.data, seatId),

@@ -54,6 +54,23 @@ export function GameOptions({ conn, view, compact = false }: { conn: SettingsHos
           <span className="muted"> · four teams share a pawn and purse{bigEnough ? '' : ` (needs ${TEAM_BOARD_MIN}+ players)`}</span>
         </span>
       </label>
+      <div className="gopts-row">
+        <span className="gopts-label">Pace</span>
+        <div className={`seg ${compact ? 'small' : ''}`} role="group" aria-label="Pace">
+          {(['relaxed', 'normal', 'quick'] as const).map((pace) => (
+            <button key={pace} aria-pressed={(s.pace ?? 'relaxed') === pace} onClick={() => set({ pace })}>
+              {pace === 'quick' ? 'Snappy' : pace[0]!.toUpperCase() + pace.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <label className="gopts-row gopts-check">
+        <input type="checkbox" checked={(s.practice ?? 'vote') === 'vote'} onChange={(e) => set({ practice: e.target.checked ? 'vote' : 'off' })} />
+        <span>
+          <b>Practice rounds</b>
+          <span className="muted"> · players can vote to try each game first, for no coins</span>
+        </span>
+      </label>
       <label className="gopts-row gopts-check">
         <input type="checkbox" checked={!!s.tutorial} onChange={(e) => set({ tutorial: e.target.checked })} />
         <span>

@@ -45,7 +45,7 @@ test('a board round: roll on the phone, pawns move on the host, colours pick the
   }
   // Landing and colours on the host, then the rules card for the chosen format.
   await expect(landed).toBeVisible({ timeout: 40_000 });
-  const rules = p.page.getByRole('button', { name: 'Ready' });
+  const rules = p.page.getByRole('button', { name: "Got it, let's play" });
   await page.screenshot({ path: 'test-results/board-resolve.png' });
   await expect(rules).toBeVisible({ timeout: 40_000 });
   await expect(page.locator('.rules-card')).toBeVisible();

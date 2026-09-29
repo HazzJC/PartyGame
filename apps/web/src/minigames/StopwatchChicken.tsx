@@ -29,7 +29,7 @@ function Host({ conn, view, mg }: MgHostProps) {
     return (
       <div className="mg-host">
         <p className="mg-host-lead">
-          Stop your clock at <b>{secs(d.target)} s</b>. It goes dark after 3 seconds. Go over and you bust!
+          Stop your clock at <b>{secs(d.target)} s</b>. It goes dark after 3 seconds. Closest wins, early or late!
         </p>
         <div className="sw-clock sticker" data-dark={elapsed >= d.visibleMs}>
           {elapsed < d.visibleMs && <span className="sw-hand" style={{ transform: `rotate(${Math.max(0, elapsed) * 0.036}deg)` }} />}
@@ -65,9 +65,9 @@ function Host({ conn, view, mg }: MgHostProps) {
           return (
             <div key={id} className="sw-row" style={{ top: `${(i / Math.max(1, rows.length)) * 88 + 4}%`, height: `${88 / Math.max(1, rows.length)}%` }}>
               {visible && (
-                <div className="sw-marker" data-bust={stop === undefined || stop > d.target} style={{ left: stop === undefined ? '100%' : x(stop) }}>
+                <div className="sw-marker" data-bust={stop === undefined} style={{ left: stop === undefined ? '100%' : x(stop) }}>
                   <Avatar avatar={s.avatar} size={Math.min(52, 700 / rows.length)} />
-                  <span className="sw-time">{stop === undefined ? 'no stop' : `${secs(stop)}`}</span>
+                  <span className="sw-time">{stop === undefined ? 'no stop' : `${secs(stop)} (${stop >= d.target ? '+' : '−'}${secs(Math.abs(stop - d.target))})`}</span>
                 </div>
               )}
             </div>

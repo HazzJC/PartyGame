@@ -68,7 +68,7 @@ export class RoomEngine {
       hostToken,
       seats: [],
       nextSeatNo: 1,
-      settings: { length: 'standard', movement: 'dice', removedGames: [] },
+      settings: { length: 'standard', movement: 'dice', removedGames: [], pace: 'relaxed', practice: 'vote' },
       phase: { kind: 'lobby', startedAt: now },
       phaseNo: 0,
       timers: [],
@@ -330,6 +330,8 @@ export class RoomEngine {
     if (typeof input.devTools === 'boolean') s.devTools = input.devTools;
     if (typeof input.teamBoard === 'boolean') s.teamBoard = input.teamBoard;
     if (typeof input.tutorial === 'boolean') s.tutorial = input.tutorial;
+    if (input.pace === 'relaxed' || input.pace === 'normal' || input.pace === 'quick') s.pace = input.pace;
+    if (input.practice === 'vote' || input.practice === 'off') s.practice = input.practice;
     if (input.forceGame === null || (typeof input.forceGame === 'string' && input.forceGame.length <= 40)) s.forceGame = input.forceGame as string | null;
     if (Array.isArray(input.removedGames)) s.removedGames = input.removedGames.filter((x): x is string => typeof x === 'string').slice(0, 64);
   }

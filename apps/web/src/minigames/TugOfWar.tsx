@@ -21,7 +21,11 @@ interface Data {
   winner?: number | null;
   team?: number;
   myTaps?: number;
+  /** How much each pull counts per team (the smaller team's count for more). */
+  weights?: number[];
 }
+
+const fmtWeight = (w: number) => `×${w.toFixed(1)}`;
 
 export const TEAM_NAMES = ['Red', 'Blue', 'Green', 'Gold'];
 export const TEAM_COLOURS = ['#FF4D5E', '#3D7BFF', '#2EC27E', '#FFB703'];
@@ -54,7 +58,7 @@ const TRAVEL = 330;
  * The host's view of the tug: the teams as paper standees leaning back on one rope, the knot's
  * ribbon over the mud pit in the middle, and each team's flag at the end it pulls towards.
  */
-function Arena({ marker, teams, avatars, pulling, slippery }: { marker: number; teams: string[][]; avatars: Map<string, number>; pulling: boolean; slippery: boolean }) {
+function Arena({ marker, teams, avatars, pulling, slippery, weights }: { marker: number; teams: string[][]; avatars: Map<string, number>; pulling: boolean; slippery: boolean; weights: number[] }) {
   const knot = 600 + marker * TRAVEL;
   const ropeY = 222;
   const side = (team: number) => (team === 0 ? -1 : 1);
@@ -75,6 +79,11 @@ function Arena({ marker, teams, avatars, pulling, slippery }: { marker: number; 
             <text x={side(t) * 34} y={-120} textAnchor="middle" fontFamily="Fredoka, sans-serif" fontWeight={700} fontSize={22} fill={PAPER} stroke={INK} strokeWidth={5} paintOrder="stroke">
               {TEAM_NAMES[t]}
             </text>
+            {(weights[t] ?? 1) > 1.05 && (
+              <text x={side(t) * 40} y={-164} textAnchor="middle" fontFamily="Fredoka, sans-serif" fontWeight={700} fontSize={24} fill="#FFD23F" stroke={INK} strokeWidth={6} paintOrder="stroke">
+                each pull {fmtWeight(weights[t]!)}
+              </text>
+            )}
           </g>
         );
       })}
@@ -120,7 +129,13 @@ function Host({ conn, view, mg }: MgHostProps) {
         avatars={new Map([...seats].map(([id, s]) => [id, s.avatar]))}
         pulling={started && mg.stage === 'play' && !slippery}
         slippery={slippery && mg.stage === 'play'}
+        weights={d.weights ?? [1, 1]}
       />
+      {(d.weights ?? []).some((w) => w > 1.05) && mg.stage === 'play' && (
+        <p className="muted" style={{ fontSize: 26, margin: 0 }}>
+          Uneven teams are fair: every player counts the same, so each pull on the smaller team counts for more.
+        </p>
+      )}
     </div>
   );
 }
@@ -166,6 +181,7 @@ function Player({ conn, mg }: MgPlayerProps) {
       <div className="mg-player-head">
         <h2 style={{ color: TEAM_COLOURS[team] }}>{TEAM_NAMES[team]} team</h2>
         <span className="chip">{Math.max(pulls, d.myTaps ?? 0)} pulls</span>
+        {(d.weights?.[team] ?? 1) > 1.05 && <span className="chip" title="Your team is smaller, so each of your pulls counts for more">Each pull {fmtWeight(d.weights![team]!)}</span>}
         {started && <PowerMeter power={d.power} />}
       </div>
       <Rope marker={d.marker} slippery={slippery} />

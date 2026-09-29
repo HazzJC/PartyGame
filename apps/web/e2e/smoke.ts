@@ -9,8 +9,8 @@ export async function smokeGame(page: Page, gameId: string, n = 5, shot = gameId
   await page.goto(`/dev/minigame/${gameId}?n=${n}`);
   const host = page.frameLocator('iframe[title="Host screen"]');
   const player = page.frameLocator('iframe[title="Player screen"]');
-  await expect(player.getByRole('button', { name: 'Ready' })).toBeVisible({ timeout: 20_000 });
-  await player.getByRole('button', { name: 'Ready' }).click();
+  await expect(player.getByRole('button', { name: "Got it, let's play" })).toBeVisible({ timeout: 20_000 });
+  await player.getByRole('button', { name: "Got it, let's play" }).click();
 
   let playShot = false;
   const deadline = Date.now() + budgetMs;

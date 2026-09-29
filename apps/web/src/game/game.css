@@ -723,3 +723,159 @@
   gap: 2px;
   margin-top: 4px;
 }
+
+/* ------------------------------------------------------------------ sides, practice and "Got it" */
+.sides {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.side-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.side {
+  padding: 8px 16px 10px;
+  border-color: var(--side);
+  border-width: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.side-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--side);
+}
+
+.side-people {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 520px;
+}
+
+.side-person {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.side-person-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.sides-vs {
+  font-family: var(--font-display);
+  font-size: 34px;
+  color: var(--ink-soft);
+}
+
+.rules-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 24px;
+}
+
+.rules-practice-votes {
+  background: #fff1b8;
+}
+
+.rules-practised {
+  align-self: flex-start;
+  background: #c9f2dc;
+}
+
+.rules-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rules-choice .btn[aria-pressed='true'] {
+  opacity: 0.85;
+}
+
+.my-side {
+  padding: 10px 14px;
+  border-color: var(--side);
+  border-width: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.my-side b {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--side);
+}
+
+.my-side-people {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.my-side-vs {
+  margin: 0 6px;
+  font-family: var(--font-display);
+  color: var(--ink-soft);
+}
+
+.practice-banner {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  z-index: 3;
+  padding: 6px 18px;
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  background: #fff1b8;
+  box-shadow: 0 4px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: 26px;
+  transform: rotate(2deg);
+}
+
+.practice-strip {
+  flex: none;
+  padding: 4px;
+  background: #fff1b8;
+  border-bottom: 3px solid var(--ink);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+
+.rules-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rules-right .sides {
+  justify-content: flex-start;
+}
+
+/* On a phone the choice stays in reach at the bottom while you read. */
+.pf .rules-choice {
+  position: sticky;
+  bottom: 0;
+  margin: 0 -4px;
+  padding: 8px 4px max(4px, env(safe-area-inset-bottom));
+  background: var(--felt);
+}

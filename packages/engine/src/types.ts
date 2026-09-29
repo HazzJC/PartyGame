@@ -20,6 +20,9 @@ export interface Seat {
 
 export type GameLength = 'quick' | 'standard' | 'long';
 
+/** How long the in-between moments last (see game/pace.ts). */
+export type Pace = 'relaxed' | 'normal' | 'quick';
+
 export interface Settings {
   length: GameLength;
   movement: 'dice' | 'cards';
@@ -33,6 +36,10 @@ export interface Settings {
   teamBoard?: boolean;
   /** Show the how-to-play intro before round 1. */
   tutorial?: boolean;
+  /** Relaxed (the default) gives people longer to read rules and enjoy results. */
+  pace?: Pace;
+  /** 'vote': players can ask for a no-stakes practice round on the rules card. */
+  practice?: 'vote' | 'off';
 }
 
 export interface Timer {

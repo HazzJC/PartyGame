@@ -14,6 +14,8 @@ export interface MgHostPhase {
   payout: Record<string, number> | null;
   revealEndsAt: number | null;
   endsAt: number | null;
+  /** A no-stakes practice round. */
+  practice?: boolean;
   game: any;
 }
 
@@ -27,6 +29,7 @@ export interface MgPlayerPhase {
   revealEndsAt: number | null;
   endsAt: number | null;
   mine: { coins: number; place: number | null; result: any } | null;
+  practice?: boolean;
   game: any;
 }
 

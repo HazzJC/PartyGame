@@ -1,4 +1,5 @@
 import { STAR_PRICE, formatForSides, fourTeams, starCount, type Format } from '@partygame/shared';
+import { paced } from '../game/pace.ts';
 import { definePhase, type PhaseBase } from '../phase.ts';
 import type { RoomEngine } from '../room.ts';
 import { dealAndShowRules, flowHooks } from '../game/flow.ts';
@@ -203,7 +204,7 @@ function endRoll(room: RoomEngine, s: BoardPhase): void {
   if (Object.keys(s.uses).length === 0) return startMove(room, s);
   s.itemLines = resolveItems(room, g, board(g), s.walks, s.uses, () => rollDie(room));
   s.stage = 'items';
-  s.endsAt = room.now() + ITEMS_REVEAL_MS;
+  s.endsAt = room.now() + paced(room, ITEMS_REVEAL_MS);
   room.setPhaseTimer('itemsDone', s.endsAt);
 }
 
@@ -305,14 +306,7 @@ function resolve(room: RoomEngine, s: BoardPhase): void {
       s.flipped.push(id);
     }
   }
-  // Two pawns ending on the same space: a duel between them.
-  const byNode = new Map<number, string[]>();
-  for (const id of g.order) byNode.set(b.positions[id]!, [...(byNode.get(b.positions[id]!) ?? []), id]);
-  for (const [node, ids] of byNode) {
-    if (ids.length < 2 || node === b.def.start) continue;
-    const [a, c] = room.rng.shuffle(ids);
-    g.pendingDuels.push({ a: a!, b: c!, reason: 'meet' });
-  }
+  // Sharing a space is fine: duels only come from duel spaces and Duel Tickets bought in the shop.
   // Spotlight cap: star purchases first, then events; the rest resolve in a summary panel.
   // Duels run after the mini game and share the same cap.
   const all = [...s.spotlights, ...events];
@@ -321,9 +315,9 @@ function resolve(room: RoomEngine, s: BoardPhase): void {
   g.spotlightsThisRound = s.spotlights.length;
   s.stage = 'resolve';
   s.resolveAt = room.now();
-  const flipMs = s.flipped.length ? FLIP_MS : 0;
+  const flipMs = s.flipped.length ? paced(room, FLIP_MS) : 0;
   // Always end on the Blue vs Red tally, which decides the mini game format.
-  s.endsAt = room.now() + LANDING_MS + flipMs + s.spotlights.length * SPOTLIGHT_MS + (s.summary.length ? SUMMARY_MS : 0) + SIDES_MS;
+  s.endsAt = room.now() + paced(room, LANDING_MS) + flipMs + s.spotlights.length * paced(room, SPOTLIGHT_MS) + (s.summary.length ? paced(room, SUMMARY_MS) : 0) + paced(room, SIDES_MS);
   room.setPhaseTimer('resolved', s.endsAt);
 }
 
@@ -419,7 +413,7 @@ export const boardPhase = definePhase<BoardPhase>({
       return;
     } else return;
     // Everyone has rolled: leave time for the last die to finish tumbling and show its number.
-    if (Object.values(s.walks).every((x) => x.roll !== null)) room.setPhaseTimer('rollEnd', room.now() + 2600);
+    if (Object.values(s.walks).every((x) => x.roll !== null)) room.setPhaseTimer('rollEnd', room.now() + paced(room, 2600));
   },
   timer(room, s, key) {
     if (key === 'rollEnd' && s.stage === 'roll') endRoll(room, s);
@@ -515,7 +509,7 @@ export const boardPhase = definePhase<BoardPhase>({
       stepMs: STEP_MS,
       teamBoard: !!g.teamBoard,
       cards: usesCards(g),
-      timeline: { landingMs: LANDING_MS, flipMs: s.flipped.length ? FLIP_MS : 0, spotlightMs: SPOTLIGHT_MS, summaryMs: s.summary.length ? SUMMARY_MS : 0 },
+      timeline: { landingMs: paced(room, LANDING_MS), flipMs: s.flipped.length ? paced(room, FLIP_MS) : 0, spotlightMs: paced(room, SPOTLIGHT_MS), summaryMs: s.summary.length ? paced(room, SUMMARY_MS) : 0 },
     };
   },
   playerView(room, s, seatId) {
@@ -553,7 +547,7 @@ export const boardPhase = definePhase<BoardPhase>({
       colour: s.colours[id] ?? null,
       resolveAt: s.resolveAt,
       /** When this player's own colour is known on the host (after the coin flip). */
-      colourKnownAt: s.resolveAt === null ? null : s.resolveAt + LANDING_MS + (s.flipped.length ? FLIP_MS : 0),
+      colourKnownAt: s.resolveAt === null ? null : s.resolveAt + paced(room, LANDING_MS) + (s.flipped.length ? paced(room, FLIP_MS) : 0),
       starPrice: b.starPrice,
     };
   },

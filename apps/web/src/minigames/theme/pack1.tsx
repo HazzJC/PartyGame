@@ -245,12 +245,12 @@ registerDemo('lowest-unique', () => {
 
 /** Stopwatch Chicken: the clock goes dark after 3 s; stop near the target without going over. */
 registerDemo('stopwatch-chicken', () => {
-  const t = useDemoTime(7, 5.6);
-  const running = Math.min(t, 5.2);
-  const dark = t > 3 && t < 5.2;
-  const stopped = t >= 5.2;
+  const t = useDemoTime(8, 6.4);
+  const running = Math.min(t, 5.8);
+  const dark = t > 3 && t < 5.8;
+  const stopped = t >= 5.8;
   return (
-    <DemoFrame caption="Stop the hidden clock as close to 6.0 as you dare: over is bust" bg="#FFF3DC">
+    <DemoFrame caption="Stop the hidden clock as close to 6.0 as you can, early or late" bg="#FFF3DC">
       <text x={300} y={70} textAnchor="middle" fontFamily="Fredoka, sans-serif" fontWeight={700} fontSize={30} fill={INK}>
         Target 6.0 s
       </text>
@@ -266,8 +266,8 @@ registerDemo('stopwatch-chicken', () => {
           STOP
         </text>
       </DemoPhone>
-      <Finger x={510} y={240} down={between(t, 5.1, 5.5)} show={fade(t, 4.4, 6.9)} />
-      <Bubble x={210} y={310} text="0.8 under: nice!" fill="#C9F2DC" size={22} show={fade(t, 5.4, 6.9)} />
+      <Finger x={510} y={240} down={between(t, 5.7, 6.1)} show={fade(t, 5, 7.8)} />
+      <Bubble x={210} y={310} text="Only 0.2 off!" fill="#C9F2DC" size={22} show={fade(t, 6, 7.9)} />
     </DemoFrame>
   );
 });

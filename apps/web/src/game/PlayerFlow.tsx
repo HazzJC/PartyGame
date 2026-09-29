@@ -6,9 +6,9 @@ import { minigameUi, type MgPlayerPhase } from './registry.ts';
 import { Shop } from './Shop.tsx';
 import { FormatBadge } from '../ui/FormatBadge.tsx';
 import { Demo, SceneStrip, themeOf, themeStyle } from '../minigames/theme/themes.tsx';
+import { MySide } from './Sides.tsx';
 import './game.css';
 
-const TEAM_NAMES = ['Red team', 'Blue team', 'Green team', 'Gold team'];
 
 const ordinal = (n: number) => {
   const s = ['th', 'st', 'nd', 'rd'];
@@ -27,23 +27,31 @@ export function RulesPlayer({ conn, view }: PlayerScreenProps) {
   }, !p.ready);
   const teamBoard = !!(view.game as { teamBoard?: boolean } | null)?.teamBoard;
   if (!p.playing) return <WatchScreen text={`${p.name}: you're watching this one`} />;
+  const gotIt = p.ready && !p.practice;
   return (
     <div className="pf">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h2 className="pf-title">{p.name}</h2>
         <Countdown conn={conn} until={p.endsAt} />
       </div>
-      <FormatBadge format={p.format} compact />
+      {p.practised ? <span className="chip rules-practised">Practice done: this one counts!</span> : <FormatBadge format={p.format} compact />}
+      {p.teams && p.team !== null && p.team >= 0 && (p.format === '1vN' || p.format === 'team') && <MySide view={view} gameId={p.gameId} format={p.format} teams={p.teams} team={p.team} />}
       <Demo gameId={p.gameId} />
-      {p.team !== null && p.team >= 0 && <span className="chip pf-team">{teamBoard && p.teams?.length === 4 ? TEAM_NAMES[p.team] : `Team ${p.team + 1}`}</span>}
       <p className="pf-blurb">{p.blurb}</p>
       {teamBoard && p.format === 'ffa' && <p className="muted" style={{ margin: 0 }}>Team board: your placing counts towards your team's average.</p>}
       <div className="panel">
         <ControlsCard inputs={p.inputs} />
       </div>
-      <button className="btn green big block" disabled={p.ready} onClick={() => conn.intent({ type: 'ready' })}>
-        {p.ready ? 'Ready! Waiting for others…' : 'Ready'}
-      </button>
+      <div className="rules-choice">
+        <button className="btn green big block" aria-pressed={gotIt} onClick={() => conn.intent({ type: 'ready' })}>
+          {gotIt ? 'Got it! Waiting for the others…' : p.practised ? 'Got it: play for real' : "Got it, let's play"}
+        </button>
+        {p.canPractise && (
+          <button className="btn white block" aria-pressed={!!p.practice} onClick={() => conn.intent({ type: 'practice' })}>
+            {p.practice ? `You asked for practice (${p.practiceVotes} of ${p.voters})` : 'Practice first (no coins)'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -53,17 +61,25 @@ function PersonalResult({ mg }: { mg: MgPlayerPhase }) {
   const r = mg.mine;
   if (!r) return <WatchScreen />;
   let headline = '';
-  if (r.result?.kind === 'ffa' && r.place) headline = r.place === 1 ? 'You won!' : `You came ${ordinal(r.place)}`;
-  else if (r.result?.kind === 'coop') headline = r.result.grade === 'fail' ? 'The team failed…' : `Team ${r.result.grade}!`;
-  else if (r.result?.kind === '1vN' || r.result?.kind === 'team') headline = r.coins >= 8 ? 'Your side won!' : 'Your side lost';
+  const res = r.result;
+  if (res?.kind === 'ffa' && r.place) headline = r.place === 1 ? 'You won!' : `You came ${ordinal(r.place)}`;
+  else if (res?.kind === 'coop') headline = res.grade === 'fail' ? 'The team failed…' : `Team ${res.grade}!`;
+  else if (res?.kind === '1vN') headline = (mg.team === 0) === res.smallWins ? 'Your side won!' : 'Your side lost';
+  else if (res?.kind === 'team' && mg.team !== null) headline = res.teamPlaces[mg.team] === 1 ? 'Your side won!' : 'Your side lost';
   return (
     <div className="pf center pop-in">
-      <FormatBadge format={mg.format} compact />
+      {mg.practice ? <span className="chip rules-practised">Practice round</span> : <FormatBadge format={mg.format} compact />}
       <h2 className="pf-title" style={{ textAlign: 'center' }}>
         {headline}
       </h2>
-      <div className="pf-coins">+{r.coins}</div>
-      <span className="muted">coins</span>
+      {mg.practice ? (
+        <span className="muted">No coins for practice. The real one is next!</span>
+      ) : (
+        <>
+          <div className="pf-coins">+{r.coins}</div>
+          <span className="muted">coins</span>
+        </>
+      )}
     </div>
   );
 }
@@ -84,6 +100,7 @@ export function MinigamePlayer({ conn, view }: PlayerScreenProps) {
   // A slice of the game's scene across the top, so each game feels like its own place.
   return (
     <div className="mg-player-themed" data-game={mg.gameId} style={themeStyle(mg.gameId)}>
+      {mg.practice && <div className="practice-strip">Practice round · no coins</div>}
       {themeOf(mg.gameId) && (
         <div className="mg-player-band">
           <SceneStrip gameId={mg.gameId} />

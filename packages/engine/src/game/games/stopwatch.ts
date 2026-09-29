@@ -3,7 +3,7 @@ import { defineMinigame } from '../minigame.ts';
 
 /**
  * Stopwatch Chicken: a clock runs on each controller for 3 s, then blanks. Stop it as close to
- * the target as you dare; going over is a bust. Timing is measured on the controller from the
+ * the target as you can, over or under: the closest stop wins. Timing is measured on the controller from the
  * frame that started the clock, so stream delay is irrelevant.
  */
 export interface StopwatchData {
@@ -19,9 +19,8 @@ const LATE_MS = 3000;
 
 export function stopwatchScore(target: number, elapsed: number | undefined): number {
   if (elapsed === undefined) return 1e9;
-  if (elapsed <= target) return target - elapsed;
-  // Busts rank after everyone who stayed under, closest bust first.
-  return 1e6 + (elapsed - target);
+  // Closest wins, early or late alike.
+  return Math.abs(elapsed - target);
 }
 
 export const stopwatchChicken = defineMinigame<StopwatchData>({
@@ -29,7 +28,7 @@ export const stopwatchChicken = defineMinigame<StopwatchData>({
   name: 'Stopwatch Chicken',
   formats: ['ffa', 'duel'],
   inputs: [{ kind: 'timing', what: 'Stop the clock' }],
-  blurb: 'The clock shows for 3 seconds, then goes dark. Stop it as close to the target as you dare. Go over and you bust.',
+  blurb: 'The clock shows for 3 seconds, then goes dark. Keep counting in your head and stop it as close to the target as you can. Early or late, the closest stop wins.',
   setup(ctx) {
     const target = ctx.rng.int(45, 90) * 100;
     const startAt = ctx.now() + 3500;
@@ -59,9 +58,9 @@ export const stopwatchChicken = defineMinigame<StopwatchData>({
     return [at - 1200, at];
   },
   bot(ctx, d) {
-    const bust = ctx.rng.chance(0.2);
-    const off = Math.abs(ctx.rng.next() + ctx.rng.next() - 1) * 900 + 30;
-    return { type: 'stop', elapsedMs: Math.round(bust ? d.target + off * 0.5 : d.target - off) };
+    // A human-ish miss: usually within a second, early or late.
+    const off = (ctx.rng.next() + ctx.rng.next() - 1) * 1400;
+    return { type: 'stop', elapsedMs: Math.max(0, Math.round(d.target + off)) };
   },
   hostView: (ctx, d) => ({
     target: d.target,

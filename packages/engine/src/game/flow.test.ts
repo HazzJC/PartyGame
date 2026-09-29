@@ -59,9 +59,10 @@ describe('scoring', () => {
     expect(places).toEqual({ a: 4, b: 4, c: 1, d: 3, e: 2, f: 4 });
   });
 
-  it('Stopwatch Chicken ranks busts after everyone under', () => {
+  it('Stopwatch Chicken ranks the closest stop first, early or late', () => {
     expect(stopwatchScore(5000, 4900)).toBeLessThan(stopwatchScore(5000, 4000));
-    expect(stopwatchScore(5000, 5010)).toBeGreaterThan(stopwatchScore(5000, 1000));
+    expect(stopwatchScore(5000, 5010)).toBeLessThan(stopwatchScore(5000, 4900));
+    expect(stopwatchScore(5000, 5300)).toBe(stopwatchScore(5000, 4700));
     expect(stopwatchScore(5000, undefined)).toBeGreaterThan(stopwatchScore(5000, 9000));
   });
 

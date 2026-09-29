@@ -7,16 +7,21 @@ import { computePayout } from './payout.ts';
 import { addCoins, createGameState, entityList, entityOf, game, isFinalStretch, membersOf, standings, type GameState, type NextMinigame } from './state.ts';
 import type { MinigameResult } from './minigame.ts';
 import { buyItem } from './items.ts';
+import { paced } from './pace.ts';
 import { ITEMS, MAX_ITEMS, type ItemId } from '@partygame/shared';
 
-/** Minimum time a rules card stays up, and the longest it waits for "Ready". */
-export const RULES_MIN_MS = 4000;
-export const RULES_MAX_MS = 25_000;
+/**
+ * Minimum time a rules card stays up (long enough for its demo to play through), and the longest
+ * it waits for everyone to press "Got it". Both are scaled by the room's pace.
+ */
+export const RULES_MIN_MS = 7000;
+export const RULES_MAX_MS = 40_000;
 const ROUND_INTRO_MS = 3000;
 const PAYOUT_MS = 7000;
 /** The shop stays open this long on a shopper's phone, while everyone else sees the standings. */
 const SHOP_MS = 15_000;
-const REVEAL_TAIL_MS = 1200;
+/** Results stay on screen this long after the reveal animation. */
+const REVEAL_TAIL_MS = 2000;
 
 // ------------------------------------------------------------------ extension points (board, endgame)
 
@@ -99,7 +104,7 @@ export function dealAndShowRules(room: RoomEngine, wanted: Format, teams?: strin
       forcedTeams = [participants.slice(0, small), participants.slice(small)];
     }
     g.next = { gameId: forced.id, format, participants, ...(forcedTeams ? { teams: forcedTeams } : {}) };
-    room.goto({ kind: 'rules', ...g.next, ready: [] });
+    room.goto({ kind: 'rules', ...g.next, ready: [], practice: [] });
     return;
   }
   let gameId = deal(room, g, format, participants.length);
@@ -116,7 +121,7 @@ export function dealAndShowRules(room: RoomEngine, wanted: Format, teams?: strin
     teams = [[...teams[0]!, ...teams[1]!], [...teams[2]!, ...teams[3]!]];
   }
   g.next = { gameId, format, participants, ...(teams ? { teams } : {}), fallback: format !== wanted };
-  room.goto({ kind: 'rules', ...g.next, ready: [] });
+  room.goto({ kind: 'rules', ...g.next, ready: [], practice: [] });
 }
 
 // ------------------------------------------------------------------ phases
@@ -130,7 +135,7 @@ export const roundIntroPhase = definePhase<RoundIntroPhase>({
   enter(room, s) {
     const g = game(room);
     g.round++;
-    s.endsAt = room.now() + ROUND_INTRO_MS;
+    s.endsAt = room.now() + paced(room, ROUND_INTRO_MS);
     room.setPhaseTimer('next', s.endsAt);
   },
   timer(room, _s, key) {
@@ -147,34 +152,62 @@ export const roundIntroPhase = definePhase<RoundIntroPhase>({
 
 export interface RulesPhase extends PhaseBase, NextMinigame {
   kind: 'rules';
+  /** Players who pressed "Got it" (or asked for practice, which also means they've read it). */
   ready: string[];
+  /** Players asking for a practice round first. */
+  practice: string[];
+  /** The practice round has been played: this card is for the real thing. */
+  practised?: boolean;
   fallback?: boolean;
 }
 
-function maybeStart(room: RoomEngine, s: RulesPhase): void {
-  const waiting = s.participants.filter((id) => {
+/** The people who get a say: connected humans who are playing this one. */
+function voters(room: RoomEngine, s: RulesPhase): string[] {
+  return s.participants.filter((id) => {
     const seat = room.seat(id);
-    return seat && !seat.isBot && seat.connected && !s.ready.includes(id);
+    return seat && !seat.isBot && seat.connected;
   });
-  if (waiting.length > 0) return;
-  room.setPhaseTimer('go', Math.max(room.now() + 600, s.startedAt + RULES_MIN_MS));
+}
+
+export const canPractise = (room: RoomEngine, s: RulesPhase): boolean => !s.practised && room.state.settings.practice !== 'off';
+
+/** A practice round runs when at least half of the players ask for one. */
+export function wantsPractice(room: RoomEngine, s: RulesPhase): boolean {
+  if (!canPractise(room, s)) return false;
+  const people = voters(room, s);
+  const asking = s.practice.filter((id) => people.includes(id)).length;
+  return people.length > 0 && asking * 2 >= people.length;
+}
+
+function maybeStart(room: RoomEngine, s: RulesPhase): void {
+  if (voters(room, s).some((id) => !s.ready.includes(id))) return;
+  room.setPhaseTimer('go', Math.max(room.now() + 900, s.startedAt + paced(room, RULES_MIN_MS)));
 }
 
 export const rulesPhase = definePhase<RulesPhase>({
   kind: 'rules',
   botDelay: [600, 2400],
   enter(room, s) {
-    s.endsAt = room.now() + RULES_MAX_MS;
+    s.practice ??= [];
+    s.endsAt = room.now() + paced(room, RULES_MAX_MS);
     room.setPhaseTimer('go', s.endsAt);
   },
   intent(room, s, seatId, intent) {
-    if (intent.type !== 'ready' || s.ready.includes(seatId)) return;
-    s.ready.push(seatId);
+    if (!s.participants.includes(seatId)) return;
+    if (intent.type === 'ready') {
+      // "Got it, let's play" (and a change of heart from asking for practice).
+      s.practice = s.practice.filter((id) => id !== seatId);
+    } else if (intent.type === 'practice') {
+      if (!canPractise(room, s)) return;
+      if (!s.practice.includes(seatId)) s.practice.push(seatId);
+    } else return;
+    if (!s.ready.includes(seatId)) s.ready.push(seatId);
     maybeStart(room, s);
   },
   timer(room, s, key) {
     if (key !== 'go') return;
-    room.goto({ kind: 'minigame', gameId: s.gameId, format: s.format, participants: s.participants, ...(s.teams ? { teams: s.teams } : {}) });
+    const practice = wantsPractice(room, s);
+    room.goto({ kind: 'minigame', gameId: s.gameId, format: s.format, participants: s.participants, ...(s.teams ? { teams: s.teams } : {}), ...(practice ? { practice: true } : {}) });
   },
   hostAction(room, s, action) {
     if (action.action !== 'skip') return false;
@@ -183,13 +216,32 @@ export const rulesPhase = definePhase<RulesPhase>({
   },
   awaiting: (_room, s, seatId) => !s.ready.includes(seatId),
   bot: () => ({ type: 'ready' }),
-  hostView(_room, s) {
-    const def = getMinigame(s.gameId);
-    return { gameId: s.gameId, name: def.name, blurb: def.blurb, inputs: def.inputs, format: s.format, teams: s.teams ?? null, ready: s.ready, participants: s.participants, fallback: !!s.fallback };
-  },
-  playerView(_room, s, seatId) {
+  hostView(room, s) {
     const def = getMinigame(s.gameId);
     return {
+      gameId: s.gameId,
+      name: def.name,
+      blurb: def.blurb,
+      inputs: def.inputs,
+      format: s.format,
+      teams: s.teams ?? null,
+      ready: s.ready,
+      participants: s.participants,
+      fallback: !!s.fallback,
+      practice: s.practice,
+      practised: !!s.practised,
+      canPractise: canPractise(room, s),
+      voters: voters(room, s).length,
+    };
+  },
+  playerView(room, s, seatId) {
+    const def = getMinigame(s.gameId);
+    return {
+      practice: s.practice.includes(seatId),
+      practised: !!s.practised,
+      canPractise: canPractise(room, s),
+      practiceVotes: s.practice.length,
+      voters: voters(room, s).length,
       gameId: s.gameId,
       name: def.name,
       blurb: def.blurb,
@@ -215,7 +267,7 @@ function endPayout(room: RoomEngine): void {
 export const payoutPhase = definePhase<PayoutPhase>({
   kind: 'payout',
   enter(room, s) {
-    s.endsAt = room.now() + (game(room).shoppers.length ? SHOP_MS : PAYOUT_MS);
+    s.endsAt = room.now() + paced(room, game(room).shoppers.length ? SHOP_MS : PAYOUT_MS);
     room.setPhaseTimer('next', s.endsAt);
   },
   intent(room, _s, seatId, intent) {
@@ -321,6 +373,17 @@ onStartGame(startGame);
 
 onMinigameFinish((room, phase, result, revealMs) => {
   const g = game(room);
+  if (phase.practice) {
+    // A practice round: show how it went, pay nothing, change nothing.
+    phase.stage = 'reveal';
+    phase.result = result;
+    phase.payout = Object.fromEntries(phase.participants.map((id) => [id, 0]));
+    g.revealPayout = null;
+    phase.revealEndsAt = room.now() + revealMs;
+    phase.endsAt = phase.revealEndsAt;
+    room.setPhaseTimer('revealDone', phase.revealEndsAt + paced(room, REVEAL_TAIL_MS));
+    return;
+  }
   if (phase.format === 'duel') {
     // Duels pay their wager in the duel result phase, not the mini game payout table.
     const [a, b] = phase.participants;
@@ -333,7 +396,7 @@ onMinigameFinish((room, phase, result, revealMs) => {
     g.revealPayout = null;
     phase.revealEndsAt = room.now() + revealMs;
     phase.endsAt = phase.revealEndsAt;
-    room.setPhaseTimer('revealDone', phase.revealEndsAt + REVEAL_TAIL_MS);
+    room.setPhaseTimer('revealDone', phase.revealEndsAt + paced(room, REVEAL_TAIL_MS));
     return;
   }
   // Anyone who is still away when the game ends was covered by the autopilot.
@@ -362,12 +425,14 @@ onMinigameFinish((room, phase, result, revealMs) => {
   phase.payout = g.teamBoard ? Object.fromEntries(phase.participants.map((id) => [id, payout[entityOf(g, id)] ?? 0])) : payout;
   phase.revealEndsAt = room.now() + revealMs;
   phase.endsAt = phase.revealEndsAt;
-  room.setPhaseTimer('revealDone', phase.revealEndsAt + REVEAL_TAIL_MS);
+  room.setPhaseTimer('revealDone', phase.revealEndsAt + paced(room, REVEAL_TAIL_MS));
 });
 
 onMinigameFlowTimer((room, phase, key) => {
   if (key !== 'revealDone') return;
-  room.goto({ kind: phase.format === 'duel' ? 'duelResult' : 'payout' });
+  // After practice, the same rules card again, for the real thing.
+  if (phase.practice) room.goto({ kind: 'rules', ...game(room).next!, ready: [], practice: [], practised: true });
+  else room.goto({ kind: phase.format === 'duel' ? 'duelResult' : 'payout' });
 });
 
 onHostAction((room, action) => {

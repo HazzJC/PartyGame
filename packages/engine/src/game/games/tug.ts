@@ -2,8 +2,9 @@ import { defineMinigame, type MgContext } from '../minigame.ts';
 
 /**
  * Tug of War (team): mash to pull. Hazard windows — drawn on every controller at a scheduled
- * server time — make taps pull your own team backwards. Teams are compared by per-player
- * average, so uneven teams are fair.
+ * server time — make taps pull your own team backwards. Every individual carries the same
+ * weight: a team's pull is its members' average, so each pull on a smaller team counts for more
+ * (3 against 5: each pull counts 5/3 as much) and uneven teams are fair.
  *
  * It runs until the rope reaches one end. Every pull starts weak and pull power doubles every
  * POWER_DOUBLING_S seconds: early on it takes a big tapping advantage to win ground, later even a
@@ -38,6 +39,22 @@ const WOBBLE = 0.004;
 export const TUG_MAX_MS = 120_000;
 
 export const tugPower = (elapsedMs: number): number => Math.pow(2, Math.max(0, elapsedMs) / 1000 / POWER_DOUBLING_S);
+
+/** How much each pull counts per team, relative to the largest team (the smaller side's pulls count for more). */
+export function tugWeights(sizes: number[]): number[] {
+  const largest = Math.max(1, ...sizes);
+  return sizes.map((n) => largest / Math.max(1, n));
+}
+
+/**
+ * Each team's pull rate per player this tick: good pulls minus slips (which cost 1.5), weighted
+ * so every individual counts the same whatever the team sizes.
+ */
+export function tugRates(pending: [number, number][], sizes: number[], dt: number): number[] {
+  const largest = Math.max(1, ...sizes);
+  const w = tugWeights(sizes);
+  return pending.map(([good, bad], i) => ((good - bad * 1.5) * (w[i] ?? 1)) / largest / Math.max(dt, 0.1));
+}
 
 export const tugOfWar = defineMinigame<TugData>({
   id: 'tug-of-war',
@@ -82,8 +99,8 @@ export const tugOfWar = defineMinigame<TugData>({
     const dt = Math.max(0, Math.min(0.5, (now - d.lastTickAt) / 1000));
     d.lastTickAt = now;
     const teams = ctx.phase.teams ?? [];
-    // Per-player average pull rate for each team.
-    const rate = d.pending.map(([good, bad], i) => (good - bad * 1.5) / Math.max(1, teams[i]?.length ?? 1) / Math.max(dt, 0.1));
+    // Every individual counts the same: the smaller team's pulls are weighted up.
+    const rate = tugRates(d.pending, d.pending.map((_, i) => teams[i]?.length ?? 1), dt);
     d.pending = d.pending.map(() => [0, 0]);
     d.power = tugPower(now - d.startAt);
     const wobble = (ctx.rng.next() - 0.5) * 2 * WOBBLE * d.power * Math.sqrt(dt);
@@ -104,7 +121,7 @@ export const tugOfWar = defineMinigame<TugData>({
     // Bots mostly notice the hazard, but not always.
     return inHazard ? (ctx.rng.chance(0.75) ? null : { type: 'mash', good: 0, bad: 1 }) : { type: 'mash', good: taps, bad: 0 };
   },
-  hostView: (_ctx, d) => ({ marker: d.marker, startAt: d.startAt, power: d.power, hazards: d.hazards, winner: d.winner }),
+  hostView: (ctx, d) => ({ marker: d.marker, startAt: d.startAt, power: d.power, hazards: d.hazards, winner: d.winner, weights: tugWeights((ctx.phase.teams ?? []).map((t) => t.length)) }),
   playerView: (ctx, d, seatId) => ({
     marker: d.marker,
     startAt: d.startAt,
@@ -112,6 +129,7 @@ export const tugOfWar = defineMinigame<TugData>({
     hazards: d.hazards,
     team: ctx.phase.teams?.findIndex((t) => t.includes(seatId)) ?? -1,
     myTaps: d.taps[seatId] ?? 0,
+    weights: tugWeights((ctx.phase.teams ?? []).map((t) => t.length)),
   }),
 });
 

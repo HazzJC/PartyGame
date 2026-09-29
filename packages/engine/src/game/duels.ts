@@ -1,4 +1,5 @@
 import { definePhase, type PhaseBase } from '../phase.ts';
+import { paced } from './pace.ts';
 import { onHostAction, type RoomEngine } from '../room.ts';
 import { flowHooks, onDuelWinner } from './flow.ts';
 import { allMinigames, getMinigame } from './minigame.ts';
@@ -219,7 +220,7 @@ export const duelResultPhase = definePhase<DuelResultPhase>({
       if (net > 0) g.players[id]!.stats.betWinnings += net;
     }
     g.duel = null;
-    s.endsAt = room.now() + RESULT_MS;
+    s.endsAt = room.now() + paced(room, RESULT_MS);
     room.setPhaseTimer('done', s.endsAt);
   },
   timer(room, _s, key) {

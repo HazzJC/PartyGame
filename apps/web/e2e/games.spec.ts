@@ -5,8 +5,10 @@ async function openHarness(page: Page, gameId: string, n = 4) {
   const host = page.frameLocator('iframe[title="Host screen"]');
   const player = page.frameLocator('iframe[title="Player screen"]');
   // Rules card, then Ready.
-  await expect(player.getByRole('button', { name: 'Ready' })).toBeVisible({ timeout: 20_000 });
-  await player.getByRole('button', { name: 'Ready' }).click();
+  await expect(player.getByRole('button', { name: "Got it, let's play" })).toBeVisible({ timeout: 20_000 });
+  await player.getByRole('button', { name: "Got it, let's play" }).click();
+  // The rules card stays up long enough for its demo to play once (relaxed pace).
+  await expect(host.locator('.mg-themed')).toBeVisible({ timeout: 30_000 });
   return { host, player };
 }
 

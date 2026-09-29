@@ -12,6 +12,7 @@ import { StarIconArt } from '../ui/StarArt.tsx';
 import { FormatBadge, FormatParade } from '../ui/FormatBadge.tsx';
 import { Icon } from '../ui/Icons.tsx';
 import { Demo, hasDemo, Scene, themeOf, themeStyle } from '../minigames/theme/themes.tsx';
+import { SidesHost } from './Sides.tsx';
 import './game.css';
 
 export interface EntityInfo {
@@ -174,6 +175,7 @@ export function RulesHost({ conn, view }: HostScreenProps) {
   const p = view.phase;
   const seats = seatMap(view);
   const ready = new Set(p.ready as string[]);
+  const sides = !!p.teams && (p.format === '1vN' || p.format === 'team');
   return (
     <HostGameFrame view={view} title={<FormatBadge format={p.format} />} right={<Countdown conn={conn} until={p.endsAt} />}>
       <Scene gameId={p.gameId} />
@@ -186,21 +188,38 @@ export function RulesHost({ conn, view }: HostScreenProps) {
         {(view.game as GameHostView | null)?.teamBoard && p.format === 'ffa' && <p className="muted">Team board: everyone plays for themselves, and each team scores its members' average placing.</p>}
         <div className={hasDemo(p.gameId) ? 'rules-main' : undefined}>
           <Demo gameId={p.gameId} />
-          <div className="rules-cols">
-            <ControlsColumn title="Touch" icon="phone" inputs={p.inputs} scheme="touch" />
-            <ControlsColumn title="Keyboard" icon="laptop" inputs={p.inputs} scheme="keys" />
+          <div className="rules-right">
+            <div className="rules-cols">
+              <ControlsColumn title="Touch" icon="phone" inputs={p.inputs} scheme="touch" />
+              <ControlsColumn title="Keyboard" icon="laptop" inputs={p.inputs} scheme="keys" />
+            </div>
+            {sides && <SidesHost view={view} gameId={p.gameId} format={p.format} teams={p.teams as string[][]} ready={ready} />}
           </div>
         </div>
-        <div className="rules-ready">
-          {(p.participants as string[]).map((id) => {
-            const s = seats.get(id);
-            return s ? (
-              <span key={id} className="rules-ready-av" data-ready={ready.has(id)}>
-                <Avatar avatar={s.avatar} size={52} dim={!ready.has(id)} />
+        {sides ? null : (
+          <div className="rules-ready">
+            {(p.participants as string[]).map((id) => {
+              const s = seats.get(id);
+              return s ? (
+                <span key={id} className="rules-ready-av" data-ready={ready.has(id)}>
+                  <Avatar avatar={s.avatar} size={52} dim={!ready.has(id)} />
+                </span>
+              ) : null;
+            })}
+          </div>
+        )}
+        <div className="rules-status">
+          {p.practised ? (
+            <span className="chip rules-practised">Practice done: this one counts!</span>
+          ) : (
+            p.canPractise &&
+            (p.practice as string[]).length > 0 && (
+              <span className="chip rules-practice-votes">
+                {(p.practice as string[]).length} of {p.voters} want a practice round{(p.practice as string[]).length * 2 >= p.voters ? ': practice first!' : ''}
               </span>
-            ) : null;
-          })}
-          <span className="muted">Press Ready on your phone</span>
+            )
+          )}
+          <span className="muted">Press “Got it” on your phone{p.canPractise ? ', or ask for a practice round' : ''}</span>
         </div>
       </div>
     </HostGameFrame>
@@ -213,6 +232,7 @@ export function MinigameHost({ conn, view }: HostScreenProps) {
   return (
     <HostGameFrame view={view} title={<span className="hg-game-title"><FormatBadge format={mg.format} compact />{mg.name}</span>} right={mg.stage === 'play' ? <Countdown conn={conn} until={mg.endsAt} /> : <span className="chip">Results</span>}>
       <Scene gameId={mg.gameId} />
+      {mg.practice && <div className="practice-banner">Practice round · no coins</div>}
       <div className="mg-themed" data-game={mg.gameId} style={themeStyle(mg.gameId)}>
         {ui ? <ui.Host conn={conn} view={view} mg={mg} /> : <div className="center">Missing UI for {mg.gameId}</div>}
       </div>
