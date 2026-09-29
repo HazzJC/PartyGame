@@ -16,7 +16,7 @@ test('a doodle drawn on a phone appears behind that sticker on the host screen',
   await p.page.mouse.up();
   await expect(page.locator('.hl-doodle path')).toHaveCount(1);
   // The phone reported itself as a touch device.
-  await expect(page.locator('.hl-device')).toHaveText('📱');
+  await expect(page.locator('.hl-device').getByRole('img', { name: 'Phone' })).toBeVisible();
   await page.screenshot({ path: 'test-results/host-doodle.png' });
   await p.ctx.close();
 });

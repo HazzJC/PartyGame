@@ -8,8 +8,11 @@ test('world map: districts sit in the middle of their quadrants, and only the ho
   const host = (await hostEl.contentFrame())!;
   await host.waitForSelector('.board-svg [data-district]', { timeout: 30_000 });
 
-  const centres = await host.evaluate(() =>
-    [...document.querySelectorAll<SVGGElement>('.board-svg [data-district]')].map((g) => {
+  // Measure the art at rest: sways and bobs would otherwise shift the boxes by a few pixels.
+  const centres = await host.evaluate(() => {
+    const running = document.getAnimations();
+    running.forEach((a) => a.cancel());
+    const out = [...document.querySelectorAll<SVGGElement>('.board-svg [data-district]')].map((g) => {
       // Union of the visible parts (clipped groups such as the lagoon waves are skipped).
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       for (const c of [...g.children] as SVGGraphicsElement[]) {
@@ -25,8 +28,10 @@ test('world map: districts sit in the middle of their quadrants, and only the ho
       }
       const m = g.transform.baseVal.consolidate()!.matrix;
       return { name: g.dataset.district!, x: m.e + (x0 + x1) / 2, y: m.f + (y0 + y1) / 2 };
-    }),
-  );
+    });
+    running.forEach((a) => a.play());
+    return out;
+  });
   // Quadrant centres inside the 80 px-inset loop of the 1440×940 board.
   const want: Record<string, [number, number]> = { pier: [400, 275], grove: [1040, 275], plaza: [400, 665], hill: [1040, 665] };
   expect(centres.map((c) => c.name).sort()).toEqual(Object.keys(want).sort());
